@@ -40,6 +40,14 @@ Each workflow is also a live skill under `.claude/skills/` (see [skills](skills.
 Cross-repo features run phase 4 in pipeline order (C++ analysis → C#/API → Angular UI), each repo on
 its own branch/PR. How-to: [run the feature workflow](../how-to/run-the-feature-workflow.md).
 
+**Report-migration variant.** If the feature is migrating a report from Conseiller (C++) to Xpert,
+`/feature` switches to **migration mode** (`.claude/skills/feature/SKILL.md` §1a): the gates stay, but
+the phase workers become the specialist agents from the sibling **report-migration workspace**
+(`C:\Repos\claude-report-migration\.claude\agents\`) — `report-analyst` for explore/plan,
+`backend-migrator` + `frontend-migrator` for build, `migration-reviewer` + `migration-validator` for
+review — invoked by reference (they aren't registered here, so they're dispatched as general-purpose
+agents that follow those definitions + conventions from the migration workspace root).
+
 ---
 
 ## 2. bug

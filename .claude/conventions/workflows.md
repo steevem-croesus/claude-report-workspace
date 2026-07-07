@@ -32,6 +32,13 @@ Agent tool and defers to this file (its `§N`) and `protocol.md` for the authori
 Notes: cross-repo features run phase 4 in pipeline order (C++ analysis → C#/API → Angular UI), each
 repo on its own branch/PR. The plan's `#### <repo>` sub-sections tell each `implementer` its slice.
 
+**Report-migration variant.** When the feature is *migrating a report from Conseiller (C++) to Xpert*,
+the `feature` skill switches to **migration mode** (see `../skills/feature/SKILL.md` §1a): the gates
+stay, but the phase workers are the specialist agents from the **report-migration workspace**
+(`C:\Repos\claude-report-migration\.claude\agents\`: `report-analyst` → explore/plan,
+`backend-migrator` + `frontend-migrator` → build, `migration-reviewer` + `migration-validator` →
+review) — reused by reference (single source of truth), not this workspace's generic agents.
+
 ---
 
 ## 2. `bug` — fix a defect
