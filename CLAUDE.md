@@ -4,10 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this workspace is
 
-`claude-report-workspace` is **not a repository** — it is a curated set of symlinks assembling
-the codebases that make up the **Croesus Xpert report-generation pipeline**, so that cross-repo
-report work can be done from a single root. The symlinks live under **`repos/`** and each points
-at a checkout elsewhere on disk:
+`claude-report-workspace` is a curated set of symlinks assembling the codebases that make up the
+**Croesus Xpert report-generation pipeline**, so that cross-repo report work can be done from a
+single root. The symlinks live under **`repos/`** and each points at a checkout elsewhere on disk:
+
+> **The workspace root is its own small *local* git repo** (on `main`, no remote) that tracks only
+> the workspace tooling — `.claude/`, `docs/`, `CLAUDE.md`, this file's helpers. It does **not**
+> track the product code: `repos/`, `.work/`, and `.benchmark/` are gitignored. **All product
+> commits/PRs happen inside the separate symlinked repos below, never at this root.** See
+> [`docs/`](docs/README.md) for the full documentation of the workflows/agents that live here.
 
 | Symlink (under `repos/`)   | Real path                                      | Language / stack        | Role in the pipeline |
 | -------------------------- | ---------------------------------------------- | ----------------------- | -------------------- |
@@ -17,10 +22,11 @@ at a checkout elsewhere on disk:
 | `repos/ReportManagerApi`   | `/c/Repos/monolith/CFF/Products/ReportManagerApi` | **C# / .NET 8** (Web API) | Async report-generation API. Clean/DDD layering; uses AWS SQS + S3; talks to the Frameworkserver. |
 | `repos/pf-web`             | `/c/Repos/pf-web`                              | **TypeScript / Angular 21 + NX** | Frontend (Croesus Xpert). The `report` domain lives under `libs/report/`. |
 
-Because these are symlinks, git operations run against the *real* repos, each on its own
-branch and remote. Check `git status`/`git branch` inside a given symlink (e.g. `cd repos/pf-web`)
-before committing — there is no single top-level repo to commit to. All workspace-relative paths
-below are written from the workspace root, hence the `repos/` prefix.
+Because these are symlinks, git operations for *product code* run against the real repos, each on
+its own branch and remote. Check `git status`/`git branch` inside a given symlink (e.g. `cd
+repos/pf-web`) before committing — product changes never go to the workspace-root repo, which only
+versions the tooling. All workspace-relative paths below are written from the workspace root, hence
+the `repos/` prefix.
 
 ## How the pieces fit (report generation flow)
 
@@ -127,6 +133,11 @@ encode how to build features, fix bugs, refactor, spike, explore, investigate, a
 each with its own phase sequence, gated for approval, and wired to pull context from **Jira**
 (Atlassian MCP) and **GitHub** (`gh`). They are inspired by and interoperate with the org's
 `code-fleet` plugin.
+
+> 📚 **Full documentation for everything in this section lives under [`docs/`](docs/README.md)**,
+> organised by the [Diátaxis](https://diataxis.fr/) method (tutorials · how-to · reference ·
+> explanation). Start at [`docs/README.md`](docs/README.md). The `.claude/` files remain the source
+> of truth; the docs explain and index them.
 
 - **Workflows** — `.claude/conventions/workflows.md` defines seven playbooks and when to use each:
   `feature`, `bug`, `refactor`, `spike`, `explore`, `investigate`, `learn`. Each names the phases,
