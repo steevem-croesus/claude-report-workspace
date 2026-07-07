@@ -4,20 +4,36 @@ Nine agents live under [`.claude/agents/`](../../.claude/agents/), dispatched vi
 the workflow skills. Each carries a distinguished/fellow-level engineering persona and a narrow role.
 They split into **read-only** (never edit code) and **editing**.
 
-| Agent | Role | Read-only? | Writes |
-|---|---|---|---|
-| [`context-gatherer`](#context-gatherer) | Jira + GitHub intel | ✅ | `context.md` |
-| [`explorer`](#explorer) | cross-repo code map | ✅ | `exploration.md` |
-| [`investigator`](#investigator) | root-cause analysis | ✅ | `investigation.md` / `bug-diagnosis.md` |
-| [`learning-guide`](#learning-guide) | teaching walkthrough | ✅ | `learning-notes.md` |
-| [`reviewer`](#reviewer) | plan/code review | ✅ | `review-plan.md` / `review-code.md` |
-| [`retrospective`](#retrospective) | capture learnings | ✅ (code) | `retro.md` |
-| [`planner`](#planner) | implementation plan | writes `plan.md` only | `plan.md` |
-| [`implementer`](#implementer) | build + test | ✏️ edits code | code, tests, `build-summary.md` |
-| [`cpp-to-csharp-porter`](#cpp-to-csharp-porter) | C++→C# value-provider port | ✏️ edits code | code, tests, `build-summary.md` |
+| Agent | Role | Read-only? | Model | Writes |
+|---|---|---|---|---|
+| [`context-gatherer`](#context-gatherer) | Jira + GitHub intel | ✅ | Sonnet | `context.md` |
+| [`explorer`](#explorer) | cross-repo code map | ✅ | Sonnet | `exploration.md` |
+| [`investigator`](#investigator) | root-cause analysis | ✅ | Opus | `investigation.md` / `bug-diagnosis.md` |
+| [`learning-guide`](#learning-guide) | teaching walkthrough | ✅ | Sonnet | `learning-notes.md` |
+| [`reviewer`](#reviewer) | plan/code review | ✅ | Opus | `review-plan.md` / `review-code.md` |
+| [`retrospective`](#retrospective) | capture learnings | ✅ (code) | Sonnet | `retro.md` |
+| [`planner`](#planner) | implementation plan | writes `plan.md` only | Opus | `plan.md` |
+| [`implementer`](#implementer) | build + test | ✏️ edits code | Opus | code, tests, `build-summary.md` |
+| [`cpp-to-csharp-porter`](#cpp-to-csharp-porter) | C++→C# value-provider port | ✏️ edits code | Opus | code, tests, `build-summary.md` |
 
 All agents obey the shared [guardrails](gates-and-protocol.md#guardrails): never run org-denied CLIs
 (`aws`, `terraform`/`tofu`), respect each repo's own `CLAUDE.md`, and read-only agents never edit.
+
+## Per-agent model
+
+Each agent pins its own model via a `model:` field in its
+[`.claude/agents/*.md`](../../.claude/agents/) frontmatter, tiered by what the role actually demands:
+
+- **Opus** — `planner`, `implementer`, `cpp-to-csharp-porter`, `reviewer`, `investigator`: anything
+  that designs the change, writes or ports code, judges quality, or does root-cause reasoning. These
+  are the correctness-critical, high-stakes roles — the plan that gates the build, the financial/date
+  C++→C# port, the review the build bar depends on.
+- **Sonnet** — `context-gatherer`, `explorer`, `learning-guide`, `retrospective`: the read-only
+  gather / map / teach / summarise roles. Plenty capable, faster, and cheaper.
+
+To change a tier, edit that agent's `model:` value (`opus` / `sonnet` / `haiku`, or `inherit` to
+follow your session model). Because the field lives in the agent frontmatter, the choice applies
+everywhere the agent is dispatched, in every workflow.
 
 ---
 

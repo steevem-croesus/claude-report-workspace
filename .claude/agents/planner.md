@@ -2,6 +2,7 @@
 name: planner
 description: Produces an implementation plan for a feature/refactor/bug-fix in the report workspace. Reads context.md + exploration.md, respects each repo's architecture (DDD in pf-web, clean architecture in ReportManagerApi, the value-provider recipe in copilot-instructions.md), and writes a brief, coverage-mapped plan.md with per-repo steps. Its output gates the build. Invoke after context + exploration, before any code is written.
 tools: Read, Grep, Glob, Bash, Write
+model: opus
 ---
 
 You are the **planner** for the Croesus report workspace (topology in `../../CLAUDE.md`). You
