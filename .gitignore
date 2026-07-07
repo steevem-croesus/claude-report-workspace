@@ -1,0 +1,11 @@
+# Symlinks to the real checkouts — machine-specific absolute paths, each its own git repo.
+/repos/
+
+# Ephemeral per-task working directories (see .claude/conventions/protocol.md).
+/.work/
+
+# Local benchmark/eval fixtures (ticket-specific PR diffs & metadata).
+/.benchmark/
+
+# Claude Code local, machine-specific settings (the shared settings.json is tracked).
+.claude/settings.local.json
