@@ -134,6 +134,12 @@ each with its own phase sequence, gated for approval, and wired to pull context 
 - **Skills** — `.claude/skills/` holds the orchestrating skills that auto-drive a workflow.
   All seven workflows are live skills (model-invocable, or run `/feature`, `/bug`, `/refactor`,
   `/spike`, `/explore`, `/investigate`, `/learn`). Each defers to `workflows.md` + `protocol.md`.
+  Alongside them, seven **monolith skills** are *symlinked in* from `/c/Repos/monolith/.claude/skills/`
+  (`croesus-orm`, `create-{small,medium,large}-tests`, `create-internal-route`, `implement-full-story`,
+  `croesus-process-conventions`) — CFF-monolith authoring/testing helpers reused here. They are
+  machine-specific links (gitignored, not tracked); (re)create them by running
+  `link-monolith-skills.ps1` elevated, then restart Claude Code. The real skills are owned by the
+  monolith repo — edit them there, not here.
 - **Shared protocol** — `.claude/conventions/protocol.md`: the task directory (`.work/<TICKET-ID>/`),
   canonical artifact filenames, context-gathering, the gate + HALT protocols, per-repo build/test
   commands, and the org git/branch guardrails.

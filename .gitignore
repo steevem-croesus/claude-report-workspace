@@ -9,3 +9,13 @@
 
 # Claude Code local, machine-specific settings (the shared settings.json is tracked).
 .claude/settings.local.json
+
+# Skills symlinked in from the monolith .claude (machine-specific links; run
+# link-monolith-skills.ps1 to (re)create them). The real skills live in the monolith.
+/.claude/skills/croesus-orm
+/.claude/skills/create-small-tests
+/.claude/skills/create-medium-tests
+/.claude/skills/create-large-tests
+/.claude/skills/create-internal-route
+/.claude/skills/implement-full-story
+/.claude/skills/croesus-process-conventions
