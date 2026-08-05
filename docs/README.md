@@ -1,5 +1,7 @@
 # Documentation — Croesus report workspace
 
+> 🇫🇷 [Version française](fr/README.md)
+
 This documentation covers **the `.claude/` workflows and agents** that live in this workspace: the
 seven gated playbooks (`feature`, `bug`, `refactor`, `spike`, `explore`, `investigate`, `learn`),
 the agents that carry them out, and the shared protocol they all obey. It is *not* documentation of
