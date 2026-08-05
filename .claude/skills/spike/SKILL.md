@@ -4,61 +4,67 @@ description: Run a timeboxed investigation in the Croesus report workspace to re
 allowed-tools: Agent, Task, AskUserQuestion, Read, Write, Grep, Glob, Bash
 ---
 
-Drive the **spike** workflow for this task:
+Pilote le workflow **spike** pour cette tâche :
 
 **$ARGUMENTS**
 
-This skill orchestrates the agents in `.claude/agents/`. The authoritative specs are
-`.claude/conventions/workflows.md` (§4 *spike*) and `.claude/conventions/protocol.md` (task dir,
-gate protocol, HALT protocol, guardrails). Cite and follow them — do not restate their rules.
-Dispatch each subagent with the **Agent** tool, passing its `subagent_type` (the agent's name) and a
-prompt of the form:
+> **Langue.** Communique avec l'utilisateur **en français** pendant tout ce workflow — notes de
+> progression, questions (`AskUserQuestion`), résumés et bilan final. Le code, les noms de
+> fichiers/d'agents, les chemins et les termes techniques restent inchangés.
+
+Ce skill orchestre les agents de `.claude/agents/`. Les spécifications qui font autorité sont
+`.claude/conventions/workflows.md` (§4 *spike*) et `.claude/conventions/protocol.md` (répertoire de
+tâche, protocole de gate, protocole HALT, garde-fous). Cite-les et suis-les — ne réénonce pas leurs
+règles. Dispatche chaque sous-agent avec l'outil **Agent**, en passant son `subagent_type` (le nom de
+l'agent) et un prompt de la forme :
 
 ```
 Task directory: .work/<slug>/
 Task: <the task text>
 ```
 
-The distinguishing rules of this workflow: **no production code** — any prototype is throwaway,
-kept isolated, and must not be shipped; the work is **timeboxed**; and the deliverable is a
-**decision**, not a merge. There is no build/review/ship phase and no retrospective phase — but you
-still capture durable learnings to memory at the end. Re-render a one-line progress note at each
-phase transition.
+Les règles distinctives de ce workflow : **aucun code de production** — tout prototype est jetable,
+gardé isolé, et ne doit pas être shippé ; le travail est **timeboxé** ; et le livrable est une
+**décision**, pas un merge. Il n'y a pas de phase build/review/ship ni de phase rétrospective — mais tu
+captures quand même les apprentissages durables en mémoire à la fin. Réaffiche une note de progression
+d'une ligne à chaque transition de phase.
 
-## 1. Frame + timebox
-Before dispatching anything, pin down with the user (via `AskUserQuestion` only if unclear):
-- the **precise question** the spike must answer,
-- a **timebox** (how much effort is worth spending),
-- what **"done"** looks like — the decision this feeds and the options on the table.
-Derive the **slug** (Jira key if present, else kebab-case of the first ~4 words; confirm if guessed),
-`mkdir -p .work/<slug>/_signals/`, and write the framing (question, timebox, done-definition) to
-`.work/<slug>/task.md`.
+## 1. Cadrer + timeboxer
+Avant de dispatcher quoi que ce soit, fixe avec l'utilisateur (via `AskUserQuestion` seulement si
+flou) :
+- la **question précise** à laquelle le spike doit répondre,
+- un **timebox** (combien d'effort ça vaut la peine d'y consacrer),
+- à quoi ressemble le **« terminé »** — la décision que ça alimente et les options sur la table.
+Dérive le **slug** (clé Jira si présente, sinon kebab-case des ~4 premiers mots ; confirme s'il a été
+deviné), `mkdir -p .work/<slug>/_signals/`, et écris le cadrage (question, timebox, définition du
+terminé) dans `.work/<slug>/task.md`.
 
-## 2. Context (light)  →  `context.md`
-Only if a ticket or GitHub ref exists: dispatch **context-gatherer** for a light brief. Skip if the
-spike is a pure "is this feasible" question with no ticket — say so and move on.
+## 2. Contexte (léger)  →  `context.md`
+Seulement si un ticket ou une réf GitHub existe : dispatche **context-gatherer** pour un brief léger.
+Saute si le spike est une pure question « est-ce faisable » sans ticket — dis-le et passe à la suite.
 
-## 3. Investigate  →  evidence (notes toward `spike.md`)
-Dispatch **explorer** (to map what exists / where the seams are) and/or **investigator** (to answer
-*why/whether* something holds) as the question needs. If a throwaway prototype is warranted, build it
-in **isolation** — a scratch location, never edited into the real repos' source — and treat it as
-disposable evidence, not a deliverable. Keep within the timebox; if it blows, stop and report what's
-known so far.
+## 3. Investiguer  →  preuves (notes vers `spike.md`)
+Dispatche **explorer** (pour cartographier ce qui existe / où sont les jointures) et/ou **investigator**
+(pour répondre au *pourquoi/si* quelque chose tient) selon ce que la question demande. Si un prototype
+jetable se justifie, construis-le en **isolation** — un emplacement de brouillon, jamais édité dans les
+sources des vrais repos — et traite-le comme une preuve jetable, pas un livrable. Reste dans le timebox ;
+s'il explose, arrête et signale ce qui est connu jusqu'ici.
 
-## 4. Findings  →  `spike.md`
-Synthesize into `spike.md`: the question, what was tried, the **options** with their trade-offs and
-the cost/risk of each, and a clear **recommendation**. Be explicit about what remains uncertain and
-what a follow-up feature/refactor would need to nail down.
+## 4. Constats  →  `spike.md`
+Synthétise dans `spike.md` : la question, ce qui a été essayé, les **options** avec leurs compromis et
+le coût/risque de chacune, et une **recommandation** claire. Sois explicite sur ce qui reste incertain
+et sur ce qu'une feature/un refactor de suivi devrait verrouiller.
 
-## 5. Decision gate
-Present `spike.md` (lead with the recommendation). Ask the user to **decide** via `AskUserQuestion` —
-typically: pick an option (which usually feeds a `feature` or `refactor` workflow), ask for more
-investigation (loop to §3, respecting a fresh timebox), or drop it. Record the decision in `spike.md`.
+## 5. Gate de décision
+Présente `spike.md` (commence par la recommandation). Demande à l'utilisateur de **décider** via
+`AskUserQuestion` — typiquement : choisir une option (qui alimente généralement un workflow `feature` ou
+`refactor`), demander plus d'investigation (reboucle au §3, en respectant un nouveau timebox), ou
+laisser tomber. Consigne la décision dans `spike.md`.
 
-## 6. Capture learnings
-Even without a retrospective phase, surface a short checklist of durable learnings worth saving to
-memory (feasibility verdicts, dead ends to avoid, constraints discovered). **Do not** auto-write
-memory — offer the checklist for the user's approval.
+## 6. Capturer les apprentissages
+Même sans phase de rétrospective, fais remonter une courte checklist d'apprentissages durables valant la
+peine d'être sauvés en mémoire (verdicts de faisabilité, impasses à éviter, contraintes découvertes).
+**N'écris pas** automatiquement la mémoire — propose la checklist pour l'approbation de l'utilisateur.
 
-Finish with a short summary: the question, the recommendation, the user's decision, the follow-up
-workflow it feeds (if any), and the proposed learnings awaiting approval.
+Termine par un court résumé : la question, la recommandation, la décision de l'utilisateur, le workflow
+de suivi qu'elle alimente (le cas échéant), et les apprentissages proposés en attente d'approbation.

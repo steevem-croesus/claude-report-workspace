@@ -1,27 +1,27 @@
-# Context — <TICKET-ID or task slug>
+# Contexte — <TICKET-ID or task slug>
 
-_Written by context-gatherer · Date: <YYYY-MM-DD> · Sources cited inline._
+_Rédigé par context-gatherer · Date : <YYYY-MM-DD> · Sources citées en ligne._
 
-## Task
-<one-paragraph restatement of what's being asked>
+## Tâche
+<reformulation en un paragraphe de ce qui est demandé>
 
 ## Jira
-- **Key / type / status / priority:** <FOG-9412 · Bug · In Progress · High>
-- **Summary:** <ticket summary>
-- **Acceptance criteria:** <bullets, or "none stated — see open questions">
-- **Key comments:** <short quotes that change the requirements, each attributed>
-- **Linked issues / blockers:** <keys + relationship>
+- **Clé / type / statut / priorité :** <FOG-9412 · Bug · In Progress · High>
+- **Résumé :** <résumé du ticket>
+- **Critères d'acceptation :** <points, ou « aucun énoncé — voir questions ouvertes »>
+- **Commentaires clés :** <courtes citations qui modifient les exigences, chacune attribuée>
+- **Tickets liés / bloqueurs :** <clés + relation>
 
 ## GitHub
-- **Target repo(s):** <ReportManagerApi / pf-web / ReportFoundations / CroesusServer / ReportServer> — branch <x>
-- **Related PRs / issues:** <#n — title — state; what it did>
-- **Prior work in this area (git log):** <sha — subject>
+- **Repo(s) cible(s) :** <ReportManagerApi / pf-web / ReportFoundations / CroesusServer / ReportServer> — branche <x>
+- **PRs / tickets associés :** <#n — titre — état ; ce qu'il a fait>
+- **Travaux antérieurs dans ce domaine (git log) :** <sha — sujet>
 
-## Reconciliation (asked vs existing)
-<where Jira and the code/PRs agree, disagree, or leave gaps>
+## Rapprochement (demandé vs existant)
+<là où Jira et le code/les PRs concordent, divergent ou laissent des lacunes>
 
-## Target & open questions
-- **Most likely repo(s) to change:** <…>
-- **Top open questions (for the plan/clarify gate):**
+## Cible & questions ouvertes
+- **Repo(s) le(s) plus susceptible(s) d'être modifié(s) :** <…>
+- **Principales questions ouvertes (pour le gate plan/clarification) :**
   1. <…>
   2. <…>

@@ -4,39 +4,45 @@ description: Build a mental model of an area of the Croesus report workspace —
 allowed-tools: Agent, Task, AskUserQuestion, Read, Write, Grep, Glob, Bash
 ---
 
-Drive the **learn** workflow for this task:
+Pilote le workflow **learn** pour cette tâche :
 
 **$ARGUMENTS**
 
-This skill orchestrates the **learning-guide** agent in `.claude/agents/`. The authoritative specs are
-`.claude/conventions/workflows.md` (§7 *learn*) and `.claude/conventions/protocol.md` (task dir,
-canonical filenames, guardrails). Cite and follow them — do not restate their rules. Dispatch the
-subagent with the **Agent** tool, passing its `subagent_type` and a prompt of the form:
+> **Langue.** Communique avec l'utilisateur **en français** pendant tout ce workflow — cadrage,
+> questions (`AskUserQuestion`), walkthrough, glossaire et clôture. Le code, les noms de
+> fichiers/d'agents, les chemins et les termes techniques restent inchangés.
+
+Ce skill orchestre l'agent **learning-guide** de `.claude/agents/`. Les spécifications qui font autorité
+sont `.claude/conventions/workflows.md` (§7 *learn*) et `.claude/conventions/protocol.md` (répertoire de
+tâche, noms de fichiers canoniques, garde-fous). Cite-les et suis-les — ne réénonce pas leurs règles.
+Dispatche le sous-agent avec l'outil **Agent**, en passant son `subagent_type` et un prompt de la
+forme :
 
 ```
 Task directory: .work/<slug>/
 Task: teach <the subsystem/concept> at <the learner's level>
 ```
 
-This is a **read-only, no-gate, teaching** workflow. There is no plan, no build, no ship, no
-retrospective — the deliverable is a walkthrough that leaves the user with a working mental model. It
-teaches; it does **not** change code.
+C'est un workflow **read-only, sans gate, pédagogique**. Il n'y a pas de plan, pas de build, pas de
+ship, pas de rétrospective — le livrable est un walkthrough qui laisse l'utilisateur avec un modèle
+mental qui fonctionne. Il enseigne ; il **ne change pas** le code.
 
-## 1. Target + level
-Pin down two things — the **subsystem/concept** to teach (e.g. value-provider params, the Spooler
-batch flow, pf-web DDD layering, the C++→C# port mechanism, the report generation pipeline end to
-end) and the **learner's current level** (new to the codebase / knows one repo / experienced elsewhere).
-If either is unclear, ask once via `AskUserQuestion`. Derive the **slug** (kebab-case of the target;
-a Jira key only if the learning is tied to one) and `mkdir -p .work/<slug>/`.
+## 1. Cible + niveau
+Fixe deux choses — le **sous-système/concept** à enseigner (p. ex. les params value-provider, le flux
+batch du Spooler, le layering DDD de pf-web, le mécanisme de port C++→C#, le pipeline de génération de
+rapport de bout en bout) et le **niveau actuel de l'apprenant** (nouveau sur la codebase / connaît un
+repo / expérimenté ailleurs). Si l'un ou l'autre est flou, demande une fois via `AskUserQuestion`.
+Dérive le **slug** (kebab-case de la cible ; une clé Jira seulement si l'apprentissage y est lié) et
+`mkdir -p .work/<slug>/`.
 
-## 2. Teach  →  `learning-notes.md`
-Dispatch **learning-guide** to produce the walkthrough, pitched to the stated level: **big picture →
-happy-path trace** through the real `repo/path:line` entry points → **key abstractions** → a
-**glossary** of the domain terms → a few **safe, hands-on exercises** (read-only or sandboxed — never
-anything that mutates the real repos). It writes `learning-notes.md`.
+## 2. Enseigner  →  `learning-notes.md`
+Dispatche **learning-guide** pour produire le walkthrough, calibré au niveau énoncé : **vue d'ensemble →
+trace du chemin nominal** à travers les vrais points d'entrée `repo/path:line` → **abstractions clés** →
+un **glossaire** des termes du domaine → quelques **exercices pratiques sûrs** (read-only ou en bac à
+sable — jamais rien qui mute les vrais repos). Il écrit `learning-notes.md`.
 
-## 3. Wrap up
-Surface the walkthrough's shape (the trace path, the key files, the exercises) and invite follow-up
-questions or a deeper pass on any one part. Point at the natural next workflow if the user now wants
-to *do* something — `explore` to map further, `feature`/`refactor` to build, `investigate` to dig into
-a behaviour.
+## 3. Conclure
+Fais remonter la forme du walkthrough (le chemin de trace, les fichiers clés, les exercices) et invite à
+des questions de suivi ou à une passe plus approfondie sur une partie. Pointe vers le prochain workflow
+naturel si l'utilisateur veut maintenant *faire* quelque chose — `explore` pour cartographier plus loin,
+`feature`/`refactor` pour construire, `investigate` pour creuser un comportement.

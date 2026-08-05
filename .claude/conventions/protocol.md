@@ -1,88 +1,88 @@
-# Working protocol (shared across all workflows)
+# Protocole de travail (partagé par tous les workflows)
 
-This is the shared foundation every workflow in `workflows.md` builds on: where artifacts live,
-how context is gathered, how gates and HALTs work, and the per-repo build/branch rules. It is
-inspired by the conventions of the org's `code-fleet` plugin (task dir, HALT protocol, staged
-gates, requirements-coverage plans, jira/gh intel) adapted to this multi-repo report workspace. See the
-root `../../CLAUDE.md` for repo topology and the report pipeline.
+Voici le socle commun sur lequel chaque workflow de `workflows.md` s'appuie : où vivent les artefacts,
+comment le contexte est rassemblé, comment fonctionnent les gates et les HALT, ainsi que les règles de build/branche
+propres à chaque repo. Il s'inspire des conventions du plugin `code-fleet` de l'org (répertoire de tâche, protocole HALT, gates
+échelonnés, plans à couverture d'exigences, intel jira/gh) adaptées à ce workspace de rapports multi-repos. Voir le
+`../../CLAUDE.md` racine pour la topologie des repos et le pipeline de rapports.
 
-## The task directory — `.work/<TICKET-ID>/`
+## Le répertoire de tâche — `.work/<TICKET-ID>/`
 
-Every non-trivial workflow run creates a per-task directory at the **workspace root**:
+Chaque exécution de workflow non triviale crée un répertoire par tâche à la **racine du workspace** :
 `C:\Repos\claude-report-workspace\.work\<slug>\`.
 
-- **Slug** = the Jira key when detected (e.g. `FOG-9412`, `CFF-1234`); otherwise the kebab-case of
-  the first ~4 words of the task. Re-running the same task reuses the directory.
-- It lives at the workspace root on purpose — it does **not** pollute the symlinked repos, and it
-  survives across sessions. Add `.work/` to your global gitignore if you don't want it tracked.
+- **Slug** = la clé Jira lorsqu'elle est détectée (ex. `FOG-9412`, `CFF-1234`) ; sinon le kebab-case des
+  ~4 premiers mots de la tâche. Réexécuter la même tâche réutilise le répertoire.
+- Il vit à la racine du workspace à dessein — il ne **pollue pas** les repos symlinkés, et il
+  survit d'une session à l'autre. Ajoute `.work/` à ton gitignore global si tu ne veux pas qu'il soit suivi.
 
-### Canonical filenames (one artifact = one file)
+### Noms de fichiers canoniques (un artefact = un fichier)
 
-| File | Written by | Purpose |
+| Fichier | Écrit par | Objet |
 |---|---|---|
-| `context.md` | context-gatherer | Jira + GitHub intel brief |
-| `exploration.md` | explorer | Code map for the task |
-| `investigation.md` | investigator | Root-cause analysis |
-| `learning-notes.md` | learning-guide | Walkthrough / mental model |
-| `spike.md` | (orchestrator + explorer) | Spike findings + recommendation |
-| `plan.md` | planner | Implementation plan (gates the build) |
-| `bug-diagnosis.md` | investigator | Reproduction + root cause for a bug |
-| `review-plan.md` | reviewer | Plan-gate findings |
-| `build-summary.md` | implementer / porter | What was built + build/test results |
-| `review-code.md` | reviewer | Code-gate findings |
-| `retro.md` | retrospective | Retrospective + proposed learnings |
-| `clarifications.md` | orchestrator | Q→A resolved before planning |
+| `context.md` | context-gatherer | Brief d'intel Jira + GitHub |
+| `exploration.md` | explorer | Carte du code pour la tâche |
+| `investigation.md` | investigator | Analyse de cause racine |
+| `learning-notes.md` | learning-guide | Walkthrough / modèle mental |
+| `spike.md` | (orchestrateur + explorer) | Constats de spike + recommandation |
+| `plan.md` | planner | Plan d'implémentation (gate le build) |
+| `bug-diagnosis.md` | investigator | Reproduction + cause racine d'un bug |
+| `review-plan.md` | reviewer | Constats du gate de plan |
+| `build-summary.md` | implementer / porter | Ce qui a été construit + résultats de build/test |
+| `review-code.md` | reviewer | Constats du gate de code |
+| `retro.md` | retrospective | Rétrospective + apprentissages proposés |
+| `clarifications.md` | orchestrateur | Q→R résolues avant la planification |
 
-## Context gathering (start of every feature/bug/refactor/spike/investigate)
+## Rassemblement du contexte (début de chaque feature/bug/refactor/spike/investigate)
 
-Always dispatch **context-gatherer** first. It:
-1. Resolves the Jira ticket via the **Atlassian MCP** — `getAccessibleAtlassianResources`
-   (for `cloudId`) → `getJiraIssue` (description, comments, acceptance criteria, links) →
-   `getJiraIssueRemoteIssueLinks`. Confluence specs fetched when referenced.
-2. Resolves GitHub context via the **`gh` CLI** run inside the relevant symlinked repo —
-   `gh pr view/diff`, `gh issue view`, `gh search`, and `git log`.
-3. Writes `context.md` and reports the target repo(s) + top open questions.
+Dispatche toujours **context-gatherer** en premier. Il :
+1. Résout le ticket Jira via le **MCP Atlassian** — `getAccessibleAtlassianResources`
+   (pour le `cloudId`) → `getJiraIssue` (description, commentaires, critères d'acceptation, liens) →
+   `getJiraIssueRemoteIssueLinks`. Les specs Confluence sont récupérées lorsqu'elles sont référencées.
+2. Résout le contexte GitHub via le **`gh` CLI** exécuté à l'intérieur du repo symlinké pertinent —
+   `gh pr view/diff`, `gh issue view`, `gh search`, et `git log`.
+3. Écrit `context.md` et rapporte le(s) repo(s) cible(s) + les principales questions ouvertes.
 
-If Jira/GitHub is unreachable (headless/auth), the workflow proceeds on local evidence and says so —
-it never fabricates ticket content.
+Si Jira/GitHub est injoignable (headless/auth), le workflow avance sur les preuves locales et le signale —
+il ne fabrique jamais le contenu du ticket.
 
-## Gate protocol (INTERACTIVE — this workspace runs gated)
+## Protocole de gate (INTERACTIF — ce workspace tourne en mode gaté)
 
-At each **gate**, the orchestrator stops and asks the user, via `AskUserQuestion`:
+À chaque **gate**, l'orchestrateur s'arrête et interroge l'utilisateur, via `AskUserQuestion` :
 
-> *"Approve, request changes, or cancel?"*
+> *« Approuver, demander des changements, ou annuler ? »*
 
-- **approve** → proceed to the next phase.
-- **changes** → write the user's feedback verbatim to `.work/<slug>/_signals/revision-request.md`,
-  re-dispatch the phase's agent (it reads its prior artifact + the revision request), then return to
-  the same gate with the revised artifact.
-- **cancel** → stop the workflow.
+- **approve** → passer à la phase suivante.
+- **changes** → écrire le retour de l'utilisateur mot pour mot dans `.work/<slug>/_signals/revision-request.md`,
+  redispatcher l'agent de la phase (il lit son artefact précédent + la demande de révision), puis revenir au
+  même gate avec l'artefact révisé.
+- **cancel** → arrêter le workflow.
 
-Never auto-proceed past a gate. The two universal gates are the **plan gate** (after `plan.md`) and
-the **code gate** (after `build-summary.md` + `review-code.md`); some workflows add their own
-(e.g. the spike's *decision* gate).
+Ne jamais franchir automatiquement un gate. Les deux gates universels sont le **gate de plan** (après `plan.md`) et
+le **gate de code** (après `build-summary.md` + `review-code.md`) ; certains workflows ajoutent le leur
+(ex. le gate de *décision* du spike).
 
-### Plan gate — the build bar
+### Gate de plan — la barre de build
 
-The plan gate has an extra, non-negotiable entry condition. `plan.md` carries a header
-`**Status:** <draft|ready> · **Grade:** <F|D|C|B|A|S>` (scale **F < D < C < B < A < S**; rubric
-owned by `../agents/planner.md`). The workflow may build **only** from a plan that is **`ready`**
-**and** graded **A or S**.
+Le gate de plan a une condition d'entrée supplémentaire et non négociable. `plan.md` porte un en-tête
+`**Status:** <draft|ready> · **Grade:** <F|D|C|B|A|S>` (échelle **F < D < C < B < A < S** ; barème
+détenu par `../agents/planner.md`). Le workflow ne peut builder **que** depuis un plan qui est **`ready`**
+**et** noté **A ou S**.
 
-- If the plan is `draft` or graded **below A**, the gate does **not** offer *approve*. Surface the
-  grade + why (blocking open questions, `needs-user` decision points), and route to **changes** —
-  re-dispatch the planner (optionally resolving `needs-user` decision points via `AskUserQuestion`
-  first) until it reaches `ready` + (A|S), or **cancel**.
-- Only when the plan is `ready` + (A|S) does the user get the normal *approve / changes / cancel*
-  choice. Approval is still required — a qualifying grade unlocks the gate, it does not auto-pass it.
-- The user may **override** and approve a sub-bar plan explicitly (e.g. a deliberately small change
-  they've judged fine); record the override in `revision-request.md` so it's auditable. Absent an
-  explicit override, the bar holds.
+- Si le plan est `draft` ou noté **en dessous de A**, le gate n'offre **pas** *approve*. Fais ressortir la
+  note + le pourquoi (questions ouvertes bloquantes, points de décision `needs-user`), et achemine vers **changes** —
+  redispatche le planner (en résolvant éventuellement d'abord les points de décision `needs-user` via `AskUserQuestion`)
+  jusqu'à ce qu'il atteigne `ready` + (A|S), ou **cancel**.
+- Ce n'est que lorsque le plan est `ready` + (A|S) que l'utilisateur obtient le choix normal *approve / changes / cancel*.
+  L'approbation reste requise — une note qualifiante déverrouille le gate, elle ne le franchit pas automatiquement.
+- L'utilisateur peut **passer outre** et approuver explicitement un plan sous la barre (ex. un changement délibérément petit
+  qu'il a jugé correct) ; consigne le passage outre dans `revision-request.md` pour qu'il soit auditable. En l'absence d'un
+  passage outre explicite, la barre tient.
 
-## HALT protocol (agent → orchestrator)
+## Protocole HALT (agent → orchestrateur)
 
-Any producing agent (planner, implementer, porter, context-gatherer, investigator) may stop mid-run
-and return a HALT block when it hits a genuine user decision:
+Tout agent producteur (planner, implementer, porter, context-gatherer, investigator) peut s'arrêter en cours d'exécution
+et renvoyer un bloc HALT lorsqu'il tombe sur une véritable décision utilisateur :
 
 ```
 HALT: need user decision
@@ -92,38 +92,38 @@ Proposed default: <recommendation>
 State: <progress so far, to resume>
 ```
 
-The orchestrator surfaces the question (via `AskUserQuestion`), writes the answer to
-`.work/<slug>/_signals/resume.<agent>.md`, and re-dispatches. Cap: **3 HALT round-trips per agent**;
-after that, proceed with the stated default or stop with a clear message.
+L'orchestrateur fait ressortir la question (via `AskUserQuestion`), écrit la réponse dans
+`.work/<slug>/_signals/resume.<agent>.md`, et redispatche. Plafond : **3 allers-retours HALT par agent** ;
+au-delà, procède avec la valeur par défaut énoncée ou arrête avec un message clair.
 
-## Per-repo build / test / lint (what agents actually run)
+## Build / test / lint par repo (ce que les agents exécutent réellement)
 
-| Repo | Build | Test (single) | Lint |
+| Repo | Build | Test (unitaire) | Lint |
 |---|---|---|---|
 | ReportManagerApi | `dotnet build repos/ReportManagerApi/ReportManagerAPI.sln` | `dotnet test <proj> --filter "FullyQualifiedName~<Name>"` | — |
 | ReportFoundations | `dotnet build <the lib .sln/.csproj>` | `dotnet test <proj.SmallTests>` | — |
 | pf-web | `nx build <project>` | `nx test <project> --testFile=<path>` | `nx lint <project>` |
-| CroesusServer | CMake / Visual Studio | (usually read-only reference) | — |
-| ReportServer | CMake / Visual Studio | (usually read-only reference) | — |
+| CroesusServer | CMake / Visual Studio | (généralement référence en lecture seule) | — |
+| ReportServer | CMake / Visual Studio | (généralement référence en lecture seule) | — |
 
-Test tiers: C# `*.SmallTests` (unit, no external deps) / `*.MediumTests` (integration), xUnit + Moq.
-Angular: Vitest. The runnable API web project is `ReportManager.API/ReportManagerAPI.csproj`.
+Paliers de test : C# `*.SmallTests` (unitaire, sans dépendances externes) / `*.MediumTests` (intégration), xUnit + Moq.
+Angular : Vitest. Le projet web d'API exécutable est `ReportManager.API/ReportManagerAPI.csproj`.
 
-## Branch, commit & ship rules (per repo, org-mandated)
+## Règles de branche, commit & ship (par repo, imposées par l'org)
 
-Commits/PRs happen **per symlinked repo, on that repo's own branch** — there is no shared root repo.
-Agents `git add`-stage new files but **do not commit** unless the task explicitly asks; committing
-is the workflow's final *ship* step, gated.
+Les commits/PR se font **par repo symlinké, sur la branche propre de ce repo** — il n'y a pas de repo racine partagé.
+Les agents mettent en staging les nouveaux fichiers avec `git add` mais **ne committent pas** sauf si la tâche le demande explicitement ; le commit
+est l'étape finale de *ship* du workflow, gatée.
 
-- Branch from a protected ref (`main`, `master`, `develop`, `release/*`, `support/*`) with
-  **`--no-track`**: `git switch -c <name> --no-track origin/develop`.
-- First push of a new branch: **`git push -u origin <branch>`** — never a bare `git push`.
-- `pf-web` enforces **Conventional Commits** via commitlint (see `repos/pf-web/CLAUDE.md`); the .NET repos
-  follow standard team conventions.
+- Brancher depuis une réf protégée (`main`, `master`, `develop`, `release/*`, `support/*`) avec
+  **`--no-track`** : `git switch -c <name> --no-track origin/develop`.
+- Premier push d'une nouvelle branche : **`git push -u origin <branch>`** — jamais un `git push` nu.
+- `pf-web` impose les **Conventional Commits** via commitlint (voir `repos/pf-web/CLAUDE.md`) ; les repos .NET
+  suivent les conventions d'équipe standard.
 
-## Guardrails (apply to every agent and phase)
+## Garde-fous (s'appliquent à chaque agent et phase)
 
-- **Never** run org-denied CLIs: `aws`, `terraform`/`tofu`, or wrappers around them (e.g. `assume`,
-  `granted`). ReportManagerApi uses AWS via the SDK/config only — never the CLI.
-- Read-only agents (explorer, investigator, learning-guide, reviewer, retrospective) never edit code.
-- Respect each repo's own `CLAUDE.md` / `copilot-instructions.md` — they override generic advice.
+- **Ne jamais** exécuter les CLI interdites par l'org : `aws`, `terraform`/`tofu`, ou leurs wrappers (ex. `assume`,
+  `granted`). ReportManagerApi utilise AWS uniquement via le SDK/la config — jamais la CLI.
+- Les agents en lecture seule (explorer, investigator, learning-guide, reviewer, retrospective) n'éditent jamais le code.
+- Respecte le `CLAUDE.md` / `copilot-instructions.md` propre à chaque repo — ils priment sur les conseils génériques.

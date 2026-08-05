@@ -1,17 +1,17 @@
 # Review — <TICKET-ID or task slug> — <plan | code>
 
-_Written by reviewer · Date: <YYYY-MM-DD>_
+_Rédigée par reviewer · Date : <YYYY-MM-DD>_
 
-## Findings
-_One line each. `repo/path:line: <emoji> <severity>: <problem>. <fix>.`_
-_🔴 must-fix · 🟡 should-fix · 🟢 consider. Skip formatting nits that don't change meaning._
+## Constats
+_Une ligne chacun. `repo/path:line: <emoji> <sévérité> : <problème>. <correctif>.`_
+_🔴 must-fix · 🟡 should-fix · 🟢 consider. Ignore les pinaillages de formatage qui ne changent pas le sens._
 
-- `repo/path:line`: 🔴 must-fix: <problem>. <fix>.
-- `repo/path:line`: 🟡 should-fix: <problem>. <fix>.
-- `repo/path:line`: 🟢 consider: <problem>. <fix>.
+- `repo/path:line`: 🔴 must-fix : <problème>. <correctif>.
+- `repo/path:line`: 🟡 should-fix : <problème>. <correctif>.
+- `repo/path:line`: 🟢 consider : <problème>. <correctif>.
 
-## Don't miss
-<the 1-3 spots a human should look at first>
+## À ne pas manquer
+<les 1-3 endroits qu'un humain devrait regarder en premier>
 
 ## Verdict
 <clean | should-fix only | must-fix present>

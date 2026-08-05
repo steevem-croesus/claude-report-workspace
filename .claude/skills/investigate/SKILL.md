@@ -4,45 +4,52 @@ description: Find out why or how something happened in the Croesus report worksp
 allowed-tools: Agent, Task, AskUserQuestion, Read, Write, Grep, Glob, Bash
 ---
 
-Drive the **investigate** workflow for this task:
+Pilote le workflow **investigate** pour cette tâche :
 
 **$ARGUMENTS**
 
-This skill orchestrates the agents in `.claude/agents/`. The authoritative specs are
-`.claude/conventions/workflows.md` (§6 *investigate*) and `.claude/conventions/protocol.md` (task dir,
-canonical filenames, HALT protocol, guardrails). Cite and follow them — do not restate their rules.
-Dispatch each subagent with the **Agent** tool, passing its `subagent_type` (the agent's name) and a
-prompt of the form:
+> **Langue.** Communique avec l'utilisateur **en français** pendant tout ce workflow — cadrage,
+> questions (`AskUserQuestion`) et conclusion finale. Le code, les noms de fichiers/d'agents, les
+> chemins et les termes techniques restent inchangés.
+
+Ce skill orchestre les agents de `.claude/agents/`. Les spécifications qui font autorité sont
+`.claude/conventions/workflows.md` (§6 *investigate*) et `.claude/conventions/protocol.md` (répertoire
+de tâche, noms de fichiers canoniques, protocole HALT, garde-fous). Cite-les et suis-les — ne réénonce
+pas leurs règles. Dispatche chaque sous-agent avec l'outil **Agent**, en passant son `subagent_type`
+(le nom de l'agent) et un prompt de la forme :
 
 ```
 Task directory: .work/<slug>/
 Task: <the question / incident>
 ```
 
-This is a **read-only, no-gate** workflow. There is no plan, no build, no ship, no retrospective — the
-deliverable is a root-cause conclusion with its supporting evidence. It is **deeper than `explore`**:
-it answers *why/how*, ruling out alternatives rather than just mapping where code lives. When the cause
-is unknown at the start of a bug, this is the front half of the `bug` workflow.
+C'est un workflow **read-only, sans gate**. Il n'y a pas de plan, pas de build, pas de ship, pas de
+rétrospective — le livrable est une conclusion de cause racine avec ses preuves à l'appui. C'est **plus
+profond qu'`explore`** : il répond au *pourquoi/comment*, en écartant les alternatives plutôt qu'en se
+contentant de cartographier où vit le code. Quand la cause est inconnue au début d'un bug, c'est la
+moitié avant du workflow `bug`.
 
-## 1. Frame
-State the **precise question or incident** in one line — what behaviour/outcome needs explaining, and
-(if known) when it started. Derive the **slug** (Jira key if present, else kebab-case of the first ~4
-words; confirm if guessed) and `mkdir -p .work/<slug>/_signals/`; write the framing to
-`.work/<slug>/task.md`. If the question is too vague to investigate, sharpen it once via
-`AskUserQuestion`.
+## 1. Cadrer
+Énonce la **question ou l'incident précis** en une ligne — quel comportement/résultat a besoin d'être
+expliqué, et (si connu) quand ça a commencé. Dérive le **slug** (clé Jira si présente, sinon kebab-case
+des ~4 premiers mots ; confirme s'il a été deviné) et `mkdir -p .work/<slug>/_signals/` ; écris le
+cadrage dans `.work/<slug>/task.md`. Si la question est trop vague pour investiguer, affine-la une fois
+via `AskUserQuestion`.
 
-## 2. Context  →  `context.md`
-Dispatch **context-gatherer** with the Jira key and/or GitHub ref — it pulls the ticket, related PRs,
-commits, and history that bear on the incident. HALT loop per protocol.md if needed. Skip only if
-there is genuinely no ticket/GitHub context and say so.
+## 2. Contexte  →  `context.md`
+Dispatche **context-gatherer** avec la clé Jira et/ou la réf GitHub — il tire le ticket, les PR liées,
+les commits et l'historique qui portent sur l'incident. Boucle HALT selon protocol.md si nécessaire.
+Saute seulement s'il n'y a véritablement aucun contexte ticket/GitHub, et dis-le.
 
-## 3. Analyze  →  `investigation.md`
-Dispatch **investigator** to work the evidence: gather from code, git history, Jira, GitHub, and logs;
-form **hypotheses**; verify or refute each with a verdict; and conclude with the **most-supported root
-cause** and a **confidence** level. It writes `investigation.md`. If it returns a HALT (needs a
-decision or missing access), run the protocol.md HALT loop.
+## 3. Analyser  →  `investigation.md`
+Dispatche **investigator** pour travailler les preuves : rassemble depuis le code, l'historique git,
+Jira, GitHub et les logs ; forme des **hypothèses** ; vérifie ou réfute chacune avec un verdict ; et
+conclus avec la **cause racine la mieux étayée** et un niveau de **confiance**. Il écrit
+`investigation.md`. S'il renvoie un HALT (besoin d'une décision ou accès manquant), exécute la boucle
+HALT de protocol.md.
 
-## 4. Conclude
-Present the conclusion: the root cause, the key evidence that pins it, the alternatives ruled out, and
-the confidence. If the natural next step is a fix, point the user at the `bug` workflow (which will
-reuse this diagnosis) or `feature`/`refactor` as appropriate — but **do not** start fixing here.
+## 4. Conclure
+Présente la conclusion : la cause racine, les preuves clés qui l'épinglent, les alternatives écartées et
+la confiance. Si la prochaine étape naturelle est un correctif, oriente l'utilisateur vers le workflow
+`bug` (qui réutilisera ce diagnostic) ou `feature`/`refactor` selon le cas — mais **ne commence pas** à
+corriger ici.

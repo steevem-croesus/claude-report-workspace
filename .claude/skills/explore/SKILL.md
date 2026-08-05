@@ -4,36 +4,43 @@ description: Map where something lives or how it flows across the Croesus report
 allowed-tools: Agent, Task, AskUserQuestion, Read, Write, Grep, Glob, Bash
 ---
 
-Drive the **explore** workflow for this task:
+Pilote le workflow **explore** pour cette tâche :
 
 **$ARGUMENTS**
 
-This skill orchestrates the **explorer** agent in `.claude/agents/`. The authoritative specs are
-`.claude/conventions/workflows.md` (§5 *explore*) and `.claude/conventions/protocol.md` (task dir,
-canonical filenames, guardrails). Cite and follow them — do not restate their rules. Dispatch the
-subagent with the **Agent** tool, passing its `subagent_type` and a prompt of the form:
+> **Langue.** Communique avec l'utilisateur **en français** pendant tout ce workflow — cadrage,
+> questions (`AskUserQuestion`) et réponse finale. Le code, les noms de fichiers/d'agents, les chemins
+> et les termes techniques restent inchangés.
+
+Ce skill orchestre l'agent **explorer** de `.claude/agents/`. Les spécifications qui font autorité sont
+`.claude/conventions/workflows.md` (§5 *explore*) et `.claude/conventions/protocol.md` (répertoire de
+tâche, noms de fichiers canoniques, garde-fous). Cite-les et suis-les — ne réénonce pas leurs règles.
+Dispatche le sous-agent avec l'outil **Agent**, en passant son `subagent_type` et un prompt de la
+forme :
 
 ```
 Task directory: .work/<slug>/
 Task: <the question>
 ```
 
-This is a **read-only, no-gate, fast** workflow. There is no plan, no build, no ship, no
-retrospective. The deliverable is a code map that answers the question. It is deliberately cheap —
-don't over-scaffold it.
+C'est un workflow **read-only, sans gate, rapide**. Il n'y a pas de plan, pas de build, pas de ship,
+pas de rétrospective. Le livrable est une carte de code qui répond à la question. Il est délibérément
+bon marché — ne le sur-échafaude pas.
 
-## 1. Scope
-Restate the question in one line and name the **candidate repos** (which of CroesusServer,
-ReportServer, ReportFoundations, ReportManagerApi, pf-web are likely in play). If the question is
-genuinely ambiguous (multiple distinct things it could mean), ask once via `AskUserQuestion`;
-otherwise proceed. For a quick one-off with no ticket you may skip the task dir — for anything
-worth keeping, derive the **slug** and `mkdir -p .work/<slug>/`.
+## 1. Cadrer
+Reformule la question en une ligne et nomme les **repos candidats** (lesquels de CroesusServer,
+ReportServer, ReportFoundations, ReportManagerApi, pf-web sont probablement en jeu). Si la question est
+véritablement ambiguë (plusieurs choses distinctes qu'elle pourrait signifier), demande une fois via
+`AskUserQuestion` ; sinon continue. Pour une question ponctuelle rapide sans ticket, tu peux sauter le
+répertoire de tâche — pour tout ce qui vaut la peine d'être gardé, dérive le **slug** et
+`mkdir -p .work/<slug>/`.
 
-## 2. Map  →  `exploration.md` (or inline)
-Dispatch **explorer** to produce a `repo/path:line` map plus the cross-repo flow. For a small, quick
-question let it answer inline; for a substantive map, have it write `exploration.md`.
+## 2. Cartographier  →  `exploration.md` (ou en ligne)
+Dispatche **explorer** pour produire une carte `repo/path:line` plus le flux inter-repos. Pour une
+petite question rapide, laisse-le répondre en ligne ; pour une carte substantielle, fais-lui écrire
+`exploration.md`.
 
-## 3. Answer
-Summarize the finding for the user: the map, the flow, and the clickable `repo/path:line` entry
-points — plus a one-line "next workflow" pointer if the exploration naturally leads into a `feature`,
-`refactor`, or `investigate`.
+## 3. Répondre
+Résume le constat pour l'utilisateur : la carte, le flux, et les points d'entrée cliquables
+`repo/path:line` — plus un pointeur « prochain workflow » d'une ligne si l'exploration mène
+naturellement vers un `feature`, un `refactor` ou un `investigate`.

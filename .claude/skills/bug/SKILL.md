@@ -4,77 +4,85 @@ description: Fix a defect in the Croesus report workspace, end to end, following
 allowed-tools: Agent, Task, AskUserQuestion, Read, Write, Grep, Glob, Bash
 ---
 
-Drive the **bug** workflow for this task:
+Pilote le workflow **bug** pour cette tâche :
 
 **$ARGUMENTS**
 
-This skill orchestrates the agents in `.claude/agents/`. The authoritative specs are
-`.claude/conventions/workflows.md` (§2 *bug*) and `.claude/conventions/protocol.md` (task dir, gate
-protocol, the plan-gate **build bar**, HALT protocol, per-repo commands, and guardrails). Cite and
-follow them — do not restate their rules. Dispatch each subagent with the **Agent** tool, passing its
-`subagent_type` (the agent's name) and a prompt of the form:
+> **Langue.** Communique avec l'utilisateur **en français** pendant tout ce workflow — notes de
+> progression, questions (`AskUserQuestion`), résumés et bilan final. Le code, les noms de
+> fichiers/d'agents, les chemins et les termes techniques restent inchangés.
+
+Ce skill orchestre les agents de `.claude/agents/`. Les spécifications qui font autorité sont
+`.claude/conventions/workflows.md` (§2 *bug*) et `.claude/conventions/protocol.md` (répertoire de
+tâche, protocole de gate, la **barre de build** du gate de plan, protocole HALT, commandes par repo et
+garde-fous). Cite-les et suis-les — ne réénonce pas leurs règles. Dispatche chaque sous-agent avec
+l'outil **Agent**, en passant son `subagent_type` (le nom de l'agent) et un prompt de la forme :
 
 ```
 Task directory: .work/<slug>/
 Task: <the task text>
 ```
 
-The distinguishing rule of this workflow: **no fix ships without a reproduction and a regression
-test** that fails before the fix and passes after. Diagnosis is mandatory and separate from the fix —
-do not patch symptoms.
+La règle distinctive de ce workflow : **aucun correctif ne ship sans une reproduction et un test de
+régression** qui échoue avant le correctif et passe après. Le diagnostic est obligatoire et séparé du
+correctif — ne rapièce pas les symptômes.
 
-## 1. Setup
-- Derive the **slug** (Jira key if present, else kebab-case of the first ~4 words); confirm if guessed.
-- `mkdir -p .work/<slug>/_signals/` and write the report to `.work/<slug>/task.md`.
+## 1. Mise en place
+- Dérive le **slug** (clé Jira si présente, sinon kebab-case des ~4 premiers mots) ; confirme s'il a été deviné.
+- `mkdir -p .work/<slug>/_signals/` et écris le rapport dans `.work/<slug>/task.md`.
 
-## 2. Context  →  `context.md`
-Dispatch **context-gatherer** with the Jira key and/or GitHub ref — it captures the bug report, repro
-steps, and any linked PRs/commits. HALT loop per protocol.md if needed.
+## 2. Contexte  →  `context.md`
+Dispatche **context-gatherer** avec la clé Jira et/ou la réf GitHub — il capture le rapport de bug, les
+étapes de repro et toute PR/tout commit lié. Boucle HALT selon protocol.md si nécessaire.
 
-## 3. Reproduce  →  `bug-diagnosis.md`
-Establish a reproduction before diagnosing. Dispatch **explorer** if you first need to locate the
-failing path. Then reproduce: prefer writing a **failing test** that captures the defect; otherwise
-document exact repro steps. Record repro status (reliable / intermittent / not-yet-reproduced) in
-`bug-diagnosis.md`. If it cannot be reproduced, surface that to the user via `AskUserQuestion` (get
-more detail, or proceed on best evidence) before continuing — do not blindly patch.
+## 3. Reproduire  →  `bug-diagnosis.md`
+Établis une reproduction avant de diagnostiquer. Dispatche **explorer** si tu dois d'abord localiser le
+chemin défaillant. Puis reproduis : préfère écrire un **test qui échoue** capturant le défaut ; sinon
+documente les étapes de repro exactes. Consigne le statut de repro (fiable / intermittent /
+pas-encore-reproduit) dans `bug-diagnosis.md`. Si ça ne peut pas être reproduit, fais-le remonter à
+l'utilisateur via `AskUserQuestion` (plus de détails, ou continuer sur les meilleures preuves) avant de
+poursuivre — ne rapièce pas à l'aveugle.
 
-## 4. Diagnose  →  `bug-diagnosis.md`
-Dispatch **investigator** to find the root cause (evidence → hypotheses with verdicts → root cause →
-confidence). It appends to `bug-diagnosis.md`. Distinguish the trigger from the underlying cause.
+## 4. Diagnostiquer  →  `bug-diagnosis.md`
+Dispatche **investigator** pour trouver la cause racine (preuves → hypothèses avec verdicts → cause
+racine → confiance). Il ajoute à `bug-diagnosis.md`. Distingue le déclencheur de la cause sous-jacente.
 
-## 5. Plan the fix  →  `plan.md`
-Dispatch **planner** (fix-scoped, minimal — the plan must include the regression test in its Tests
-section). It writes a graded, status-stamped `plan.md`. HALT/decision-point loop as in protocol.md.
+## 5. Planifier le correctif  →  `plan.md`
+Dispatche **planner** (cadré sur le correctif, minimal — le plan doit inclure le test de régression dans
+sa section Tests). Il écrit un `plan.md` noté et estampillé d'un statut. Boucle HALT/point de décision
+comme dans protocol.md.
 
-## 6. Plan gate — enforce the build bar
-Present `plan.md` (lead with **Status** + **Grade**). Apply the protocol.md **build bar**: approvable
-only when `ready` + graded **A or S**. Below bar → surface + **changes** (re-dispatch planner) or
-**cancel**; explicit user override recorded in `_signals/revision-request.md`. At/above bar → ask
-*approve / changes / cancel*. Small fixes may grade quickly, but the bar still holds unless overridden.
+## 6. Gate de plan — faire respecter la barre de build
+Présente `plan.md` (commence par **Status** + **Grade**). Applique la **barre de build** de protocol.md :
+approuvable uniquement lorsque `ready` + noté **A ou S**. Sous la barre → fais remonter + **changements**
+(re-dispatche le planner) ou **annuler** ; passage-outre explicite de l'utilisateur consigné dans
+`_signals/revision-request.md`. À/au-dessus de la barre → demande *approuver / changements / annuler*.
+Les petits correctifs peuvent obtenir une note vite, mais la barre tient sauf passage-outre.
 
-## 7. Build the fix  →  `build-summary.md`
-Dispatch **implementer** (or **cpp-to-csharp-porter** if the fix is in a C++→C# value-provider port).
-The build **must** include the regression test proving the bug is fixed. The builder builds + runs
-tests before returning. HALT loop as needed. `git add`-stage, no commit.
+## 7. Construire le correctif  →  `build-summary.md`
+Dispatche **implementer** (ou **cpp-to-csharp-porter** si le correctif est dans un port de
+value-provider C++→C#). Le build **doit** inclure le test de régression prouvant que le bug est corrigé.
+Le builder build + exécute les tests avant de renvoyer. Boucle HALT au besoin. `git add`-stage, pas de
+commit.
 
-## 8. Verify + review  →  `review-code.md`
-Confirm the original reproduction is gone (re-run the failing test / repro). Dispatch **reviewer** in
-code mode; it writes `review-code.md`. The review must confirm the regression test actually covers
-the root cause, not just the symptom.
+## 8. Vérifier + review  →  `review-code.md`
+Confirme que la reproduction d'origine a disparu (ré-exécute le test qui échouait / la repro). Dispatche
+**reviewer** en mode code ; il écrit `review-code.md`. La review doit confirmer que le test de
+régression couvre réellement la cause racine, pas seulement le symptôme.
 
-## 9. Code gate
-Ask *approve / changes / cancel*. **changes** or `must-fix` present → write findings to
-`_signals/revision-request.md`, loop to §7 (**cap 3** build↔review iterations), then report remaining
-issues. **approve** → continue.
+## 9. Gate de code
+Demande *approuver / changements / annuler*. **changements** ou `must-fix` présent → écris les constats
+dans `_signals/revision-request.md`, reboucle au §7 (**plafond 3** itérations build↔review), puis signale
+les problèmes restants. **approuver** → continue.
 
-## 10. Ship (optional, gated)
-If the user wants to ship: **per touched repo**, branch (`--no-track` from a protected ref), commit,
-`git push -u`, open a PR — per the org git rules in protocol.md. Skip if declined.
+## 10. Ship (optionnel, gaté)
+Si l'utilisateur veut ship : **par repo touché**, branche (`--no-track` depuis une réf protégée),
+commite, `git push -u`, ouvre une PR — selon les règles git de l'org dans protocol.md. Saute si refusé.
 
-## 11. Retrospective  →  `retro.md`
-Dispatch **retrospective**. Its `retro.md` **must** include the root-cause *class* (so similar bugs
-are caught earlier) and propose memory/doc updates as a checklist for user approval — do not
-auto-write them.
+## 11. Rétrospective  →  `retro.md`
+Dispatche **retrospective**. Son `retro.md` **doit** inclure la *classe* de cause racine (pour que des
+bugs similaires soient attrapés plus tôt) et proposer des mises à jour mémoire/doc sous forme de
+checklist pour approbation de l'utilisateur — ne les écris pas automatiquement.
 
-Finish with a short summary: the root cause, the fix + regression test, verify/review outcome, PRs
-(if any), and the proposed learnings awaiting approval.
+Termine par un court résumé : la cause racine, le correctif + le test de régression, le résultat
+vérification/review, les PR (le cas échéant), et les apprentissages proposés en attente d'approbation.

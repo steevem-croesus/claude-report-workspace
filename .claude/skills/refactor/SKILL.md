@@ -4,79 +4,92 @@ description: Restructure code in the Croesus report workspace without changing b
 allowed-tools: Agent, Task, AskUserQuestion, Read, Write, Grep, Glob, Bash
 ---
 
-Drive the **refactor** workflow for this task:
+Pilote le workflow **refactor** pour cette tâche :
 
 **$ARGUMENTS**
 
-This skill orchestrates the agents in `.claude/agents/`. The authoritative specs are
-`.claude/conventions/workflows.md` (§3 *refactor*) and `.claude/conventions/protocol.md` (task dir,
-gate protocol, the plan-gate **build bar**, HALT protocol, per-repo commands, and guardrails). Cite
-and follow them — do not restate their rules. Dispatch each subagent with the **Agent** tool, passing
-its `subagent_type` (the agent's name) and a prompt of the form:
+> **Langue.** Communique avec l'utilisateur **en français** pendant tout ce workflow — notes de
+> progression, questions (`AskUserQuestion`), résumés et bilan final. Le code, les noms de
+> fichiers/d'agents, les chemins et les termes techniques restent inchangés.
+
+Ce skill orchestre les agents de `.claude/agents/`. Les spécifications qui font autorité sont
+`.claude/conventions/workflows.md` (§3 *refactor*) et `.claude/conventions/protocol.md` (répertoire de
+tâche, protocole de gate, la **barre de build** du gate de plan, protocole HALT, commandes par repo et
+garde-fous). Cite-les et suis-les — ne réénonce pas leurs règles. Dispatche chaque sous-agent avec
+l'outil **Agent**, en passant son `subagent_type` (le nom de l'agent) et un prompt de la forme :
 
 ```
 Task directory: .work/<slug>/
 Task: <the task text>
 ```
 
-The distinguishing rule of this workflow: **behaviour must not change**. Characterization tests come
-*before* any edit; every downstream consumer of a touched `ReportFoundations` surface must be named.
-Re-render a short one-line progress note at each phase transition (which phase, what artifact landed).
+La règle distinctive de ce workflow : **le comportement ne doit pas changer**. Les tests de
+caractérisation viennent *avant* toute modification ; chaque consommateur en aval d'une surface
+`ReportFoundations` touchée doit être nommé. Réaffiche une courte note de progression d'une ligne à
+chaque transition de phase (quelle phase, quel artefact a été produit).
 
-## 1. Setup
-- Derive the **slug** (Jira key if present, else kebab-case of the first ~4 words); confirm if guessed.
-- `mkdir -p .work/<slug>/_signals/` and write the raw task text to `.work/<slug>/task.md`.
+## 1. Mise en place
+- Dérive le **slug** (clé Jira si présente, sinon kebab-case des ~4 premiers mots) ; confirme s'il a été deviné.
+- `mkdir -p .work/<slug>/_signals/` et écris le texte brut de la tâche dans `.work/<slug>/task.md`.
 
-## 2. Context  →  `context.md`
-Dispatch **context-gatherer** with the Jira key and/or GitHub ref — capture *why* the refactor is
-wanted and any constraints (deadlines, frozen APIs, callers that must not break). HALT loop per
-protocol.md if needed.
+## 2. Contexte  →  `context.md`
+Dispatche **context-gatherer** avec la clé Jira et/ou la réf GitHub — capture *pourquoi* le refactor est
+voulu et toute contrainte (échéances, API gelées, appelants à ne pas casser). Boucle HALT selon
+protocol.md si nécessaire.
 
 ## 3. Explore  →  `exploration.md`
-Dispatch **explorer** to map the **blast radius**: the code to be changed and every consumer of it
-across the repos. For `ReportFoundations` this is critical — it is consumed by `ReportManagerApi` and
-the Spooler; the map must list downstream call sites.
+Dispatche **explorer** pour cartographier le **rayon d'impact** : le code à changer et chacun de ses
+consommateurs à travers les repos. Pour `ReportFoundations` c'est critique — il est consommé par
+`ReportManagerApi` et le Spooler ; la carte doit lister les sites d'appel en aval.
 
-## 4. Characterize  →  safety-net tests (note in `build-summary.md`)
-*Before touching anything*, dispatch **implementer** to add a **safety-net of characterization tests**
-that pin the current observable behaviour of the code in scope, and to build + run them green. Note
-any behaviour that cannot be pinned (external deps, non-determinism) as a gap. This net is what proves
-the refactor is behaviour-preserving.
+## 4. Caractériser  →  tests filet de sécurité (noté dans `build-summary.md`)
+*Avant de toucher quoi que ce soit*, dispatche **implementer** pour ajouter un **filet de sécurité de
+tests de caractérisation** qui fige le comportement observable actuel du code en portée, et pour les
+build + exécuter au vert. Note tout comportement qui ne peut pas être figé (deps externes,
+non-déterminisme) comme une lacune. Ce filet est ce qui prouve que le refactor préserve le comportement.
 
 ## 5. Plan  →  `plan.md`
-Dispatch **planner**. The plan must be a sequence of **ordered, individually-safe, behaviour-preserving
-steps**, and must explicitly call out any breaking-change surface (public API, contract, wire format).
-It writes a graded, status-stamped `plan.md`. HALT/decision-point loop per protocol.md.
+Dispatche **planner**. Le plan doit être une séquence d'**étapes ordonnées, individuellement sûres et
+préservant le comportement**, et doit explicitement pointer toute surface à changement cassant (API
+publique, contrat, format de fil). Il écrit un `plan.md` noté et estampillé d'un statut. Boucle
+HALT/point de décision selon protocol.md.
 
-## 6. Plan gate — enforce the build bar
-Present `plan.md` (lead with its **Status** + **Grade** header). Apply the protocol.md **build bar**:
-approvable **only** when `ready` **and** graded **A or S**. Below bar → do not offer *approve*; surface
-the grade + blockers, then **changes** (write feedback to `_signals/revision-request.md`, re-dispatch
-planner, return here) or **cancel**. An explicit user override is recorded in `_signals/revision-request.md`.
-At/above bar → ask *approve / changes / cancel* via `AskUserQuestion`. **cancel** → stop.
+## 6. Gate de plan — faire respecter la barre de build
+Présente `plan.md` (commence par son en-tête **Status** + **Grade**). Applique la **barre de build** de
+protocol.md : approuvable **uniquement** lorsque `ready` **et** noté **A ou S**. Sous la barre → ne
+propose pas *approuver* ; fais remonter la note + les bloqueurs, puis **changements** (écris le retour
+dans `_signals/revision-request.md`, re-dispatche le planner, reviens ici) ou **annuler**. Un
+passage-outre explicite de l'utilisateur est consigné dans `_signals/revision-request.md`. À/au-dessus
+de la barre → demande *approuver / changements / annuler* via `AskUserQuestion`. **annuler** → arrête.
 
 ## 7. Build  →  `build-summary.md`
-For each repo/slice named in the plan's `#### <repo>` sub-sections, dispatch **implementer** and apply
-the refactor in the plan's **small steps** — the characterization + existing tests must stay green
-**after every step**. If a step goes red, that step's change is not behaviour-preserving: stop and
-report rather than adjusting the tests to match. Builders `git add`-stage, no commit. HALT loop as needed.
+Pour chaque repo/tranche nommé dans les sous-sections `#### <repo>` du plan, dispatche **implementer** et
+applique le refactor dans les **petites étapes** du plan — la caractérisation + les tests existants
+doivent rester au vert **après chaque étape**. Si une étape passe au rouge, le changement de cette étape
+ne préserve pas le comportement : arrête et signale plutôt que d'ajuster les tests pour qu'ils
+correspondent. Les builders `git add`-stagent, pas de commit. Boucle HALT au besoin.
 
 ## 8. Review  →  `review-code.md`
-Dispatch **reviewer** in code mode over the working diff. The review must verify **no behaviour change
-and no contract drift** — especially at the consumer surfaces the explorer mapped.
+Dispatche **reviewer** en mode code sur le diff de travail. La review doit vérifier **aucun changement
+de comportement et aucune dérive de contrat** — surtout aux surfaces consommatrices que l'explorer a
+cartographiées.
 
-## 9. Code gate
-Present the verdict + `build-summary.md` outcome. Ask *approve / changes / cancel*. **changes** or
-`must-fix` present → write findings to `_signals/revision-request.md`, loop to §7 (**cap 3**
-build↔review iterations), then report remaining issues. **approve** → continue.
+## 9. Gate de code
+Présente le verdict + le résultat de `build-summary.md`. Demande *approuver / changements / annuler*.
+**changements** ou `must-fix` présent → écris les constats dans `_signals/revision-request.md`, reboucle
+au §7 (**plafond 3** itérations build↔review), puis signale les problèmes restants. **approuver** →
+continue.
 
-## 10. Ship (optional, gated)
-If the user wants to ship: **per touched repo** (no shared root repo), branch (`--no-track` from a
-protected ref), commit, `git push -u`, open a PR — per the org git rules in protocol.md. Skip if declined.
+## 10. Ship (optionnel, gaté)
+Si l'utilisateur veut ship : **par repo touché** (pas de repo racine partagé), branche (`--no-track`
+depuis une réf protégée), commite, `git push -u`, ouvre une PR — selon les règles git de l'org dans
+protocol.md. Saute si refusé.
 
-## 11. Retrospective  →  `retro.md`
-Dispatch **retrospective**. It proposes durable memory entries + doc/CLAUDE.md updates as a checklist.
-Surface the checklist to the user for approval — **do not** auto-write memory or edit docs.
+## 11. Rétrospective  →  `retro.md`
+Dispatche **retrospective**. Il propose des entrées de mémoire durables + des mises à jour doc/CLAUDE.md
+sous forme de checklist. Fais remonter la checklist à l'utilisateur pour approbation — **n'écris pas**
+automatiquement la mémoire et ne modifie pas les docs.
 
-Finish with a short summary: what was restructured, the plan grade, whether the safety net held green
-throughout, review outcome, PRs (if any), and the proposed learnings awaiting approval.
+Termine par un court résumé : ce qui a été restructuré, la note du plan, si le filet de sécurité a tenu
+au vert tout du long, le résultat de la review, les PR (le cas échéant), et les apprentissages proposés
+en attente d'approbation.

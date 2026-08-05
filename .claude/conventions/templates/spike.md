@@ -1,30 +1,30 @@
 # Spike — <question / slug>
 
-_Date: <YYYY-MM-DD> · Timebox: <e.g. 1 day> · Prototypes are throwaway._
+_Date : <YYYY-MM-DD> · Timebox : <ex. 1 jour> · Les prototypes sont jetables._
 
 ## Question
-<the single decision this spike must inform>
+<la décision unique que ce spike doit éclairer>
 
-## Definition of done
-<what evidence/answer ends the spike>
+## Définition de terminé
+<quelle preuve/réponse met fin au spike>
 
-## What was tried
-- <explorations, prototypes (isolated/throwaway), references consulted — with `repo/path:line`>
+## Ce qui a été essayé
+- <explorations, prototypes (isolés/jetables), références consultées — avec `repo/path:line`>
 
-## Findings
-<what we now know that we didn't before>
+## Constats
+<ce que l'on sait désormais et qu'on ignorait avant>
 
 ## Options
-| Option | Pros | Cons | Cost / risk |
+| Option | Avantages | Inconvénients | Coût / risque |
 |---|---|---|---|
 | A — <…> | | | |
 | B — <…> | | | |
 
-## Recommendation
-<the recommended option and why; what it unblocks>
+## Recommandation
+<l'option recommandée et pourquoi ; ce qu'elle débloque>
 
-## Next step
-<usually: run the `feature` or `refactor` workflow with this decision as input>
+## Étape suivante
+<en général : lancer le workflow `feature` ou `refactor` avec cette décision en entrée>
 
-## Learnings to keep
-<durable facts worth saving to Claude memory even though there's no retro phase>
+## Apprentissages à conserver
+<faits durables qui valent la peine d'être sauvegardés dans Claude memory même s'il n'y a pas de phase de rétro>

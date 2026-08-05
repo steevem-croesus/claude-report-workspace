@@ -1,29 +1,29 @@
-# Retrospective — <TICKET-ID or task slug>
+# Rétrospective — <TICKET-ID or task slug>
 
-_Written by retrospective · Date: <YYYY-MM-DD>_
+_Rédigée par retrospective · Date : <YYYY-MM-DD>_
 
-## What shipped
-<the change, repos/PRs, outcome — merged? tests green?>
+## Ce qui a été livré
+<le changement, repos/PRs, résultat — mergé ? tests au vert ?>
 
-## Plan vs reality
-<where the plan held; where and why it deviated; was requirements coverage actually met?>
+## Plan vs réalité
+<là où le plan a tenu ; où et pourquoi il a dévié ; la couverture des exigences a-t-elle réellement été atteinte ?>
 
-## What went well
+## Ce qui a bien marché
 - <…>
 
-## What was hard / surprising
-- <friction: confusing code, missing docs, flaky tests, cross-repo coupling, C++→C# gotchas>
+## Ce qui a été difficile / surprenant
+- <frictions : code confus, docs manquantes, tests instables, couplage inter-repos, pièges C++→C#>
 
-## Root-cause note (bugs only)
-<the underlying cause + the class of bug, so similar ones are caught earlier>
+## Note sur la cause racine (bugs uniquement)
+<la cause sous-jacente + la classe de bug, afin d'attraper les similaires plus tôt>
 
-## Follow-ups
-- [ ] <actionable item> — owner TBD
-- [ ] <file a Jira ticket for …>
+## Suites à donner
+- [ ] <élément actionnable> — responsable à déterminer
+- [ ] <ouvrir un ticket Jira pour …>
 
-## Durable learnings (for user approval — not auto-saved)
-Proposed **Claude memory** entries:
-- [ ] type `<project|feedback|reference>` — <the one fact>
+## Apprentissages durables (pour approbation utilisateur — non sauvegardés automatiquement)
+Entrées **Claude memory** proposées :
+- [ ] type `<project|feedback|reference>` — <le fait unique>
 
-Proposed **doc / CLAUDE.md** updates:
-- [ ] `<file>` — add: <the line/section>
+Mises à jour **doc / CLAUDE.md** proposées :
+- [ ] `<file>` — ajouter : <la ligne/section>

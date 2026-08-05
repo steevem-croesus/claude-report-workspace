@@ -1,63 +1,63 @@
 # Plan — <TICKET-ID or task slug>
 
-_Written by planner · Date: <YYYY-MM-DD>_
+_Rédigé par planner · Date : <YYYY-MM-DD>_
 
 **Status:** <draft | ready> · **Grade:** <F | D | C | B | A | S>
 <!-- Buildable only when Status = ready AND Grade ∈ {A, S}. Scale: F < D < C < B < A < S. -->
 
-## Problem
-<one paragraph. Name the target repo(s) and language(s).>
+## Problème
+<un paragraphe. Nomme le(s) repo(s) et langage(s) cible(s).>
 
-## Requirements coverage
-| Requirement (from context / acceptance criteria) | Covered by | Notes |
+## Couverture des exigences
+| Exigence (issue du contexte / des critères d'acceptation) | Couverte par | Notes |
 |---|---|---|
-| <req 1> | Step 2 | |
-| <req 2> | Step 3 | |
-| <req 3> | — | deferred / out-of-scope — <why> |
+| <exigence 1> | Étape 2 | |
+| <exigence 2> | Étape 3 | |
+| <exigence 3> | — | reportée / hors périmètre — <pourquoi> |
 
-_Nothing requested may be silently dropped; every row maps to a Step or an explicit deferral._
+_Rien de ce qui est demandé ne peut être abandonné en silence ; chaque ligne renvoie à une Étape ou à un report explicite._
 
-## Affected areas
-- **<repo>** — `path/to/area` — <what changes>
-- **<repo>** — `path/to/area` — <what changes>
+## Zones affectées
+- **<repo>** — `path/to/area` — <ce qui change>
+- **<repo>** — `path/to/area` — <ce qui change>
 
-## Steps
-<ordered and concrete. For multi-repo/multi-language work, group under `#### <repo-or-lang>`.>
+## Étapes
+<ordonnées et concrètes. Pour un travail multi-repo/multi-langage, regroupe sous `#### <repo-or-lang>`.>
 
 #### <repo-or-lang A>
-1. <step>
-2. <step>
+1. <étape>
+2. <étape>
 
 #### <repo-or-lang B>
-1. <step>
+1. <étape>
 
 ## Tests
-- <what to test> — tier: <SmallTests / MediumTests / Vitest / E2E> — traces to Step <n>
+- <ce qu'il faut tester> — palier : <SmallTests / MediumTests / Vitest / E2E> — se rattache à l'Étape <n>
 
-## Risks & breaking changes
-- <shared-lib ripple, contract/DTO change, migration, C++→C# fidelity risk>
+## Risques & changements incompatibles
+- <répercussion sur une lib partagée, changement de contrat/DTO, migration, risque de fidélité C++→C#>
 
-## Decision points
-| # | Decision | Options considered | Chosen | Rationale | Status |
+## Points de décision
+| # | Décision | Options considérées | Choix | Justification | Status |
 |---|---|---|---|---|---|
-| 1 | <…> | A / B | A | <why> | resolved |
-| 2 | <…> | X / Y | — | <why it needs the user> | needs-user |
+| 1 | <…> | A / B | A | <pourquoi> | resolved |
+| 2 | <…> | X / Y | — | <pourquoi ça requiert l'utilisateur> | needs-user |
 
-_Any `needs-user` row must also appear in Open questions and keeps the plan in `draft`._
+_Toute ligne `needs-user` doit aussi apparaître dans Questions ouvertes et maintient le plan en `draft`._
 
-## Estimate
-_T-shirt size → ideal engineer-time: XS ≤ 2h · S ≈ ½ day · M ≈ 1-2 days · L ≈ 3-5 days · XL > 1 week (split it)._
+## Estimation
+_Taille en T-shirt → temps-ingénieur idéal : XS ≤ 2h · S ≈ ½ journée · M ≈ 1-2 jours · L ≈ 3-5 jours · XL > 1 semaine (à découper)._
 
-| Step | Size | Ideal time | Notes |
+| Étape | Taille | Temps idéal | Notes |
 |---|---|---|---|
-| Step 1 — <…> | S | ~½ day | |
-| Step 2 — <…> | M | ~1-2 days | |
-| Tests (item 5) | S | ~½ day | |
+| Étape 1 — <…> | S | ~½ journée | |
+| Étape 2 — <…> | M | ~1-2 jours | |
+| Tests (élément 5) | S | ~½ journée | |
 
-- **Per repo (multi-repo only):** <repo A: M · repo B: S>
-- **Overall:** <size> — <range, e.g. 3-5 ideal days>
-- **Confidence:** <high / medium / low>
-- **What drives it:** <the 1-3 assumptions / unknowns / XL-or-open-question risks that move the number>
+- **Par repo (multi-repo uniquement) :** <repo A : M · repo B : S>
+- **Global :** <taille> — <fourchette, ex. 3-5 jours idéaux>
+- **Confiance :** <high / medium / low>
+- **Ce qui la détermine :** <les 1-3 hypothèses / inconnues / risques XL-ou-question-ouverte qui font bouger le chiffre>
 
-## Open questions (resolve at the plan gate)
+## Questions ouvertes (à résoudre au gate plan)
 - <…>
