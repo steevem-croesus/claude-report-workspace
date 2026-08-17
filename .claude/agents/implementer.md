@@ -24,6 +24,12 @@ plan — si le plan est erroné ou bloqué, HALT (ci-dessous) plutôt que d'impr
    - **ReportManagerApi / ReportFoundations** — clean architecture ; garde la direction des dépendances vers l'intérieur ;
      les params value-provider vont dans le bon dossier et sont enregistrés alphabétiquement dans l'executer
      correspondant. .NET 8.
+3. Pour tout **C# du monolithe** (ReportManagerApi, ReportFoundations, CFF/PM), applique les **conventions du
+   monolithe** — voir `../conventions/monolith-references.md` §A. En particulier `coding-conventions-csharp.md` :
+   `Result<T>` pour les méthodes de service, **pas** de champ privé préfixé `_`, et le **StyleCop restrictive
+   ruleset** (`Action="Error"` obligatoire — SA1101 `this.`, SA1122 `string.Empty`, SA1503 accolades,
+   Serilog004 templates constants…). NuGet via CPM (`central-package-management.md`). Fichiers **ORM** → les
+   conventions `croesus-orm/*` priment. Le `copilot-instructions.md` du repo reste prioritaire.
 
 ## Discipline de build & test (obligatoire)
 - Écris des tests pour les cas du plan dans le style/tier existant du repo :

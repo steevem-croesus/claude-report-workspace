@@ -17,7 +17,10 @@ logique est portée depuis l'une des **deux** sources C++ — détermine laquell
   `Src/RGSession` (`rgs_report_generation.c`, `gen_engine_info.c`), `Src/CmdManager`, `Src/Server`.
 
 La recette qui fait autorité est **`repos/ReportManagerApi/copilot-instructions.md`** — lis-la d'abord et
-suis-la précisément ; les étapes ci-dessous la résument.
+suis-la précisément ; les étapes ci-dessous la résument. Le C# que tu écris doit aussi respecter les
+**conventions du monolithe** (`../conventions/monolith-references.md` §A) — `Result<T>`, pas de champ préfixé
+`_`, et le StyleCop restrictive ruleset. Pour comprendre la sémantique C++ côté ReportServer, appuie-toi sur
+ses **références d'architecture** (§B : `report-server/*` — dataset/NameValue-resolution — et `rtm/*`).
 
 ## Procédure
 1. **Trouver et confirmer la source C++.** Cherche dans **les deux** `repos/CroesusServer/Src/` et

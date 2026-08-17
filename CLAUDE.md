@@ -21,6 +21,7 @@ single root. The symlinks live under **`repos/`** and each points at a checkout 
 | `repos/ReportFoundations`  | `/c/Repos/monolith/CFF/ReportFoundations`      | **C#** (class libs)     | Shared reporting libraries: business logic, entities, design, implementations, and the **Spooler** (batch generation). Consumed by `ReportManagerApi`. |
 | `repos/ReportManagerApi`   | `/c/Repos/monolith/CFF/Products/ReportManagerApi` | **C# / .NET 8** (Web API) | Async report-generation API. Clean/DDD layering; uses AWS SQS + S3; talks to the Frameworkserver. |
 | `repos/pf-web`             | `/c/Repos/pf-web`                              | **TypeScript / Angular 21 + NX** | Frontend (Croesus Xpert). The `report` domain lives under `libs/report/`. |
+| `repos/CroesusClient`      | `/c/Repos/monolith/CFF/Products/CroesusClient` | **C# / WPF**            | The legacy **WPF desktop client** — the interfaces `pf-web` is being rebuilt from. A *reference source* of report UI/logic being ported to `ReportManagerApi` + `pf-web`. Report-porting surface is staged under `TempReport/`. |
 
 Because these are symlinks, git operations for *product code* run against the real repos, each on
 its own branch and remote. Check `git status`/`git branch` inside a given symlink (e.g. `cd
@@ -51,6 +52,11 @@ Each repo carries its own, more detailed guidance. Prefer it over anything here 
 - **ReportServer** → no CLAUDE/README, but `repos/ReportServer/Doc/` holds report-parameter references
   useful when porting (e.g. `Bible des parametres de rapport.docx`, `params_source.xls`,
   `sources.xls`, `SrvRap-API.doc`). Mostly `.doc`/`.xls`/`.pdf`, not plain text.
+- **Monolith conventions & architecture** → `C:\Repos\monolith\doc\references\` (outside `repos/`) — the
+  authoritative C#/ORM **coding conventions** (StyleCop restrictive ruleset, `Result<T>`, NuGet CPM) and
+  **architecture references** (ReportServer, RTM, FrameworkServer, AgentServer, CoreApi). Catalogued, with the
+  precedence chain, in [`.claude/conventions/monolith-references.md`](.claude/conventions/monolith-references.md);
+  the workflows/agents consult it when generating, reviewing, or explaining monolith code.
 
 ## Cross-repo workflow: porting C++ report logic to C#
 
@@ -68,6 +74,11 @@ New parameter classes go under
 `ReportManagerAPI.Infrastructure/Repositories/ValueProviderFunctions/Parameters/` (date ones in
 `.../Parameters/Date/`) and must be registered — in alphabetical order — in the matching
 `Pre`/`PostParamEntryValueProviderFunctionsExecuter.cs`.
+
+- For a **declarative radio/combo**, the already-migrated **sibling report sharing the same `TPL_`
+  template** is the first oracle for the `PossibleValues`/`PossibleDisplayValues` keys — copy them 1:1
+  before resolving legacy C++ `.resx` keys (which are often the wrong/old namespace). New keys use the
+  `RPT_mgr_*` prefix, never `CRESUS_rpt_*`; never invent a translation.
 
 ## Commands by repo
 
@@ -154,11 +165,34 @@ each with its own phase sequence, gated for approval, and wired to pull context 
 - **Shared protocol** — `.claude/conventions/protocol.md`: the task directory (`.work/<TICKET-ID>/`),
   canonical artifact filenames, context-gathering, the gate + HALT protocols, per-repo build/test
   commands, and the org git/branch guardrails.
+- **Monolith conventions & references** — `.claude/conventions/monolith-references.md`: the catalogued index
+  of `C:\Repos\monolith\doc\references\` — the C#/ORM **coding conventions** the workflows apply to generated
+  code (StyleCop restrictive ruleset, `Result<T>`, NuGet CPM, `croesus-orm/*`) and the **architecture
+  references** (ReportServer, RTM, FrameworkServer, AgentServer, CoreApi) they use to understand the system,
+  with the precedence chain. `protocol.md` and the planner/implementer/porter/reviewer/explorer/investigator/
+  learning-guide agents all point here.
 - **Agents** — `.claude/agents/` (dispatch via the Agent tool):
   - read-only: `context-gatherer` (Jira+GitHub intel), `explorer` (code map), `investigator`
     (root cause), `learning-guide` (walkthrough), `reviewer` (plan/code review), `retrospective`.
   - editing: `planner` (→ `plan.md`), `implementer` (build+test, any stack), `cpp-to-csharp-porter`
     (the C++→C# value-provider recipe).
+  - report migration: `report-analyst` (read-only spec/analysis), `backend-migrator` (C++→C#
+    parameters in ReportManagerApi/ReportFoundations), `frontend-migrator` (Angular param component
+    in pf-web), `migration-reviewer` (read-only convention audit), `migration-validator` (read-only
+    Xpert-JSON vs Conseiller-XML equivalence). Dispatch by `subagent_type`.
+- **Report migration** — a full C++→Xpert report-migration toolkit lives natively here (merged in from
+  the former `claude-report-migration` workspace): the 5 agents above, ~40 helper skills under
+  `.claude/skills/` (e.g. `locate-cpp-function`, `analyze-cpp-function`, `classify-functions`,
+  `implement-report-parameters`, `register-parameter`, `register-web-report`, `update-e2e-baselines`,
+  `create-migration-pr`, `manage-state`, `jira-*-migration-ticket`), the conventions
+  `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`. **All
+  deliverables for a migration go under `.work/{slug}/`** (analysis, logs, review, PDF, `state.json`) —
+  `{slug}` = the Jira key if a ticket is given, else the report internal name; **never** under
+  `docs/reports/`. Shared global inputs (not deliverables) stay under `docs/`: `fields.csv` (master
+  parameter list) + `template_ids.csv`. Backend/frontend/review are reachable either
+  directly (dispatch a migration agent) or through the gated `/feature` **migration mode**
+  (`.claude/skills/feature/SKILL.md` §1a). All migration paths use the `repos/` symlinks like the rest
+  of this workspace.
 - **Templates** — `.claude/conventions/templates/` (context, plan, review, spike, bug-diagnosis, retro).
 
 Starting a piece of work? Pick the matching workflow in `workflows.md` and follow its phases;

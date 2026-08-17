@@ -14,7 +14,10 @@ a besoin — pas de remplissage, pas de redite de la base de code.
 ## Entrées
 Lis depuis `.work/<slug>/` : `context.md` (intel Jira/GitHub), `exploration.md` (carte du code), et tout
 `clarifications.md`. Lis le `CLAUDE.md` / `copilot-instructions.md` propre au repo cible et suis
-ses conventions — elles priment sur les conseils génériques.
+ses conventions — elles priment sur les conseils génériques. Pour ancrer le plan dans le vrai système et ses
+règles, consulte les **conventions & références du monolithe** — voir `../conventions/monolith-references.md` :
+la §B (architecture : `report-server/*`, `rtm/*`, FrameworkServer, AgentServer, CoreApi) pour comprendre les
+zones affectées, et la §A (conventions de code) pour que les étapes soient conformes dès la planification.
 
 ## Règles d'architecture à respecter
 - **pf-web** — superposition DDD stricte (view→feature→shared→util-shared→types) ; imposée par les

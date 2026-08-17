@@ -34,10 +34,13 @@ repo sur sa propre branche/PR. Les sous-sections `#### <repo>` du plan indiquent
 
 **Variante migration de rapport.** Lorsque la feature consiste à *migrer un rapport de Conseiller (C++) vers Xpert*,
 le skill `feature` bascule en **mode migration** (voir `../skills/feature/SKILL.md` §1a) : les gates
-restent, mais les workers de phase sont les agents spécialistes du **workspace de migration de rapports**
-(`C:\Repos\claude-report-migration\.claude\agents\` : `report-analyst` → explore/plan,
-`backend-migrator` + `frontend-migrator` → build, `migration-reviewer` + `migration-validator` →
-review) — réutilisés par référence (source de vérité unique), et non les agents génériques de ce workspace.
+restent, mais les workers de phase sont les **agents de migration natifs** de ce workspace
+(`.claude/agents/` : `report-analyst` → explore/plan, `backend-migrator` + `frontend-migrator` → build,
+`migration-reviewer` + `migration-validator` → review), dispatchés en `subagent_type`, et non les
+agents génériques. Leurs règles sont dans `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`.
+Tous les **livrables** d'une migration (analysis, logs, review, PDF, `state.json`) vivent sous
+`.work/{slug}/` — `{slug}` = la clé Jira, sinon le nom interne du rapport ; jamais sous `docs/reports/`.
+Les entrées globales partagées restent sous `docs/` (`fields.csv`, `template_ids.csv`).
 
 ---
 

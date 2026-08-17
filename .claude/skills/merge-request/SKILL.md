@@ -15,7 +15,7 @@ Authoritative rules to follow (cite and obey, don't restate):
 - Org git guardrails + branch/ship rules → `.claude/conventions/protocol.md` (§ *Branch, commit & ship rules*).
 - Repo topology (tooling root vs symlinked product repos) → root `CLAUDE.md`.
 - Each product repo's own `CLAUDE.md` — pf-web enforces Conventional Commits (commitlint); the .NET/C++
-  repos follow Gitflow + Conventional Commits (see the migration workspace's `CLAUDE.md`).
+  repos follow Gitflow + Conventional Commits (see the `git-conventions-monolith` / `git-conventions-pf-web` skills).
 
 ---
 
@@ -72,29 +72,34 @@ with the user if it's anything other than `develop`. State the base you'll targe
 squash commit subject, so make it a clean CC subject. Types: `feat`/`fix`/`refactor`/`perf`/`test`/
 `docs`/`build`/`ci`/`chore`.
 
-**Body** — fill only the sections that apply; keep it tight and specific:
+**Langue — la description (body) de la MR est TOUJOURS écrite en français** : le contenu *et* les titres
+de section (Résumé, Changements, …). Le **titre** de la MR reste un sujet Conventional Commits (préfixe
+`type(scope):` en anglais ; le sujet peut être en français). Restent inchangés : les mots-clés GitHub
+(`Closes`/`Refs`), les identifiants de code, chemins, commandes et la ligne de footer.
+
+**Body** — remplis seulement les sections applicables ; reste concis et spécifique :
 
 ```markdown
-## Summary
-<1-3 sentences: what this delivers and WHY. The reviewer reads this first.>
+## Résumé
+<1-3 phrases : ce que ça livre et POURQUOI. Le reviewer lit ça en premier.>
 
-## Changes
-- <area/file>: <what changed>
-- <area/file>: <what changed>
+## Changements
+- <zone/fichier> : <ce qui change>
+- <zone/fichier> : <ce qui change>
 
-## Testing
-<what you ran and the result — e.g. `dotnet test …` green (N/N), `nx test …` green, manual steps.
-Say "not run" honestly if you didn't.>
+## Tests
+<ce que tu as lancé et le résultat — p. ex. `dotnet test …` vert (N/N), `nx test …` vert, étapes
+manuelles. Dis honnêtement « non lancé » si ce n'est pas le cas.>
 
-## Breaking changes
-<API/DTO/contract/ReportFoundations ripple + migration notes — or "None".>
+## Changements incompatibles
+<API/DTO/contrat/répercussion ReportFoundations + notes de migration — ou « Aucun ».>
 
-## Linked issues
+## Tickets liés
 Closes FOG-9412
-<or `Refs FOG-9412` if it doesn't fully resolve it. Cross-repo: link the sibling MRs here.>
+<ou `Refs FOG-9412` si ça ne le résout pas entièrement. Multi-repo : lie ici les MR sœurs.>
 
-## Review notes
-<the 1-3 spots to look at first; anything intentionally out of scope.>
+## Notes de revue
+<les 1-3 endroits à regarder en premier ; tout ce qui est volontairement hors périmètre.>
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```

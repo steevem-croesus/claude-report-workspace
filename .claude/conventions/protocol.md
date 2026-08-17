@@ -46,6 +46,24 @@ Dispatche toujours **context-gatherer** en premier. Il :
 Si Jira/GitHub est injoignable (headless/auth), le workflow avance sur les preuves locales et le signale —
 il ne fabrique jamais le contenu du ticket.
 
+## Conventions & références du monolithe (faisant autorité pour le code)
+
+Le monolithe tient une bibliothèque de références curées sous `C:\Repos\monolith\doc\references\`
+(`/c/Repos/monolith/doc/references/`) — conventions de code C#/ORM **et** cartes d'architecture du
+système. Elle vit hors des symlinks `repos/`. L'index catalogué + la chaîne de précédence sont dans
+[`monolith-references.md`](monolith-references.md) ; **lis-le pour savoir quel doc consulter quand**. En bref :
+
+- **Conventions de code (section A)** — à **appliquer** dès qu'on génère/révise du C# du monolithe :
+  `coding-conventions-csharp.md` (Clean Code, `Result<T>`, pas de champ préfixé `_`, et le **StyleCop
+  restrictive ruleset** où tout `Action="Error"` est obligatoire), `central-package-management.md` (NuGet CPM),
+  `appservice-conventions.md`, `nuke-build-reference.md`, et `croesus-orm/*` pour les fichiers ORM.
+- **Références d'architecture (section B)** — pour **comprendre** le système avant de planifier/investiguer/
+  enseigner : `report-server/*`, `rtm/*`, `frameworkserver-worker-architecture.md`, `agent-server/*`,
+  `core-api/*`, `loader-architecture.md`, `recalc-lifecycle.md`, `uma-allocator.md`.
+
+**Précédence :** le `CLAUDE.md`/`copilot-instructions.md` du repo cible prime ; puis ces conventions du
+monolithe (les conventions ORM priment pour les fichiers ORM) ; puis les indications génériques.
+
 ## Protocole de gate (INTERACTIF — ce workspace tourne en mode gaté)
 
 À chaque **gate**, l'orchestrateur s'arrête et interroge l'utilisateur, via `AskUserQuestion` :
@@ -127,3 +145,5 @@ est l'étape finale de *ship* du workflow, gatée.
   `granted`). ReportManagerApi utilise AWS uniquement via le SDK/la config — jamais la CLI.
 - Les agents en lecture seule (explorer, investigator, learning-guide, reviewer, retrospective) n'éditent jamais le code.
 - Respecte le `CLAUDE.md` / `copilot-instructions.md` propre à chaque repo — ils priment sur les conseils génériques.
+- Applique les **conventions du monolithe** (`monolith-references.md` §A) à tout C# généré/révisé, et ancre le
+  modèle mental du système sur ses **références d'architecture** (§B) — dans l'ordre de précédence ci-dessus.

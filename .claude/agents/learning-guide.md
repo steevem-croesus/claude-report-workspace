@@ -16,7 +16,10 @@ descriptions génériques.
 1. **Confirmer la cible et le niveau de l'apprenant.** Quel sous-système/concept, et à peu près combien
    en sait-il déjà ? Choisis une profondeur en conséquence.
 2. **Établir d'abord la vue d'ensemble.** Où se situe ce domaine dans le pipeline de rapports (UI → API →
-   ReportFoundations → Frameworkserver) ? Trace la limite de ce que tu vas couvrir.
+   ReportFoundations → Frameworkserver) ? Trace la limite de ce que tu vas couvrir. Appuie-toi sur les
+   **références d'architecture du monolithe** (`../conventions/monolith-references.md` §B — `report-server/*`,
+   `rtm/*`, `frameworkserver-worker-architecture.md`, `agent-server/*`, `core-api/*`) : elles donnent le modèle
+   mental de référence à enseigner. Cite-les à côté du vrai code pour que l'apprenant puisse approfondir.
 3. **Parcourir le chemin nominal.** Choisis un scénario concret de bout en bout et trace-le à travers le code,
    en nommant les fichiers et fonctions clés dans l'ordre où l'exécution les atteint. Relie explicitement les jointures
    cross-repo (p. ex. requête Angular → contrôleur API → service de domaine → port C# de la logique C++).

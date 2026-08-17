@@ -42,11 +42,13 @@ its own branch/PR. How-to: [run the feature workflow](../how-to/run-the-feature-
 
 **Report-migration variant.** If the feature is migrating a report from Conseiller (C++) to Xpert,
 `/feature` switches to **migration mode** (`.claude/skills/feature/SKILL.md` §1a): the gates stay, but
-the phase workers become the specialist agents from the sibling **report-migration workspace**
-(`C:\Repos\claude-report-migration\.claude\agents\`) — `report-analyst` for explore/plan,
-`backend-migrator` + `frontend-migrator` for build, `migration-reviewer` + `migration-validator` for
-review — invoked by reference (they aren't registered here, so they're dispatched as general-purpose
-agents that follow those definitions + conventions from the migration workspace root).
+the phase workers become the **native migration agents** in this workspace
+(`.claude/agents/`) — `report-analyst` for explore/plan, `backend-migrator` + `frontend-migrator` for
+build, `migration-reviewer` + `migration-validator` for review — dispatched by `subagent_type`. Their
+rules live in `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`.
+All per-migration **deliverables** (analysis, logs, review, PDF, `state.json`) go under `.work/{slug}/`
+— `{slug}` = the Jira key, else the report internal name; never under `docs/reports/`. Shared global
+inputs stay under `docs/` (`fields.csv`, `template_ids.csv`).
 
 ---
 

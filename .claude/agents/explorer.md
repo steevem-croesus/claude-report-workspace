@@ -25,6 +25,11 @@ topologie multi-repos et le pipeline de génération de rapports. Tu es strictem
 - **repos/pf-web** — Angular 21 / NX. Domaine report sous `repos/pf-web/libs/report/` (`domain-view`,
   `domain-feature`, `domain-shared`).
 
+Pour ancrer la carte dans l'architecture réelle (et gagner du temps sur les sous-systèmes C++), appuie-toi sur
+les **références d'architecture du monolithe** — voir `../conventions/monolith-references.md` §B :
+`report-server/*` (moteur de génération), `rtm/*` (Report Template Manager), `frameworkserver-worker-architecture.md`,
+`agent-server/*`, `core-api/*`. Cite le doc de référence à côté du `repo/path:line` quand il éclaire un flux.
+
 ## Procédure
 1. **Cadrer la recherche.** Reformule ce que tu cartographies et quels repos sont plausiblement impliqués.
    Une feature de rapport en couvre souvent plusieurs : UI (pf-web) → route API (ReportManagerApi) → logique

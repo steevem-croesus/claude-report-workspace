@@ -32,7 +32,7 @@ artefact a été produit).
   deviné.
 - `mkdir -p .work/<slug>/_signals/` et écris le texte brut de la tâche dans `.work/<slug>/task.md`.
 
-## 1a. Mode migration de rapport — déléguer au workspace de migration de rapports
+## 1a. Mode migration de rapport — piloter les agents de migration natifs
 
 **Quand l'activer.** Si cette feature *migre un rapport de Conseiller (C++) vers Xpert* — signaux : la
 tâche dit « migrate »/« migration » avec un nom interne de rapport (p. ex. `FOREIGN_PROPERTY`,
@@ -40,42 +40,35 @@ tâche dit « migrate »/« migration » avec un nom interne de rapport (p. ex. 
 C#/Angular — exécute le **mode migration**. Confirme en une ligne que tu es en mode migration avant de
 continuer ; sinon ignore cette section et exécute le flux standard ci-dessous.
 
-En mode migration, le travail de domaine est piloté par les agents spécialistes qui vivent dans le
-**workspace de migration de rapports**, *et non* par les `explorer`/`planner`/`implementer`/`reviewer`
-génériques de ce workspace. Les **gates de la feature restent** — cette orchestration gatée est
-exactement ce que `/feature` apporte.
+**Slug en mode migration (surcharge le §1).** Le `{slug}` du répertoire de tâche est la **clé Jira**
+si un ticket est fourni, **sinon le nom interne du rapport** (p. ex. `FOREIGN_PROPERTY`) — pas le
+kebab-case des premiers mots. **Tous les livrables** (analysis, logs, review, PDF, `state.json`)
+vivent sous `.work/{slug}/`, jamais sous `docs/reports/` (voir `migration-protocol.md`).
 
-**Les agents de migration (source unique de vérité — ne les copie PAS dans ce workspace) :**
-`C:\Repos\claude-report-migration\.claude\agents\` → `report-analyst`, `backend-migrator`,
-`frontend-migrator`, `migration-validator`, `migration-reviewer`. Leurs règles vivent dans
-`C:\Repos\claude-report-migration\.claude\conventions\` (`migration-protocol.md` +
-`backend-conventions.md` + `frontend-conventions.md`).
+En mode migration, le travail de domaine est piloté par les **agents spécialistes de migration**,
+*et non* par les `explorer`/`planner`/`implementer`/`reviewer` génériques de ce workspace. Les
+**gates de la feature restent** — cette orchestration gatée est exactement ce que `/feature` apporte.
 
-**Comment en invoquer un.** Ces agents ne sont **pas enregistrés comme sous-agents ici**, donc tu ne
-peux pas passer leur nom en `subagent_type`. Dispatche avec l'outil **Agent** en utilisant
-`subagent_type: general-purpose` et un prompt de cette forme exacte (remplis
-`<agent>`/`<file>`/rapport/tâche) :
+**Les agents de migration (sous-agents natifs de ce workspace, `.claude/agents/`) :**
+`report-analyst`, `backend-migrator`, `frontend-migrator`, `migration-validator`,
+`migration-reviewer`. Leurs règles vivent dans `.claude/conventions/` (`migration-protocol.md` +
+`backend-conventions.md` + `frontend-conventions.md`). **Livrables :** tous sous `.work/{slug}/`
+(analysis.md, logs, review, PDF, state.json) — **jamais** sous `docs/reports/`. Données globales
+partagées (entrées, pas livrables) : `docs/fields.csv` (liste maître des paramètres) et
+`docs/template_ids.csv`.
 
-```
-You are the <agent> for the Croesus report-migration workspace. Répondre en français.
-Working root: C:\Repos\claude-report-migration — treat it as your cwd. All of that workspace's
-relative paths (ReportManagerApi/, ReportFoundations/, CroesusServer/, pf-web/, docs/) resolve from
-there, and they symlink the SAME monolith/pf-web checkouts this workspace uses, so edits are shared.
-Read and follow your definition EXACTLY: C:\Repos\claude-report-migration\.claude\agents\<file>.md,
-plus the conventions it cites in C:\Repos\claude-report-migration\.claude\conventions\.
-Write your artifacts where your definition says (docs/reports/<REPORT>/…).
-Report: <internal report name>.  Task: <the task text>.
-```
-
-Note : le dispatch general-purpose n'hérite pas du frontmatter `model:` de l'agent de migration —
-c'est correct ; la définition gouverne quand même le comportement.
+**Comment en invoquer un.** Dispatche avec l'outil **Agent** en passant le nom de l'agent en
+`subagent_type` (p. ex. `subagent_type: backend-migrator`) : sa définition + les conventions qu'elle
+cite gouvernent le comportement, et son frontmatter `model:` est respecté. Les chemins repo
+(`repos/ReportManagerApi/`, `repos/ReportFoundations/`, `repos/CroesusServer/`, `repos/pf-web/`) et
+l'état (`docs/…`) résolvent depuis la racine de CE workspace. Réponds en français.
 
 **Correspondance des phases (phases feature de ce workspace → agents de migration) :**
 
 | Phase feature | Mode migration |
 |---|---|
 | 2. Contexte | garde `context-gatherer` seulement si une réf Jira/GitHub existe ; sinon saute-le et dis-le |
-| 3. Explore | dispatche **`report-analyst`** → `docs/reports/<REPORT>/analysis.md` (la spec) |
+| 3. Explore | dispatche **`report-analyst`** → `.work/{slug}/analysis.md` (la spec) |
 | 4. Plan | la spec du `report-analyst` **est** le plan — n'exécute pas le `planner` de ce workspace |
 | 5. GATE de plan | présente `analysis.md` ; approuver / changements (re-dispatcher `report-analyst`) / annuler |
 | 6. Build | dispatche **`backend-migrator`**, puis **`frontend-migrator`** (ordre backend → frontend) |

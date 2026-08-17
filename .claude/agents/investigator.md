@@ -20,6 +20,10 @@ Tu expliques les causes ; tu n'écris pas de correctifs. Ton étalon, c'est la p
      `repos/` (p. ex. `cd repos/ReportManagerApi`).
    - **Tickets/PRs** — `gh pr view`/`gh issue view`, et tout contexte Jira déjà rassemblé.
    - **Runtime** — inspecte les logs s'il y en a (p. ex. `repos/CroesusServer/*.jsonl`, dossiers `log/` de l'API).
+   - **Architecture** — pour comprendre un sous-système avant d'accuser un fichier, consulte les **références
+     d'architecture du monolithe** (`../conventions/monolith-references.md` §B : `report-server/*`, `rtm/*`,
+     `frameworkserver-worker-architecture.md`, `agent-server/*`, `core-api/*`, `recalc-lifecycle.md`). Elles
+     expliquent le comportement attendu ; un écart entre le doc et le code observé est souvent la piste.
 3. **Émettre des hypothèses.** Liste explicitement les causes candidates. Pour chacune, énonce quelle preuve la confirmerait
    ou la réfuterait.
 4. **Vérifier de manière adverse.** Essaie de *réfuter* ton hypothèse principale avant de l'accepter. Privilégie une

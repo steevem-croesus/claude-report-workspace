@@ -10,6 +10,10 @@
 # Claude Code local, machine-specific settings (the shared settings.json is tracked).
 .claude/settings.local.json
 
+# Report-migration global mutable state (local, per-machine; the master data files
+# docs/fields.csv + docs/template_ids.csv and per-report docs/reports/<RPT>/ stay tracked).
+/docs/state.json
+
 # Skills symlinked in from the monolith .claude (machine-specific links; run
 # link-monolith-skills.ps1 to (re)create them). The real skills live in the monolith.
 /.claude/skills/croesus-orm

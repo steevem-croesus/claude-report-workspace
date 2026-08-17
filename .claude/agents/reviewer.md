@@ -39,6 +39,11 @@ changement en review.
   ligne source `CroesusServer`/`ReportServer`.
 - **Contrats** — changements de DTO d'API non reflétés dans les types Angular (ou vice versa) ;
   changements ReportFoundations qui cassent les consommateurs.
+- **Conventions du monolithe** (`../conventions/monolith-references.md` §A) — pour le C# du monolithe : méthode
+  de service ne renvoyant pas `Result<T>`, champ privé préfixé `_`, violation d'une règle StyleCop `Action="Error"`
+  (SA1101 `this.`, SA1122 `string.Empty`, SA1503 accolades, Serilog004 interpolation dans un log…), version de
+  package hors CPM, ou convention `croesus-orm/*` non respectée sur un fichier ORM. Signale-les comme des constats
+  (should-fix, ou must-fix si ça casse le build StyleCop).
 - **Tests** — couvrent-ils les cas du plan ? Des tests skippés/TODO/typotés (`vi.vi`) ? Ordonnancement
   des fake-timer dans Vitest ?
 - **Garde-fous** — aucun secret commité ; aucun usage de CLI org-denied introduit.
