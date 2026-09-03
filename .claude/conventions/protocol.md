@@ -33,6 +33,15 @@ Chaque exécution de workflow non triviale crée un répertoire par tâche à la
 | `retro.md` | retrospective | Rétrospective + apprentissages proposés |
 | `clarifications.md` | orchestrateur | Q→R résolues avant la planification |
 
+> **Toute revue de code produit un fichier, pas seulement une réponse en chat.** Quelle que soit la
+> voie utilisée — la skill intégrée `/code-review`, l'agent `reviewer`, `migration-reviewer`, ou une
+> revue improvisée — écrire les constats dans `.work/<slug>/review-code.md` (`review-plan.md` pour un
+> gate de plan) **avant** de les résumer à l'utilisateur. Le résumé en chat reste utile, mais il est
+> volatile : le fichier est ce qu'on relit, ce qu'on coche au fur et à mesure des correctifs et ce qui
+> alimente la description de MR. Y mettre : la cible (branche/PR/diff), le niveau d'effort, un constat
+> par section (`chemin:ligne`, sévérité, scénario de défaillance), et ce qui a été vérifié comme *n'étant
+> pas* un problème.
+
 ## Rassemblement du contexte (début de chaque feature/bug/refactor/spike/investigate)
 
 Dispatche toujours **context-gatherer** en premier. Il :

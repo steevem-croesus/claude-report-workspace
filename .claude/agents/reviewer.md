@@ -19,7 +19,13 @@ changement en review.
   est-elle sous-spécifiée au point de faire deviner l'implémenteur ? **Vérifie le Grade + Status auto-assignés**
   (échelle F < D < C < B < A < S) : le grade est-il justifié ou gonflé, et `ready` tient-il
   réellement (pas de points de décision `needs-user`, pas de questions ouvertes bloquantes) ? Signale un
-  plan sur-noté ou à tort `ready` comme un must-fix — la barre de build dépend de son honnêteté. Aussi :
+  plan sur-noté ou à tort `ready` comme un must-fix — la barre de build dépend de son honnêteté. **Contrats &
+  interfaces** : tout ce que le plan crée ou modifie a-t-il un contrat concret — route + request/response + codes
+  pour un endpoint, schéma complet (types, nullabilité) pour un DTO/entité, signature exacte pour une méthode
+  publique ? Un contrat resté en prose là où l'implémenteur devrait deviner un nom, un type ou une nullabilité est
+  un must-fix. Vérifie aussi la cohérence : DTO API vs son miroir Angular, conventions du monolithe (`Result<T>`,
+  `Async`/`CancellationToken`), enregistrement de VPF, `spAddColumn` pour une colonne — et qu'un `⚠ à confirmer`
+  sur un contrat central se reflète bien dans la confiance de l'estimation. Aussi :
   pour toute feature lisant des données config/« default »/setup, le plan a-t-il confirmé la **route de discovery**
   (helper évident vs un **scenario** repository/Flex), et son repo-scope découle-t-il de cette route ?
   Pour toute feature ajoutant un **flux parallèle**, le plan a-t-il considéré (comme un point de décision) l'extraction

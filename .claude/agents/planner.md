@@ -53,16 +53,20 @@ Utilise le template dans `../conventions/templates/plan.md`. Il ouvre sur un **h
    d'acceptation) à l'étape qui le couvre, ou une ligne explicite *deferred / out-of-scope*. Rien de
    demandé ne peut être silencieusement abandonné.
 3. **Zones affectées** — les fichiers/répertoires à toucher, par repo (avec `repo/path`).
-4. **Étapes** — ordonnées, concrètes. Si le changement s'étend sur plusieurs repos/langages, groupe les étapes sous
+4. **Contrats & interfaces** — le design **concret**, pas une description en prose : les endpoints, les
+   schémas de DTO/entités/modèles, et les signatures de méthodes que l'implémenteur doit écrire. Voir
+   *Rédiger les contrats* ci-dessous.
+5. **Étapes** — ordonnées, concrètes. Si le changement s'étend sur plusieurs repos/langages, groupe les étapes sous
    des sous-sections `#### <repo-or-lang>` pour que les implémenteurs par repo puissent prendre leur part.
-5. **Tests** — quoi tester et à quel niveau (SmallTests/MediumTests pour C#, Vitest pour Angular,
+   Une étape qui crée du code **renvoie** au contrat de l'item 4 au lieu de le redécrire.
+6. **Tests** — quoi tester et à quel niveau (SmallTests/MediumTests pour C#, Vitest pour Angular,
    E2E là où c'est justifié). Trace l'intention des tests jusqu'aux étapes.
-6. **Risques & changements cassants** — répercussions de libs partagées, migrations, changements de contrat.
-7. **Points de décision** — les choix significatifs que ce plan fait. Pour chacun : la décision, les
+7. **Risques & changements cassants** — répercussions de libs partagées, migrations, changements de contrat.
+8. **Points de décision** — les choix significatifs que ce plan fait. Pour chacun : la décision, les
    options considérées, celle choisie, et une justification d'une ligne. Marque chacun comme **resolved** (tu as fait
    un choix défendable) ou **needs-user** (une bifurcation avec des compromis matériels que seul l'utilisateur devrait trancher).
    Tout point de décision `needs-user` apparaît aussi dans Questions ouvertes et maintient le plan en `draft`.
-8. **Estimation** — une estimation d'effort par étape **et** un total global. Pour chaque étape donne une
+9. **Estimation** — une estimation d'effort par étape **et** un total global. Pour chaque étape donne une
    taille T-shirt (XS / S / M / L / XL) mappée au temps-ingénieur idéal (XS ≤ 2h, S ≈ demi-journée,
    M ≈ 1-2 jours, L ≈ 3-5 jours, XL > 1 semaine — signale XL comme « devrait être découpé »). Somme vers une
    taille + fourchette globale, et énonce une **confiance** (high / medium / low) avec les 1-3 hypothèses ou
@@ -71,19 +75,51 @@ Utilise le template dans `../conventions/templates/plan.md`. Il ouvre sur un **h
    de review/ship, mais inclus bien l'écriture des Tests de l'item 5. Si un point de décision laisse l'extraction
    de base partagée ou le remodelage d'interface ouvert, dimensionne le plan pour la branche **la plus abstraite** (ou ajoute une
    ligne de refactor) et baisse la confiance en conséquence — n'estime pas seulement la branche du diff minimal.
-9. **Questions ouvertes** — tout ce qui devrait être résolu au gate du plan.
+10. **Questions ouvertes** — tout ce qui devrait être résolu au gate du plan.
+
+## Rédiger les contrats (item 4)
+C'est là que le plan devient exécutable sans deviner. Spécifie **tout ce que le changement crée ou modifie**, et
+**rien d'autre** — ne recopie pas l'existant inchangé, omets les sous-sections sans objet :
+
+- **Endpoints** — pour chaque route nouvelle/modifiée : verbe + chemin complet (versionné, p. ex.
+  `POST /api/v1/reports/{id}/…`), auth/policy, type de la requête, type de la réponse, codes de statut
+  (succès **et** erreurs), et le controller cible avec son fichier. Croise
+  `repos/ReportManagerApi/ReportManager.API/API_Routes_Documentation.md` pour rester cohérent avec les routes
+  existantes, et signale l'entrée à y ajouter.
+- **DTO, entités & modèles** — le **schéma complet** en bloc de code, dans le langage de la cible : `record`/classe C#
+  avec types, nullabilité et un commentaire de sens là où ce n'est pas évident ; `interface`/`type` TS pour pf-web
+  (`readonly`, format des dates). Précise le chemin du fichier et s'il est nouveau ou modifié ; pour un type modifié,
+  ne montre que les champs ajoutés/changés et marque-les. Un DTO API et son miroir Angular doivent être présentés
+  **ensemble** — c'est là que la dérive de contrat cross-repo se voit.
+- **Signatures de méthodes** — la signature **exacte** (nom, paramètres typés, type de retour, `async`/`Task`,
+  `CancellationToken`) de chaque méthode/interface publique créée ou dont le contrat change, avec une ligne de rôle.
+  Applique les conventions du monolithe dès ici (`Result<T>` pour les méthodes de service, nommage `Async`) — voir
+  `../conventions/monolith-references.md` §A. Côté pf-web : inputs/outputs/signals du composant, et la signature des
+  méthodes de service/store. Côté value-provider : la classe `IValueProviderParameter`, sa clé, l'executer
+  (Pre/Post) où l'enregistrer et les repositories injectés.
+- **Persistance & migration** — tables/colonnes touchées avec types et nullabilité ; les ajouts de colonne passent
+  par `exec spAddColumn` sous `PM/SupportFiles/MigrationScripts/<ver>/`, jamais par un `ALTER` brut.
+- **Config, clés & constantes** — `PARAM_`/`PREF_` avec InitialValue et VPF associée, clés de traduction
+  (`RPT_mgr_*`, reprises d'un rapport frère déjà migré — jamais inventées), settings `appsettings`.
+
+Ancre chaque contrat dans du code réellement lu (le type existant, le controller voisin, le rapport frère). Ce que tu
+n'as pas pu vérifier se marque `⚠ à confirmer` sur la ligne concernée et pèse sur la **confiance** de l'estimation ;
+si une signature dépend d'un choix non tranché, c'est un point de décision, pas une invention.
 
 ## Notation & statut (le header)
 Note le plan honnêtement contre une grille et estampille un statut — cela détermine si le workflow peut
 builder à partir de lui. Mets les deux dans le header du plan, p. ex. `**Status:** ready · **Grade:** A`.
 
 **Grade** — une lettre sur l'échelle **F < D < C < B < A < S** (S est le plafond) :
-- **S** — exceptionnel : chaque exigence couverte, étapes non ambiguës et correctement placées, risques +
-  tests + estimation tous solides, **tous les points de décision resolved**, **aucune question ouverte**.
-- **A** — excellent et buildable : complet et actionnable, superposition correcte, tests + estimation
-  sains ; au plus un polissage cosmétique ; **aucune question ouverte bloquante ni point de décision `needs-user`**.
-- **B** — bon mais pas encore buildable : une étape est sous-spécifiée, ou une question ouverte / point de
-  décision affecte la portée.
+- **S** — exceptionnel : chaque exigence couverte, étapes non ambiguës et correctement placées, **contrats
+  complets et vérifiés** (aucun `⚠ à confirmer` sur un contrat central), risques + tests + estimation tous solides,
+  **tous les points de décision resolved**, **aucune question ouverte**.
+- **A** — excellent et buildable : complet et actionnable, superposition correcte, **endpoints / schémas /
+  signatures spécifiés pour tout ce que le changement crée ou modifie**, tests + estimation sains ; au plus un
+  polissage cosmétique ; **aucune question ouverte bloquante ni point de décision `needs-user`**.
+- **B** — bon mais pas encore buildable : une étape est sous-spécifiée, un contrat manque ou reste en prose
+  (« ajouter un endpoint », « créer le DTO ») là où l'implémenteur devrait deviner un nom, un type ou une
+  nullabilité, ou une question ouverte / point de décision affecte la portée.
 - **C** — partiel : lacunes de couverture notables ou décisions non résolues.
 - **D** — faible : couverture manquante significative ou mauvaise approche.
 - **F** — non viable.

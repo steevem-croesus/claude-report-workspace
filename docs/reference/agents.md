@@ -128,9 +128,14 @@ everywhere the agent is dispatched, in every workflow.
   out); parallel-flow shared-base/interface-reshape as a first-class decision point.
 - **Output:** `plan.md` (template:
   [`templates/plan.md`](../../.claude/conventions/templates/plan.md)) with a **Status/Grade header**,
-  Problem, Requirements coverage, Affected areas, Steps (grouped `#### <repo>` for multi-repo), Tests,
-  Risks, Decision points (`resolved`/`needs-user`), Estimate (T-shirt sizes + confidence), Open
-  questions.
+  Problem, Requirements coverage, Affected areas, **Contracts & interfaces**, Steps (grouped `#### <repo>`
+  for multi-repo), Tests, Risks, Decision points (`resolved`/`needs-user`), Estimate (T-shirt sizes +
+  confidence), Open questions.
+- **Contracts & interfaces:** the concrete design the implementer writes as-is — endpoints (route, auth,
+  request/response, status codes, controller), DTO/entity/model schemas as code blocks (types + nullability,
+  C# and its TS mirror), exact public method signatures, columns/`spAddColumn` migrations, `PARAM_`/`PREF_`/
+  `RPT_mgr_*` keys. Only what the change creates or modifies; anything not verified in code is flagged
+  `⚠ à confirmer` and lowers the estimate's confidence. A contract left as prose caps the plan at **B**.
 - **The build bar:** grades on **F < D < C < B < A < S**; marks `draft` unless honestly `ready` +
   (A|S). **Never inflates the grade to pass the gate** — see
   [gates & the build bar](../explanation/gates-and-the-build-bar.md).

@@ -132,9 +132,14 @@ partout où l'agent est dispatché, dans chaque workflow.
   premier plan.
 - **Sortie :** `plan.md` (template :
   [`templates/plan.md`](../../../.claude/conventions/templates/plan.md)) avec un **en-tête Status/Grade**,
-  Problème, Couverture des exigences, Zones affectées, Étapes (groupées `#### <repo>` pour le multi-repo), Tests,
-  Risques, Points de décision (`resolved`/`needs-user`), Estimation (tailles T-shirt + confiance), Questions
-  ouvertes.
+  Problème, Couverture des exigences, Zones affectées, **Contrats & interfaces**, Étapes (groupées `#### <repo>`
+  pour le multi-repo), Tests, Risques, Points de décision (`resolved`/`needs-user`), Estimation (tailles T-shirt +
+  confiance), Questions ouvertes.
+- **Contrats & interfaces :** le design concret que l'implémenteur écrit tel quel — endpoints (route, auth,
+  request/response, codes, controller), schémas de DTO/entités/modèles en bloc de code (types + nullabilité, C# et
+  son miroir TS), signatures exactes des méthodes publiques, colonnes/migrations `spAddColumn`, clés
+  `PARAM_`/`PREF_`/`RPT_mgr_*`. Uniquement ce qui est créé ou modifié ; ce qui n'a pas pu être vérifié dans le code
+  est marqué `⚠ à confirmer` et pèse sur la confiance. Un contrat resté en prose plafonne le plan à **B**.
 - **La barre de build :** note sur **F < D < C < B < A < S** ; marque `draft` sauf si honnêtement `ready` +
   (A|S). **Ne gonfle jamais le grade pour passer le gate** — voir
   [gates & la barre de build](../explanation/gates-and-the-build-bar.md).

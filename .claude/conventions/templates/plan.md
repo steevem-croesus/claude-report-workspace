@@ -21,8 +21,51 @@ _Rien de ce qui est demandé ne peut être abandonné en silence ; chaque ligne 
 - **<repo>** — `path/to/area` — <ce qui change>
 - **<repo>** — `path/to/area` — <ce qui change>
 
+## Contrats & interfaces
+_Le design concret que l'implémenteur doit écrire tel quel — pas une description en prose. Ne liste que ce qui est
+**créé ou modifié** ; ne recopie pas l'existant inchangé. Omets une sous-section entière si elle ne s'applique pas.
+Marque `⚠ à confirmer` toute signature déduite plutôt que lue dans le code. Les noms, types, nullabilité et
+conventions (`Result<T>`, `Async`/`CancellationToken`, `readonly`, signals Angular) sont ceux du repo cible._
+
+### Endpoints
+| Méthode + route | Auth / policy | Request | Response | Codes | Controller (fichier) |
+|---|---|---|---|---|---|
+| `POST /api/v1/<…>` | `<policy>` | `<XxxRequest>` | `<XxxResponse>` | 200 / 400 / 404 | `ReportManager.API/Controllers/<Xxx>Controller.cs` (nouveau) |
+
+### DTO, entités & modèles
+```csharp
+// <repo>/<chemin>/XxxDto.cs (nouveau)
+public sealed record XxxDto(
+    string Id,                 // <sens / origine>
+    DateTime? EffectiveDate);  // nullable ⇒ <sémantique du null>
+```
+
+```ts
+// repos/pf-web/libs/report/<…>/xxx.model.ts (nouveau)
+export interface Xxx {
+  readonly id: string;
+  readonly effectiveDate: string | null; // ISO-8601
+}
+```
+
+### Signatures de méthodes
+| Fichier (nouveau / modifié) | Signature | Rôle |
+|---|---|---|
+| `<…>/IXxxService.cs` (nouveau) | `Task<Result<XxxDto>> GetXxxAsync(string id, CancellationToken cancellationToken)` | <une ligne> |
+| `<…>/XxxService.cs` (modifié) | `Result<Xxx> Map(<…>)` | <une ligne> |
+| `<…>/xxx.component.ts` (nouveau) | `readonly value = input.required<Xxx>()` / `readonly changed = output<Xxx>()` | <une ligne> |
+
+### Persistance & migration
+- Table `<…>` — colonne `<…>` (`<type>`, null/not null) via `exec spAddColumn` sous `PM/SupportFiles/MigrationScripts/<ver>/`
+
+### Config, clés & constantes
+- `PARAM_<…>` / `PREF_<…>` — <InitialValue, ValueProviderFunction associée, executer Pre/Post>
+- Clé de traduction `RPT_mgr_<…>` — <source : rapport frère déjà migré ; jamais inventée>
+- Setting `appsettings` `<…>` — <défaut, portée>
+
 ## Étapes
-<ordonnées et concrètes. Pour un travail multi-repo/multi-langage, regroupe sous `#### <repo-or-lang>`.>
+<ordonnées et concrètes. Pour un travail multi-repo/multi-langage, regroupe sous `#### <repo-or-lang>`.
+Chaque étape qui crée du code renvoie au contrat correspondant ci-dessus plutôt que de le redécrire.>
 
 #### <repo-or-lang A>
 1. <étape>
