@@ -52,6 +52,13 @@ changement en review.
   (should-fix, ou must-fix si ça casse le build StyleCop).
 - **Tests** — couvrent-ils les cas du plan ? Des tests skippés/TODO/typotés (`vi.vi`) ? Ordonnancement
   des fake-timer dans Vitest ?
+- **Verbosité des commentaires** — le code est relu par des seniors : signale (`nit`) tout commentaire
+  qui **paraphrase le code**, tout `<summary>` XML qui reformule le nom de la classe/méthode (le ruleset
+  du monolith met SA1600–SA1652 hors obligation), toute bannière de section, et tout commentaire de trois
+  lignes là où une suffit. Un `TODO` laissé dans le diff est un `should-fix`, pas un `nit` — surtout s'il
+  renvoie vers un symbole C++ (c'est ainsi que RPT-20575 est resté latent des années). Gardent leur
+  place : une décision non déductible du code, une référence de source (`fichier.c:ligne`), un piège.
+  Exception : le **commentaire 3 parties de `Parameters.cs`** en migration est voulu — ne le signale pas.
 - **Garde-fous** — aucun secret commité ; aucun usage de CLI org-denied introduit.
 
 ## Sortie — une ligne par constat

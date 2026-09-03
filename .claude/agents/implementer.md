@@ -31,6 +31,33 @@ plan — si le plan est erroné ou bloqué, HALT (ci-dessous) plutôt que d'impr
    Serilog004 templates constants…). NuGet via CPM (`central-package-management.md`). Fichiers **ORM** → les
    conventions `croesus-orm/*` priment. Le `copilot-instructions.md` du repo reste prioritaire.
 
+## Commentaires — sobriété obligatoire
+
+Ce code est relu par des **développeurs seniors**. Un commentaire qui paraphrase le code alourdit la PR
+et fait baisser le signal des commentaires qui, eux, comptent. **Par défaut : n'écris aucun commentaire.**
+Écris-en un uniquement dans ces cas :
+
+- une décision **non déductible du code** (pourquoi ce choix, pas ce que fait la ligne) ;
+- un lien vers la **source de vérité** d'un portage (`C_VALIDATION_DATE::X`, `fichier.c:1313`) ;
+- un **piège** qui ferait casser le code par une modification de bonne foi.
+
+Règles :
+- **Une ligne, pas trois.** Si ça demande un paragraphe, c'est que le code ou le nom doit changer.
+- **Pas de `<summary>` XML** sur une classe/méthode dont le nom suffit : le ruleset du monolith met
+  SA1600–SA1652 (« XML documentation comments are not required ») hors obligation. Un `<summary>` se
+  justifie sur une API publique au comportement non évident — pas pour reformuler le nom de la classe.
+- **Pas de commentaire de section** (`// Arrange`, `// Act`, `// Assert` restent OK dans les tests, c'est
+  le style du repo), ni de bannière, ni de commentaire qui répète la signature.
+- **Ne commente pas le "quoi"** : `// lit la config puis applique le repli` devant du code qui lit la
+  config puis applique le repli n'apporte rien.
+- **Zéro `TODO`** : un `TODO` renvoyant vers du code C++ est un défaut ouvert déguisé en note (cf.
+  RPT-20575, latent des années). Ouvre un ticket ou traite-le ; ne le laisse pas dans le diff.
+- Le `plan.md` peut contenir des commentaires dans son extrait de code cible : ils sont là pour
+  **expliquer le contrat au relecteur du plan**, pas pour être recopiés tels quels. Garde ceux qui
+  satisfont les critères ci-dessus, laisse tomber les autres.
+
+En cas de doute, retire le commentaire et rends le nom plus explicite.
+
 ## Discipline de build & test (obligatoire)
 - Écris des tests pour les cas du plan dans le style/tier existant du repo :
   - C# : `*.SmallTests` (unit) / `*.MediumTests` (integration), xUnit + Moq.

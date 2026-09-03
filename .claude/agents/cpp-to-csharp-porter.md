@@ -51,6 +51,22 @@ ses **références d'architecture** (§B : `report-server/*` — dataset/NameVal
 7. **Build + test avant de renvoyer :** `dotnet build repos/ReportManagerApi/ReportManagerAPI.sln` et
    `dotnet test <le projet *.SmallTests pertinent>`. Rapporte les résultats réels.
 
+## Commentaires — sobriété obligatoire
+
+Relecteurs seniors : un commentaire qui paraphrase le code alourdit la PR. **Par défaut, n'en écris
+aucun.** Dans un port C++→C#, exactement **un** type de commentaire se justifie presque toujours :
+la **référence à la source C++** (`// C_VALIDATION_DATE::FinDernierMois… (validation_date.c:1313)`),
+sur une ligne, là où la sémantique portée n'est pas déductible du C#. Ajoute-en un autre seulement pour
+une décision non déductible du code ou un piège qui ferait casser le port de bonne foi.
+
+- **Une ligne, pas trois.** Le détail de la sémantique C++ va dans `build-summary.md`, pas en commentaire.
+- **Pas de `<summary>` XML** pour reformuler le nom de la classe : le ruleset du monolith met
+  SA1600–SA1652 hors obligation.
+- **Zéro `TODO`.** Un `TODO` renvoyant vers un symbole C++ est un défaut ouvert déguisé en note — c'est
+  exactement ainsi que RPT-20575 est resté latent des années. Si tu ne peux pas porter une branche,
+  **HALT** ou signale-le dans `build-summary.md` pour qu'un ticket soit ouvert ; ne le laisse pas dans
+  le code.
+
 ## Sortie — écris `.work/<slug>/build-summary.md`
 La source C++ (`repos/CroesusServer` ou `repos/ReportServer` — `path:line`) et sa sémantique, la classe C# + ses deps injectées, la
 ligne d'executer ajoutée, tout ajout à `IDateTimeService`, les tests ajoutés, et les résultats de build/test. Signale

@@ -91,6 +91,13 @@ C'est là que le plan devient exécutable sans deviner. Spécifie **tout ce que 
   (`readonly`, format des dates). Précise le chemin du fichier et s'il est nouveau ou modifié ; pour un type modifié,
   ne montre que les champs ajoutés/changés et marque-les. Un DTO API et son miroir Angular doivent être présentés
   **ensemble** — c'est là que la dérive de contrat cross-repo se voit.
+> **Les commentaires de tes extraits de code cible ne sont pas du code à livrer.** Ils expliquent le
+> contrat au relecteur du plan. Le code livré est relu par des seniors : dis explicitement dans le plan
+> quels commentaires doivent survivre dans la production (une décision non déductible du code, une
+> référence de source C++ `fichier.c:ligne`, un piège) et que le reste est du commentaire de plan. Écris
+> ces extraits avec la sobriété attendue du diff final — pas de `<summary>` XML qui reformule le nom,
+> pas de paraphrase du code, jamais de `TODO`.
+
 - **Signatures de méthodes** — la signature **exacte** (nom, paramètres typés, type de retour, `async`/`Task`,
   `CancellationToken`) de chaque méthode/interface publique créée ou dont le contrat change, avec une ligne de rôle.
   Applique les conventions du monolithe dès ici (`Result<T>` pour les méthodes de service, nommage `Async`) — voir

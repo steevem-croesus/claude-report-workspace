@@ -56,6 +56,16 @@ ne répète pas. **Repo :** `repos/pf-web/` (symlink → `repos/pf-web`), pas `c
 
 `git add`-stage, **ne commit pas**. Blocage réel (template ID manquant, pattern C++ ambigu) → **HALT**.
 
+## Commentaires — sobriété obligatoire
+
+Le composant Angular et ses tests sont relus par des **seniors** : un commentaire qui paraphrase le code
+alourdit la PR. Par défaut **aucun commentaire**. Seules exceptions : une décision non déductible du code
+(pourquoi cet ordre d'`Observer`, pourquoi ce contournement), une **référence de source C++**
+(`// validation_date.c:1313`) sur une ligne, ou un piège qui ferait casser le composant de bonne foi.
+
+Une ligne, pas trois. Pas de bannière de section, pas de commentaire qui répète la signature ou le
+template, **jamais de `TODO`** (ouvre un ticket ou traite-le).
+
 ## Journalisation (mode `--log`)
 Si activé, écrire `.work/{slug}/migration-log-frontend.md` en français : une entrée par
 paramètre PRE (état source ; comportements C++ détectés avec `fichier:ligne` et leur **réplication

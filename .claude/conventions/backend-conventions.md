@@ -80,6 +80,29 @@ la lister dans le résumé.
 > `DateTime.TryParse()` alors que le C++ parse un format « mois.jour » (« 3.31 ») et compare mois/jour
 > séparément — résultats C# complètement faux.
 
+### Audit « fonction C++ à appelants multiples » — après tout fix de fidélité
+
+Corriger **une** VPF ne clôt pas la famille. Quand la fonction C++ portée appelle un **helper partagé**
+(`Check*Configuration`, `Get*ForCfg`, etc.), avant de considérer le sujet clos :
+
+1. Grep le helper sur **tout le monolith** (pas seulement `repos/CroesusServer`) pour lister ses
+   appelants C++.
+2. Pour chaque appelant, retrouver la VPF C# mappée via la clé string du `Init()` de `validation_*.c`,
+   et vérifier qu'elle porte **toutes** les branches — pas seulement le repli.
+3. Traiter tout `TODO` renvoyant vers un symbole C++ comme un **défaut ouvert**, pas une note.
+4. Se méfier d'une VPF dont le nom promet plus que le corps ne fait.
+
+> Exemple vécu : RPT-20533 a corrigé la lecture de `END_DATE_FUNCTION` sur
+> `LastQuarterEndDateDisableParameter` (port de `FinDernierTrimestreDisable`). Mais
+> `CheckEndDateConfiguration` (`validation_date.c:1591`) a **deux** appelants ; le second,
+> `FinDernierMoisMaxDernierTraitement` (`:1307`), est resté cassé et est devenu RPT-20575 deux mois plus
+> tard. Un seul grep des appelants aurait fermé les deux d'un coup.
+
+**Classe de bug à connaître — portage partiel masqué par une valeur par défaut coïncidente** : la VPF
+n'a porté que la branche de *repli* du C++ en la transformant en chemin unique, et l'écart est resté
+invisible pendant des années parce que la config semée par défaut produisait numériquement la même date
+que le calcul codé en dur. « Aucun écart observé » n'est donc **pas** une preuve de fidélité.
+
 ## Créer une classe VPF (catégorie F)
 
 - Nom : `<FunctionName>Parameter`, implémente `IValueProvidedParameter`, méthode `ProvideValue(...)`.
@@ -186,7 +209,14 @@ grep -oP 'ValueProviderFunction\s*=\s*"(\K[^"]+)' repos/ReportFoundations/.../Re
     `"Allocation - Maturity"` (`BusinessLogicDefs.h`).
 - **IsReadOnly/Disable** : si la fonction C++ fait `SetEnable(false)`/`SetReadOnly(true)`/contient
   « Disable », le VPF C# doit setter `parameter.IsReadOnly = true` (classe dédiée, ne pas réutiliser une
-  VPF qui ne gère que la valeur).
+  VPF qui ne gère que la valeur). **Corollaire : si le C++ ne le fait pas, le VPF ne doit PAS le
+  setter** — deux VPF frères portant deux fonctions C++ voisines peuvent diverger sur ce seul point
+  (ex. `FinDernierTrimestreDisable` → `IsReadOnly = true` vs `FinDernierMoisMaxDernierTraitement` →
+  rien ; RPT-20575).
+  - **Piège de test symétrique** : pour asserter qu'un VPF ne pose **pas** `IsReadOnly` (ou toute autre
+    propriété publique settable du DTO), poser explicitement la valeur opposée **en Arrange** avant
+    d'appeler le SUT, puis asserter `Should().BeFalse()`. Sans cet Arrange, `AutoFixture`/`AutoMoq`
+    peuple la propriété avec une valeur arbitraire et l'assertion ne prouve rien.
 - **Ordre d'exécution des VPF PRE** : ils s'exécutent dans l'ordre d'`AddParameter()`. Si une VPF de
   date lit un checkbox (ex. `PARAM_UseLastYear`) qui apparaît après elle dans la liste, ajouter
   `InitialValue = "1"` sur le checkbox (réf. GL Realized).

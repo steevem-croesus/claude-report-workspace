@@ -64,6 +64,21 @@ sémantique ambiguë, repository requis inexistant), suivre le **HALT** du proto
    PREF. La validation `compare-report-params` (paramètres Xpert vs Conseiller) se fait **sur l'image du
    PR**, donc après création.
 
+## Commentaires — sobriété dans le code, traçabilité dans `Parameters.cs`
+
+Distingue deux endroits, avec deux règles opposées :
+
+- **`Parameters.cs`** — le **commentaire obligatoire 3 parties reste obligatoire**, tel quel. Ce fichier
+  est la documentation de la migration (audité par `migration-reviewer`) : la verbosité y est le produit
+  attendu, pas du bruit.
+- **Classes VPF custom (cat. F), `DateTimeService`, tests** — c'est du code de production relu par des
+  **seniors**. Par défaut **aucun commentaire**. Seules exceptions : une décision non déductible du code,
+  une **référence de source C++** (`// C_VALIDATION_DATE::X (validation_date.c:1313)`) sur une ligne, ou
+  un piège qui ferait casser le code de bonne foi. Pas de `<summary>` XML qui reformule le nom de la
+  classe (le ruleset du monolith met SA1600–SA1652 hors obligation), pas de paraphrase du code,
+  **jamais de `TODO`** — un `TODO` renvoyant vers du C++ est un défaut ouvert déguisé en note (RPT-20575
+  est resté latent des années comme ça) : signale-le pour qu'un ticket soit ouvert.
+
 ## Journalisation (mode `--log`)
 
 Si activé, écrire `.work/{slug}/migration-log-backend.md` en français : une entrée par
