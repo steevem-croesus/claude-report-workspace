@@ -105,9 +105,26 @@ exigences, étapes, tests, risques, points de décision, estimation). Exécute l
 renvoie une. Résous tout point de décision `needs-user` qu'il fait remonter via `AskUserQuestion` avant
 de re-dispatcher.
 
+### 4a. Relecture adverse du plan (obligatoire si contrainte de sécurité ou d'intégrité)
+
+Si le plan porte une **contrainte de sécurité ou d'intégrité** — contrôle d'accès, donnée à laquelle
+il ne faut pas faire confiance, invariant de cohérence, secret, droit — dispatche **reviewer** sur
+`plan.md` avant le gate. Il écrit `review-plan.md`.
+
+Le plan est noté par son propre auteur : sans relecteur adverse, une faiblesse de conception atteint
+le gate avec la caution d'un Grade A, puis se paie en itérations de revue de code.
+
+Exige en particulier que toute garantie formulée comme « fermée par construction » soit énoncée
+**canal d'entrée par canal d'entrée** : lister tous les points par lesquels la donnée dangereuse
+peut arriver (grep du symbole dans le repo), et pour chacun l'invariant qui la neutralise. Une
+garantie vraie du chemin nominal n'est pas une garantie du système, et une garde posée derrière un
+feature flag désactivé ne protège rien. Préférer un **point de passage unique** à une garde répétée ;
+quand la répétition est inévitable, documenter l'**invariant** et non la duplication.
+
 ## 5. Gate de plan — faire respecter la barre de build
-Présente `plan.md` (commence par son en-tête **Status** + **Grade**). Applique la **barre de build** de
-protocol.md : un plan n'est approuvable **que** lorsqu'il est `ready` **et** noté **A ou S**.
+Présente `plan.md` (commence par son en-tête **Status** + **Grade**), et `review-plan.md` s'il existe.
+Applique la **barre de build** de protocol.md : un plan n'est approuvable **que** lorsqu'il est
+`ready` **et** noté **A ou S**.
 - Si `draft` ou en-dessous de A → **ne propose pas** *approuver*. Fais remonter la note + les bloqueurs,
   puis **changements** (écris le retour dans `_signals/revision-request.md`, re-dispatche le planner,
   reviens à ce gate) ou **annuler**. L'utilisateur peut explicitement passer outre pour approuver un

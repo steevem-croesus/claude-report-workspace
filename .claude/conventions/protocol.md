@@ -136,6 +136,20 @@ au-delà, procède avec la valeur par défaut énoncée ou arrête avec un messa
 Paliers de test : C# `*.SmallTests` (unitaire, sans dépendances externes) / `*.MediumTests` (intégration), xUnit + Moq.
 Angular : Vitest. Le projet web d'API exécutable est `ReportManager.API/ReportManagerAPI.csproj`.
 
+### Traçabilité d'une mesure de build ou de test
+
+Un chiffre de build ou de test rapporté à l'utilisateur, ou transmis entre agents, précise **la
+commande exacte** et **l'état de l'arbre** sur lequel il a été mesuré.
+
+- Vérifier `git diff --name-only` d'abord : s'il est vide, l'index égale l'arbre de travail et la
+  mesure porte bien sur ce qui sera commité. Sinon, mesurer sur l'index seul
+  (`git stash push --keep-index`) et le dire.
+- Donner le total **ventilé par assembly ou projet**, pas un agrégat : un total qui bouge sans
+  explication est un signal.
+- **Ne jamais relayer le chiffre d'un sous-agent comme le sien.** Le rejouer, ou dire explicitement
+  d'où il vient. Un verdict `build-failed` dû à l'environnement (jeton NuGet expiré, service arrêté)
+  se distingue d'un échec de code : le dire, et ne pas déclarer vert ce qui n'a pas été exécuté.
+
 ## Règles de branche, commit & ship (par repo, imposées par l'org)
 
 Les commits/PR se font **par repo symlinké, sur la branche propre de ce repo** — il n'y a pas de repo racine partagé.

@@ -82,54 +82,12 @@ New parameter classes go under
 
 ## Commands by repo
 
-### ReportManagerApi & ReportFoundations (.NET 8, C#)
-
-```bash
-# Build / test the API solution
-dotnet build repos/ReportManagerApi/ReportManagerAPI.sln
-dotnet test  repos/ReportManagerApi/ReportManagerAPI.sln
-
-# Run a single test project or a single test
-dotnet test repos/ReportManagerApi/ReportManagerAPI.Domain.SmallTests
-dotnet test repos/ReportManagerApi/ReportManagerAPI.Domain.SmallTests --filter "FullyQualifiedName~DateTimeServiceTests"
-
-# Code coverage (from the repo dir, needs dotnet-reportgenerator-globaltool)
-cd repos/ReportManagerApi && ./show-code-coverage.cmd
-
-# Docker
-docker build -t reportmanagerapi repos/ReportManagerApi --no-cache --progress=plain
-docker run -d -p 5000:80 --name reportmanagerapi reportmanagerapi
-```
-
-- The runnable web project is **`ReportManager.API/ReportManagerAPI.csproj`** (contains `Program.cs`, controllers). The bare `ReportManagerAPI/` folder is a build-output stub — ignore it.
-- Test-project naming: `*.SmallTests` (unit, no external deps), `*.MediumTests` (integration). Stack is **xUnit + Moq** (some MSTest present).
-- `ReportFoundations` projects each have their own `.sln`/`.csproj` and are also referenced by the API solution; build them the same way.
-- Local AWS/auth config lives in `appsettings.Development.json` (queue URL, bucket, `AWSOptions`) and `launchSettings.json` (`AWS_PROFILE`). Requires a reachable Frameworkserver on port 8999.
-
-### CroesusServer & ReportServer (C++, CMake)
-
-Both are built with CMake / Visual Studio (`CroesusServer.sln` / `ReportServer.sln`, each with a
-`CMakeLists.txt`). They are generally **read-only sources of truth** for the porting workflow — you
-locate and analyze C++ functions here, you don't typically modify them for report tasks. A report
-function to port may live in either one, so search both.
-
-- **CroesusServer** — Frameworkserver monolith; report logic under `Src/Report`, `Src/ReportApi`.
-  Its `POST_BUILD` step generates `versions.ini` and signs the binary.
-- **ReportServer** — the legacy report-generation engine; generation logic under `Src/RGSession`
-  (`rgs_report_generation.c`, `gen_engine_info.c`), plus `Src/CmdManager`, `Src/Server`, `Src/gRPC`,
-  `Src/XMLRPC`.
-
-### pf-web (Angular 21 + NX)
-
-See `repos/pf-web/CLAUDE.md` for the full command set. Most-used:
-
-```bash
-cd repos/pf-web
-npm install
-nx hybrid xpert --backend=http://localhost   # serve against a backend
-nx test report                                # test the report domain libs
-nx lint <project>
-```
+Per-repo build/test/coverage/serve commands and their gotchas live in the
+`workspace-commands` skill (`.claude/skills/workspace-commands/SKILL.md`) — invoke it before
+building or testing anything under `repos/`. Two things worth knowing up front:
+**ReportManagerApi must be built from the real monolith path, not the `repos/` symlink**, and the
+C++ repos (`CroesusServer`, `ReportServer`) are **read-only sources of truth** for the porting
+workflow — a function to port may live in either, so search both.
 
 ## Conventions
 
@@ -150,50 +108,31 @@ each with its own phase sequence, gated for approval, and wired to pull context 
 > explanation). Start at [`docs/README.md`](docs/README.md). The `.claude/` files remain the source
 > of truth; the docs explain and index them.
 
-- **Workflows** — `.claude/conventions/workflows.md` defines seven playbooks and when to use each:
-  `feature`, `bug`, `refactor`, `spike`, `explore`, `investigate`, `learn`. Each names the phases,
-  the interactive gates, and which agent produces which artifact.
-- **Skills** — `.claude/skills/` holds the orchestrating skills that auto-drive a workflow.
-  All seven workflows are live skills (model-invocable, or run `/feature`, `/bug`, `/refactor`,
-  `/spike`, `/explore`, `/investigate`, `/learn`). Each defers to `workflows.md` + `protocol.md`.
-  Alongside them, seven **monolith skills** are *symlinked in* from `/c/Repos/monolith/.claude/skills/`
-  (`croesus-orm`, `create-{small,medium,large}-tests`, `create-internal-route`, `implement-full-story`,
-  `croesus-process-conventions`) — CFF-monolith authoring/testing helpers reused here. They are
-  machine-specific links (gitignored, not tracked); (re)create them by running
-  `link-monolith-skills.ps1` elevated, then restart Claude Code. The real skills are owned by the
-  monolith repo — edit them there, not here.
-- **Shared protocol** — `.claude/conventions/protocol.md`: the task directory (`.work/<TICKET-ID>/`),
-  canonical artifact filenames, context-gathering, the gate + HALT protocols, per-repo build/test
-  commands, and the org git/branch guardrails.
-- **Monolith conventions & references** — `.claude/conventions/monolith-references.md`: the catalogued index
-  of `C:\Repos\monolith\doc\references\` — the C#/ORM **coding conventions** the workflows apply to generated
-  code (StyleCop restrictive ruleset, `Result<T>`, NuGet CPM, `croesus-orm/*`) and the **architecture
-  references** (ReportServer, RTM, FrameworkServer, AgentServer, CoreApi) they use to understand the system,
-  with the precedence chain. `protocol.md` and the planner/implementer/porter/reviewer/explorer/investigator/
-  learning-guide agents all point here.
-- **Agents** — `.claude/agents/` (dispatch via the Agent tool):
-  - read-only: `context-gatherer` (Jira+GitHub intel), `explorer` (code map), `investigator`
-    (root cause), `learning-guide` (walkthrough), `reviewer` (plan/code review), `retrospective`.
-  - editing: `planner` (→ `plan.md`), `implementer` (build+test, any stack), `cpp-to-csharp-porter`
-    (the C++→C# value-provider recipe).
-  - report migration: `report-analyst` (read-only spec/analysis), `backend-migrator` (C++→C#
-    parameters in ReportManagerApi/ReportFoundations), `frontend-migrator` (Angular param component
-    in pf-web), `migration-reviewer` (read-only convention audit), `migration-validator` (read-only
-    Xpert-JSON vs Conseiller-XML equivalence). Dispatch by `subagent_type`.
-- **Report migration** — a full C++→Xpert report-migration toolkit lives natively here (merged in from
-  the former `claude-report-migration` workspace): the 5 agents above, ~40 helper skills under
-  `.claude/skills/` (e.g. `locate-cpp-function`, `analyze-cpp-function`, `classify-functions`,
-  `implement-report-parameters`, `register-parameter`, `register-web-report`, `update-e2e-baselines`,
-  `create-migration-pr`, `manage-state`, `jira-*-migration-ticket`), the conventions
-  `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`. **All
-  deliverables for a migration go under `.work/{slug}/`** (analysis, logs, review, PDF, `state.json`) —
-  `{slug}` = the Jira key if a ticket is given, else the report internal name; **never** under
-  `docs/reports/`. Shared global inputs (not deliverables) stay under `docs/`: `fields.csv` (master
-  parameter list) + `template_ids.csv`. Backend/frontend/review are reachable either
-  directly (dispatch a migration agent) or through the gated `/feature` **migration mode**
-  (`.claude/skills/feature/SKILL.md` §1a). All migration paths use the `repos/` symlinks like the rest
-  of this workspace.
-- **Templates** — `.claude/conventions/templates/` (context, plan, review, spike, bug-diagnosis, retro).
+Where things live — the files are the source of truth; consult them rather than this list:
+
+- **Workflows** — `.claude/conventions/workflows.md` (seven playbooks: `feature`, `bug`, `refactor`,
+  `spike`, `explore`, `investigate`, `learn` — each a live skill, with phases and gates).
+- **Shared protocol** — `.claude/conventions/protocol.md` (task directory, artifact filenames, the
+  gate + HALT protocols, org git/branch guardrails).
+- **Monolith conventions & references** — `.claude/conventions/monolith-references.md`, the catalogued
+  index of `C:\Repos\monolith\doc\references\` with the precedence chain.
+- **Agents** — `.claude/agents/` (dispatch by `subagent_type`); **templates** —
+  `.claude/conventions/templates/`; **migration conventions** —
+  `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`.
+
+Rules that aren't discoverable from those files:
+
+- The **monolith skills** (`croesus-orm`, `create-{small,medium,large}-tests`, `create-internal-route`,
+  `implement-full-story`, `croesus-process-conventions`) are *symlinks* into
+  `/c/Repos/monolith/.claude/skills/` — machine-specific and gitignored. (Re)create them with
+  `link-monolith-skills.ps1` run elevated, then restart Claude Code. **They are owned by the monolith
+  repo — edit them there, never here.**
+- **All deliverables for a report migration go under `.work/{slug}/`** (analysis, logs, review, PDF,
+  `state.json`); `{slug}` = the Jira key if a ticket is given, else the report internal name.
+  **Never** under `docs/reports/`. Shared global inputs (not deliverables) stay under `docs/`:
+  `fields.csv` (master parameter list) + `template_ids.csv`.
+- Migration work is reachable directly (dispatch a migration agent) or through the gated `/feature`
+  **migration mode** (`.claude/skills/feature/SKILL.md` §1a).
 
 Starting a piece of work? Pick the matching workflow in `workflows.md` and follow its phases;
 begin every non-trivial task by dispatching `context-gatherer` with the Jira key and/or GitHub ref.
