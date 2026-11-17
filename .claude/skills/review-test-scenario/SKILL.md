@@ -1,7 +1,7 @@
 ---
 name: review-test-scenario
 description: Revoit un cas de test QA (scénario CSV/tableau + ticket Jira de test) en le confrontant au code source du monolith, puis produit un document de revue, un scénario corrigé et une mise à jour du ticket Jira. Utiliser quand l'utilisateur demande de « réviser / peaufiner / valider / corriger » des cas de test, des préconditions ou un scénario de test, quand il fournit un CSV de cas de test avec un ticket RPT-/CAR-/MROX-, ou quand il demande si une précondition de test est réalisable. Détecte les attendus impossibles, les préconditions non produisibles par l'application, les étapes qui cliquent un contrôle non affiché, et les noms de champs inexistants.
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash, ToolSearch, mcp__atlassian__getAccessibleAtlassianResources, mcp__atlassian__getJiraIssue, mcp__atlassian__editJiraIssue, mcp__atlassian__addCommentToJiraIssue, mcp__claude_ai_Atlassian__getAccessibleAtlassianResources, mcp__claude_ai_Atlassian__getJiraIssue, mcp__claude_ai_Atlassian__editJiraIssue, mcp__claude_ai_Atlassian__addCommentToJiraIssue
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, ToolSearch, mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources, mcp__plugin_atlassian_atlassian__getJiraIssue, mcp__plugin_atlassian_atlassian__editJiraIssue, mcp__plugin_atlassian_atlassian__addCommentToJiraIssue, mcp__claude_ai_Atlassian__getAccessibleAtlassianResources, mcp__claude_ai_Atlassian__getJiraIssue, mcp__claude_ai_Atlassian__editJiraIssue, mcp__claude_ai_Atlassian__addCommentToJiraIssue
 ---
 
 # Skill: Revue d'un cas de test contre le code source

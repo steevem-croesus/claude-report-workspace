@@ -24,11 +24,10 @@ Transformer la spec d'implémentation en code C# fonctionnel en 2 phases:
 
 ## Input Requis
 
-**Depuis manage-state:**
-- `state.analysis.files.spec` - Spec complète d'implémentation
-- `state.analysis.functionsToAnalyze[]` - Liste fonctions avec patterns
-- `state.reportId` - ID du rapport
-- `state.reportName` - Nom du rapport
+**Depuis la spec `.work/{slug}/analysis.md` (produite par `report-analyst`) :**
+- la spec complète d'implémentation
+- la liste des fonctions à implémenter avec leur pattern (ci-dessous « fonctions de la spec »)
+- l'ID et le nom interne du rapport
 
 **Format fonction attendu:**
 ```json
@@ -103,7 +102,7 @@ namespace ReportManagerAPI.Infrastructure.Repositories.ReportParameters
 
 **Lire spec:** `.work/{slug}/spec.md` → Section 3
 
-**Pour chaque fonction dans `state.analysis.functionsToAnalyze`:**
+**Pour chaque fonction dans `fonctionsDeLaSpec`:**
 
 Identifier pattern via `implementationPattern`:
 
@@ -146,7 +145,7 @@ this.AddParameter(new ParameterJoinEntity(
 
 **Indicateur:** `"implementationPattern": "declarative:InitialValue"`
 
-**Valeur constante définie dans l'état:** `fonction.initialValue`
+**Valeur constante définie dans la spec:** `fonction.initialValue`
 
 **Code:**
 ```csharp
@@ -181,7 +180,7 @@ InitialValue = "Allocation - Maturity"
 
 **Indicateur:** `"implementationPattern": "declarative:InitialValueFromPref"`
 
-**Préférence définie dans l'état:** `fonction.preference`
+**Préférence définie dans la spec:** `fonction.preference`
 
 **Code:**
 ```csharp
@@ -300,30 +299,10 @@ dotnet build ReportManagerAPI.sln
 
 ---
 
-### Étape 5: Update État
+### Étape 5: Consigner l'avancement
 
-**Pour chaque paramètre déclaratif configuré:**
-
-```bash
-manage-state → update {REPORT-ID}:
-- completedParameters += {
-    "name": "{FunctionName}",
-    "type": "declarative",
-    "file": "Parameters.cs ligne {X}",
-    "pattern": "{implementationPattern}",
-    "testsFile": null,
-    "testsStatus": "not_required",
-    "registered": "n/a",  // Déclaratifs ne nécessitent pas d'enregistrement
-    "completedAt": "{timestamp}"
-  }
-- pendingParameters -= "{FunctionName}"
-```
-
-**Update step:**
-```bash
-manage-state → update {REPORT-ID}:
-- development.currentStep: "parameters_declarative_completed"
-```
+Noter chaque paramètre déclaratif configuré (nom, pattern, `Parameters.cs` ligne) dans
+`.work/{slug}/build-summary.md`.
 
 **Temps total Phase A:** 5-20min selon nombre de paramètres
 
@@ -331,14 +310,14 @@ manage-state → update {REPORT-ID}:
 
 ## PHASE B: Classes Parameter Custom (Si Nécessaire)
 
-**Condition:** SEULEMENT si `state.analysis.functionsToAnalyze` contient des fonctions avec `implementationPattern: "custom:ValueProviderFunction"`
+**Condition:** SEULEMENT si `fonctionsDeLaSpec` contient des fonctions avec `implementationPattern: "custom:ValueProviderFunction"`
 
 ---
 
 ### Étape 1: Filtrer Fonctions Custom
 
 ```javascript
-const customFunctions = state.analysis.functionsToAnalyze.filter(
+const customFunctions = fonctionsDeLaSpec.filter(
   f => f.implementationPattern && f.implementationPattern.includes("custom:")
 );
 
@@ -476,21 +455,10 @@ dotnet test --filter "FullyQualifiedName~{FunctionName}ParameterTests"
 
 ---
 
-**Sous-étape 2.5: Update État**
+**Sous-étape 2.5: Consigner l'avancement**
 
-```bash
-manage-state → update {REPORT-ID}:
-- completedParameters += {
-    "name": "{FunctionName}",
-    "type": "implemented",
-    "file": "Parameters/{Category}/{FunctionName}Parameter.cs",
-    "testsFile": "Parameters/{Category}/{FunctionName}ParameterTests.cs",
-    "testsStatus": "passing",
-    "registered": false,  // Sera enregistré Phase 3
-    "completedAt": "{timestamp}"
-  }
-- pendingParameters -= "{FunctionName}"
-```
+Ajouter la classe, son fichier de tests et le résultat réel des tests dans
+`.work/{slug}/build-summary.md` (enregistrement dans l'executer : Phase 3).
 
 ---
 
@@ -579,13 +547,12 @@ using System.Collections.Generic;
 - `implementation-guide` - Patterns 1-9 classes custom
 - `check-implementation` - Vérifier si déjà implémenté
 - `register-parameter` - Enregistrement Phase 3
-- `manage-state` - Gestion état persistant
 - `generic-functions-reference` - Hiérarchie décision
 
 **Documentation:**
 - Spec: `.work/{slug}/spec.md`
 - Classification: `.work/{slug}/analysis-classification.md`
-- État: `.work/{slug}/state.json`
+- Avancement: `.work/{slug}/build-summary.md`
 
 ---
 

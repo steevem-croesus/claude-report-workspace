@@ -1,7 +1,7 @@
 ---
 name: jira-append-to-migration-ticket
 description: Met à jour la description d'un ticket Jira de migration. Si la description est auto-générée (footer "Description générée par /migrate-to-xpert-*"), elle est REMPLACÉE entièrement par la nouvelle version. Sinon, ajoute une section à la suite SANS effacer le contenu humain existant. Utiliser pour empiler les artefacts produits par les commandes /migrate-to-xpert-* dans le même ticket.
-allowed-tools: ToolSearch, mcp__atlassian__getAccessibleAtlassianResources, mcp__atlassian__getJiraIssue, mcp__atlassian__editJiraIssue
+allowed-tools: ToolSearch, mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources, mcp__plugin_atlassian_atlassian__getJiraIssue, mcp__plugin_atlassian_atlassian__editJiraIssue
 ---
 
 # Skill: Jira — Append/Replace Migration Ticket
@@ -39,13 +39,13 @@ Empiler des artefacts dans un même ticket de migration (analyse → spec backen
 ### 1. Charger les outils MCP nécessaires
 
 ```
-ToolSearch(query="select:mcp__atlassian__getAccessibleAtlassianResources,mcp__atlassian__getJiraIssue,mcp__atlassian__editJiraIssue", max_results=3)
+ToolSearch(query="select:mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources,mcp__plugin_atlassian_atlassian__getJiraIssue,mcp__plugin_atlassian_atlassian__editJiraIssue", max_results=3)
 ```
 
 ### 2. Récupérer le cloudId
 
 ```
-mcp__atlassian__getAccessibleAtlassianResources()
+mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources()
 ```
 
 Retenir l'`id` de la ressource `https://croesus-support.atlassian.net` (scope `write:jira-work` requis).
@@ -53,7 +53,7 @@ Retenir l'`id` de la ressource `https://croesus-support.atlassian.net` (scope `w
 ### 3. Lire la description actuelle
 
 ```
-mcp__atlassian__getJiraIssue(
+mcp__plugin_atlassian_atlassian__getJiraIssue(
   cloudId={cloudId},
   issueIdOrKey={ticketKey},
   fields=["description"],
@@ -96,7 +96,7 @@ La description est considérée **auto-générée** si elle satisfait l'**une** 
 ### 5. Mettre à jour le ticket
 
 ```
-mcp__atlassian__editJiraIssue(
+mcp__plugin_atlassian_atlassian__editJiraIssue(
   cloudId={cloudId},
   issueIdOrKey={ticketKey},
   fields={"description": {nouvelle description}},

@@ -1,6 +1,6 @@
 ---
 name: migration-validator
-description: Validateur post-migration (lecture seule). Compare la sortie Xpert (JSON) avec la sortie Conseiller (XML) d'un même rapport pour valider l'équivalence fonctionnelle des paramètres. Classe chaque différence (identique / attendue / fonctionnelle) et propose des pistes d'investigation. À utiliser après une migration backend. Remplace l'ancienne commande /migrate-to-xpert-validation. Ne modifie aucun code.
+description: Validateur post-migration (lecture seule). Compare la sortie Xpert (JSON) avec la sortie Conseiller (XML) d'un même rapport pour valider l'équivalence fonctionnelle des paramètres. Classe chaque différence (identique / attendue / fonctionnelle) et propose des pistes d'investigation. À utiliser après une migration backend. Ne modifie aucun code.
 tools: Read, Grep, Glob, Bash, Write, Skill
 model: sonnet
 ---

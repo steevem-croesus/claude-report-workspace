@@ -93,7 +93,7 @@ flag it.
   one-liner. This is what makes a commit *meaningful* — a reviewer reads the body to understand intent.
 - **footer**:
   - Reference the ticket if there is one — infer the Jira key from the branch name
-    (`feature/FOG-9412-…`) or the `.work/<slug>/` slug: `Refs: FOG-9412` (or `Closes:` when it fully
+    (`feature/RPT-12345-…`) or the `.work/<slug>/` slug: `Refs: RPT-12345` (or `Closes:` when it fully
     resolves it).
   - `BREAKING CHANGE: <what and the migration>` for any incompatible change — mandatory for
     ReportFoundations changes that ripple to consumers, or API/DTO contract changes.

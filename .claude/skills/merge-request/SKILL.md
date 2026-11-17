@@ -62,7 +62,7 @@ with the user if it's anything other than `develop`. State the base you'll targe
   raw material; a good MR body synthesises them, it doesn't just relist them.
 - `git -C <dir> diff --stat <base>...HEAD` and `git -C <dir> diff <base>...HEAD` — read the actual diff
   to describe *what changed and why*, and to spot anything needing reviewer attention.
-- **Jira key**: infer from the branch name (`feature/FOG-9412-…`) or the `.work/<slug>/` slug; read
+- **Jira key**: infer from the branch name (`feature/RPT-12345-…`) or the `.work/<slug>/` slug; read
   `.work/<slug>/context.md` if present for the "why".
 
 ## 5. Write the MR
@@ -95,8 +95,8 @@ manuelles. Dis honnêtement « non lancé » si ce n'est pas le cas.>
 <API/DTO/contrat/répercussion ReportFoundations + notes de migration — ou « Aucun ».>
 
 ## Tickets liés
-Closes FOG-9412
-<ou `Refs FOG-9412` si ça ne le résout pas entièrement. Multi-repo : lie ici les MR sœurs.>
+Closes RPT-12345
+<ou `Refs RPT-12345` si ça ne le résout pas entièrement. Multi-repo : lie ici les MR sœurs.>
 
 ## Notes de revue
 <les 1-3 endroits à regarder en premier ; tout ce qui est volontairement hors périmètre.>

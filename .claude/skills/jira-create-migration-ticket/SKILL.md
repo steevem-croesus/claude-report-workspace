@@ -1,7 +1,7 @@
 ---
 name: jira-create-migration-ticket
 description: 'Crée une nouvelle Story Jira dans le projet RPT pour suivre la migration Xpert d''un rapport. Titre standardisé "Migrer vers Xpert : {NomFR} ({REPORT_NAME})", format markdown, footer de traçabilité automatique. Demande TOUJOURS confirmation utilisateur avant création.'
-allowed-tools: ToolSearch, mcp__atlassian__getAccessibleAtlassianResources, mcp__atlassian__createJiraIssue
+allowed-tools: ToolSearch, mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources, mcp__plugin_atlassian_atlassian__createJiraIssue
 ---
 
 # Skill: Jira — Create Migration Ticket
@@ -28,13 +28,13 @@ Créer un ticket de suivi de migration avec une description structurée, après 
 ### 1. Charger les outils MCP nécessaires
 
 ```
-ToolSearch(query="select:mcp__atlassian__getAccessibleAtlassianResources,mcp__atlassian__createJiraIssue", max_results=2)
+ToolSearch(query="select:mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources,mcp__plugin_atlassian_atlassian__createJiraIssue", max_results=2)
 ```
 
 ### 2. Récupérer le cloudId
 
 ```
-mcp__atlassian__getAccessibleAtlassianResources()
+mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources()
 ```
 
 Retenir l'`id` de la ressource `https://croesus-support.atlassian.net` (scope `write:jira-work` requis).
@@ -69,7 +69,7 @@ Date au format ISO `YYYY-MM-DD` (jour de création).
 ### 5. Créer la Story
 
 ```
-mcp__atlassian__createJiraIssue(
+mcp__plugin_atlassian_atlassian__createJiraIssue(
   cloudId={cloudId},
   projectKey="RPT",
   issueTypeName="Story",

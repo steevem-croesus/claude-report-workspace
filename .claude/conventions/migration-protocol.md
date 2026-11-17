@@ -30,14 +30,11 @@ L'analyse n'est pas toujours nécessaire : pour un rapport simple, `backend-migr
 analyse inline. Utiliser `report-analyst` quand on veut une spec revue avant d'implémenter, ou pour
 estimer/planifier.
 
-### Ces agents remplacent les anciennes commandes
+### Lancer une phase
 
-Les commandes `/migrate-to-xpert-backend`, `/migrate-to-xpert-frontend` et
-`/migrate-to-xpert-validation` ont été **retirées** ; leur logique vit maintenant dans les agents
-`backend-migrator`, `frontend-migrator` et `migration-validator` respectivement. Pour lancer une
-phase, demander en langage naturel (« migre le backend de FOREIGN_PROPERTY ») — l'assistant principal
-dispatche l'agent correspondant. Les commandes d'analyse (`/report-analyst:*`, `/validation:*`) et
-les **21 skills** restent inchangées et servent d'outils aux agents.
+Demander en langage naturel (« migre le backend de FOREIGN_PROPERTY ») — l'assistant principal
+dispatche l'agent correspondant — ou passer par `/feature` en mode migration. Les skills de migration
+sous `.claude/skills/` servent d'outils aux agents.
 
 ## Les skills (outils des agents)
 
@@ -108,7 +105,8 @@ Mapping Widget → fichier C++ :
 ## Gestion d'état et livrables
 
 - **Répertoire de tâche (`.work/{slug}/`) — RÈGLE FERME.** TOUS les livrables d'une migration vivent
-  sous `.work/{slug}/` à la racine du workspace — **jamais** sous `docs/reports/`. C'est la convention
+  sous `.work/{slug}/` à la racine du workspace (non versionné) — on ne **travaille** jamais directement sous
+  `docs/reports/`, qui est une archive (voir ci-dessous). C'est la convention
   de répertoire de tâche du workspace (voir `protocol.md`), partagée avec `/feature`. Créer le dossier
   si absent : `mkdir -p .work/{slug}`.
   - **`{slug}`** = la **clé du ticket Jira** si un ticket est fourni (p. ex. `RPT-20590`), **sinon** le
@@ -116,14 +114,18 @@ Mapping Widget → fichier C++ :
 - **Livrables canoniques** sous `.work/{slug}/` :
   - `analysis.md` (spec du `report-analyst`) + artefacts intermédiaires éventuels
     (`analysis-extraction.md`, `analysis-classification.md`).
-  - `state.json` (état persistant `manage-state`, pour la reprise).
   - `migration-log-{backend,frontend,validation}.md` (journaux `--log`) et les PDF générés.
   - `review.md` (audit `migration-reviewer`) et le rapport du `migration-validator`.
 - **Données globales — NE PAS déplacer :** `docs/fields.csv` (liste maître des paramètres) et
   `docs/template_ids.csv` restent sous `docs/` ; ce sont des **entrées partagées**, pas des livrables.
 - **Journaux (`--log`) :** chaque phase peut produire un journal détaillé en français sous
   `.work/{slug}/`, puis un PDF via `docs/scripts/log-to-pdf.mjs` → `.work/{slug}/{Phase}.pdf`.
-- Skill `manage-state` pour l'état persistant JSON (`.work/{slug}/state.json`).
+- **Archive versionnée (`docs/reports/{REPORT_NAME}/`) :** une fois la migration terminée, copier dans
+  `docs/reports/{REPORT_NAME}/` les **livrables finaux à conserver dans git** (`analysis.md`,
+  `migration-log-*.md`) — sur demande de l'utilisateur, jamais automatiquement. Rien d'autre n'y va :
+  pas de brouillon, pas de review intermédiaire, pas de PDF.
+- **Reprise :** pas de fichier d'état dédié — une migration interrompue reprend en relisant les artefacts
+  de `.work/{slug}/` (`task.md`, `analysis.md`, `build-summary.md`).
 
 ## Build & tests
 

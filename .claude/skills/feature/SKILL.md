@@ -27,8 +27,8 @@ Réaffiche une courte note de progression d'une ligne à chaque transition de ph
 artefact a été produit).
 
 ## 1. Mise en place
-- Dérive le **slug** : la clé Jira si le texte de la tâche en contient une (p. ex. `FOG-9412`,
-  `CFF-1234`), sinon le kebab-case des ~4 premiers mots. Confirme le slug avec l'utilisateur s'il a été
+- Dérive le **slug** : la clé Jira si le texte de la tâche en contient une (p. ex. `RPT-12345`,
+  `CAR-1234`), sinon le kebab-case des ~4 premiers mots. Confirme le slug avec l'utilisateur s'il a été
   deviné.
 - `mkdir -p .work/<slug>/_signals/` et écris le texte brut de la tâche dans `.work/<slug>/task.md`.
 
@@ -42,8 +42,8 @@ continuer ; sinon ignore cette section et exécute le flux standard ci-dessous.
 
 **Slug en mode migration (surcharge le §1).** Le `{slug}` du répertoire de tâche est la **clé Jira**
 si un ticket est fourni, **sinon le nom interne du rapport** (p. ex. `FOREIGN_PROPERTY`) — pas le
-kebab-case des premiers mots. **Tous les livrables** (analysis, logs, review, PDF, `state.json`)
-vivent sous `.work/{slug}/`, jamais sous `docs/reports/` (voir `migration-protocol.md`).
+kebab-case des premiers mots. **Tous les livrables** (analysis, logs, review, PDF)
+vivent sous `.work/{slug}/` ; `docs/reports/` n'est qu'une archive des livrables finaux (voir `migration-protocol.md`).
 
 En mode migration, le travail de domaine est piloté par les **agents spécialistes de migration**,
 *et non* par les `explorer`/`planner`/`implementer`/`reviewer` génériques de ce workspace. Les
@@ -53,7 +53,7 @@ En mode migration, le travail de domaine est piloté par les **agents spécialis
 `report-analyst`, `backend-migrator`, `frontend-migrator`, `migration-validator`,
 `migration-reviewer`. Leurs règles vivent dans `.claude/conventions/` (`migration-protocol.md` +
 `backend-conventions.md` + `frontend-conventions.md`). **Livrables :** tous sous `.work/{slug}/`
-(analysis.md, logs, review, PDF, state.json) — **jamais** sous `docs/reports/`. Données globales
+(analysis.md, logs, review, PDF) — on ne travaille **jamais** directement sous `docs/reports/`. Données globales
 partagées (entrées, pas livrables) : `docs/fields.csv` (liste maître des paramètres) et
 `docs/template_ids.csv`.
 
@@ -153,7 +153,7 @@ Présente le verdict + le résultat de `build-summary.md`. Demande *approuver / 
 - **approuver** → continue.
 
 ## 9. Ship (optionnel, gaté)
-Demande s'il faut ship. Si oui, **par repo touché** (il n'y a pas de repo racine partagé) : crée une
+Demande s'il faut ship. Si oui, **par repo git touché** (monolith et/ou pf-web — jamais le repo racine du workspace) : crée une
 branche de feature (`--no-track` depuis une réf protégée), commite, `git push -u`, ouvre une PR. Suis
 les règles git de l'org dans protocol.md à la lettre. Saute entièrement si l'utilisateur refuse.
 

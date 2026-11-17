@@ -48,7 +48,7 @@ ses **références d'architecture** (§B : `report-server/*` — dataset/NameVal
    `ReportManagerAPI.Infrastructure.SmallTests/.../ValueProviderFunctions/Parameters/...` et
    les tests du date-service dans `ReportManagerAPI.Domain.SmallTests/Services/DateTimeServiceTests.cs`
    (xUnit + Moq). Couvre les cas limites C++ que tu as identifiés.
-7. **Build + test avant de renvoyer :** `dotnet build repos/ReportManagerApi/ReportManagerAPI.sln` et
+7. **Build + test avant de renvoyer :** `dotnet build /c/Repos/monolith/CFF/Products/ReportManagerApi/ReportManagerAPI.sln` et
    `dotnet test <le projet *.SmallTests pertinent>`. Rapporte les résultats réels.
 
 ## Commentaires — sobriété obligatoire

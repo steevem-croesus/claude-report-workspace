@@ -11,10 +11,11 @@ propres à chaque repo. Il s'inspire des conventions du plugin `code-fleet` de l
 Chaque exécution de workflow non triviale crée un répertoire par tâche à la **racine du workspace** :
 `C:\Repos\claude-report-workspace\.work\<slug>\`.
 
-- **Slug** = la clé Jira lorsqu'elle est détectée (ex. `FOG-9412`, `CFF-1234`) ; sinon le kebab-case des
+- **Slug** = la clé Jira lorsqu'elle est détectée (ex. `RPT-12345`, `CAR-1234`) ; sinon le kebab-case des
   ~4 premiers mots de la tâche. Réexécuter la même tâche réutilise le répertoire.
 - Il vit à la racine du workspace à dessein — il ne **pollue pas** les repos symlinkés, et il
-  survit d'une session à l'autre. Ajoute `.work/` à ton gitignore global si tu ne veux pas qu'il soit suivi.
+  survit d'une session à l'autre. Il est ignoré par le `.gitignore` du workspace : rien de ce qui s'y
+  trouve n'est versionné.
 
 ### Noms de fichiers canoniques (un artefact = un fichier)
 
@@ -45,7 +46,9 @@ Chaque exécution de workflow non triviale crée un répertoire par tâche à la
 ## Rassemblement du contexte (début de chaque feature/bug/refactor/spike/investigate)
 
 Dispatche toujours **context-gatherer** en premier. Il :
-1. Résout le ticket Jira via le **MCP Atlassian** — `getAccessibleAtlassianResources`
+1. Résout le ticket Jira via le **MCP Atlassian** (préfixe d'outil : `mcp__plugin_atlassian_atlassian__`
+   en priorité — c'est le seul qui a les droits d'écriture ; `mcp__claude_ai_Atlassian__` en repli,
+   lecture seule ; l'ancien `mcp__atlassian__` n'existe plus) — `getAccessibleAtlassianResources`
    (pour le `cloudId`) → `getJiraIssue` (description, commentaires, critères d'acceptation, liens) →
    `getJiraIssueRemoteIssueLinks`. Les specs Confluence sont récupérées lorsqu'elles sont référencées.
 2. Résout le contexte GitHub via le **`gh` CLI** exécuté à l'intérieur du repo symlinké pertinent —
@@ -127,7 +130,7 @@ au-delà, procède avec la valeur par défaut énoncée ou arrête avec un messa
 
 | Repo | Build | Test (unitaire) | Lint |
 |---|---|---|---|
-| ReportManagerApi | `dotnet build repos/ReportManagerApi/ReportManagerAPI.sln` | `dotnet test <proj> --filter "FullyQualifiedName~<Name>"` | — |
+| ReportManagerApi | `dotnet build /c/Repos/monolith/CFF/Products/ReportManagerApi/ReportManagerAPI.sln` | `dotnet test <proj> --filter "FullyQualifiedName~<Name>"` | — |
 | ReportFoundations | `dotnet build <the lib .sln/.csproj>` | `dotnet test <proj.SmallTests>` | — |
 | pf-web | `nx build <project>` | `nx test <project> --testFile=<path>` | `nx lint <project>` |
 | CroesusServer | CMake / Visual Studio | (généralement référence en lecture seule) | — |
@@ -135,6 +138,10 @@ au-delà, procède avec la valeur par défaut énoncée ou arrête avec un messa
 
 Paliers de test : C# `*.SmallTests` (unitaire, sans dépendances externes) / `*.MediumTests` (intégration), xUnit + Moq.
 Angular : Vitest. Le projet web d'API exécutable est `ReportManager.API/ReportManagerAPI.csproj`.
+
+**Builder ReportManagerApi depuis le chemin réel du monolithe, jamais depuis le symlink `repos/`** — les
+références de la solution ne se résolvent pas à travers le symlink. Détail et autres pièges : skill
+`workspace-commands`.
 
 ### Traçabilité d'une mesure de build ou de test
 
@@ -152,7 +159,10 @@ commande exacte** et **l'état de l'arbre** sur lequel il a été mesuré.
 
 ## Règles de branche, commit & ship (par repo, imposées par l'org)
 
-Les commits/PR se font **par repo symlinké, sur la branche propre de ce repo** — il n'y a pas de repo racine partagé.
+Les commits/PR de produit se font **dans le repo réel derrière le symlink**, jamais dans le repo racine du
+workspace (qui ne versionne que l'outillage). Il n'y a que **deux repos produit** : le monorepo
+`/c/Repos/monolith` (tous les symlinks sauf pf-web — une seule branche et une seule PR couvrent
+ReportManagerApi + ReportFoundations + C++) et `/c/Repos/pf-web`.
 Les agents mettent en staging les nouveaux fichiers avec `git add` mais **ne committent pas** sauf si la tâche le demande explicitement ; le commit
 est l'étape finale de *ship* du workflow, gatée.
 

@@ -1,7 +1,7 @@
 ---
 name: jira-find-migration-ticket
 description: Recherche dans Jira un ticket existant pour la migration Xpert d'un rapport, dans le projet RPT. Filtre les projets archivés. Retourne 0 ou plusieurs candidats avec leur statut. Utiliser au début de chaque commande /migrate-to-xpert-* pour savoir si un ticket existe avant de modifier ou créer.
-allowed-tools: ToolSearch, mcp__atlassian__getAccessibleAtlassianResources, mcp__atlassian__searchJiraIssuesUsingJql
+allowed-tools: ToolSearch, mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources, mcp__plugin_atlassian_atlassian__searchJiraIssuesUsingJql
 ---
 
 # Skill: Jira — Find Migration Ticket
@@ -20,7 +20,7 @@ Détecter si un ticket de migration actif existe déjà dans le projet `RPT` ava
 
 ## Prérequis
 
-Le serveur **MCP Atlassian** doit être connecté. Si les outils `mcp__atlassian__*` ne sont pas disponibles via `ToolSearch`, retourner immédiatement :
+Le serveur **MCP Atlassian** doit être connecté. Si les outils `mcp__plugin_atlassian_atlassian__*` ne sont pas disponibles via `ToolSearch`, retourner immédiatement :
 
 ```json
 {
@@ -34,13 +34,13 @@ Le serveur **MCP Atlassian** doit être connecté. Si les outils `mcp__atlassian
 ### 1. Charger les outils MCP nécessaires
 
 ```
-ToolSearch(query="select:mcp__atlassian__getAccessibleAtlassianResources,mcp__atlassian__searchJiraIssuesUsingJql", max_results=2)
+ToolSearch(query="select:mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources,mcp__plugin_atlassian_atlassian__searchJiraIssuesUsingJql", max_results=2)
 ```
 
 ### 2. Récupérer le cloudId
 
 ```
-mcp__atlassian__getAccessibleAtlassianResources()
+mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources()
 ```
 
 Identifier la ressource dont l'URL est `https://croesus-support.atlassian.net` et retenir son `id` (cloudId).
@@ -65,7 +65,7 @@ ORDER BY created DESC
 ### 4. Exécuter la recherche
 
 ```
-mcp__atlassian__searchJiraIssuesUsingJql(
+mcp__plugin_atlassian_atlassian__searchJiraIssuesUsingJql(
   cloudId={cloudId},
   jql={JQL construit},
   fields=["summary", "status", "issuetype"],

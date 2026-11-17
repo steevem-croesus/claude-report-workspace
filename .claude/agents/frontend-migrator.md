@@ -1,6 +1,6 @@
 ---
 name: frontend-migrator
-description: Crée le composant Angular de paramétrage d'un rapport migré dans pf-web. Extrait les paramètres PRE, reproduit la logique C++ (patterns Observer inter-champs, validateurs de dates, visibilité conditionnelle), implémente le composant TypeScript + template HTML, l'enregistre (factory, listes de types, cleanParamType, rapports exclusifs), crée les tests e2e Cypress + fixtures, et vérifie la compilation. Remplace l'ancienne commande /migrate-to-xpert-frontend. Pour le backend C#, utiliser backend-migrator.
+description: Crée le composant Angular de paramétrage d'un rapport migré dans pf-web. Extrait les paramètres PRE, reproduit la logique C++ (patterns Observer inter-champs, validateurs de dates, visibilité conditionnelle), implémente le composant TypeScript + template HTML, l'enregistre (factory, listes de types, cleanParamType, rapports exclusifs), crée les tests e2e Cypress + fixtures, et vérifie la compilation. Pour le backend C#, utiliser backend-migrator.
 tools: Read, Glob, Grep, Edit, Write, Bash, Skill, mcp__ide__getDiagnostics
 model: opus
 ---

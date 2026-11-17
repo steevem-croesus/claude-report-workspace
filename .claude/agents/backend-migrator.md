@@ -1,6 +1,6 @@
 ---
 name: backend-migrator
-description: Migre le backend d'un rapport de Conseiller (C++) vers Xpert (C#, ReportManagerApi). Localise les classes, extrait/classifie les paramètres, analyse le C++, implémente Parameters.cs (InitialValue, ValueProviderFunction, radio/combo déclaratifs), crée les classes VPF custom + tests, enregistre dans les executers et WebRTMRunner, build et teste. Remplace l'ancienne commande /migrate-to-xpert-backend. Pour du frontend, utiliser frontend-migrator.
+description: Migre le backend d'un rapport de Conseiller (C++) vers Xpert (C#, ReportManagerApi). Localise les classes, extrait/classifie les paramètres, analyse le C++, implémente Parameters.cs (InitialValue, ValueProviderFunction, radio/combo déclaratifs), crée les classes VPF custom + tests, enregistre dans les executers et WebRTMRunner, build et teste. Pour du frontend, utiliser frontend-migrator.
 tools: Read, Glob, Grep, Edit, Write, Bash, Skill, mcp__ide__getDiagnostics
 model: opus
 ---

@@ -26,11 +26,11 @@ l'outil Agent et défère à ce fichier (son `§N`) et à `protocol.md` pour les
 | 4. Build | `implementer` (ou `cpp-to-csharp-porter` pour les ports de value-provider ; un par repo/tranche) | code + tests, `build-summary.md` |
 | 5. Review | `reviewer` (mode code) | `review-code.md` |
 | **GATE de code** | — | approve / changes (boucle vers build, plafond 3) / cancel |
-| 6. Ship (optionnel, gaté) | orchestrateur | branche + commit + PR **par repo** (règles git de l'org) |
+| 6. Ship (optionnel, gaté) | orchestrateur | branche + commit + PR **par repo git** — monolith et/ou pf-web (règles git de l'org) |
 | 7. Retrospective | `retrospective` | `retro.md` + apprentissages proposés |
 
-Notes : les features cross-repo exécutent la phase 4 dans l'ordre du pipeline (analyse C++ → C#/API → UI Angular), chaque
-repo sur sa propre branche/PR. Les sous-sections `#### <repo>` du plan indiquent à chaque `implementer` sa tranche.
+Notes : les features cross-repo exécutent la phase 4 dans l'ordre du pipeline (analyse C++ → C#/API → UI Angular). Le C++
+et le C# partagent **une seule** branche/PR (monorepo `monolith`) ; pf-web a la sienne. Les sous-sections `#### <repo>` du plan indiquent à chaque `implementer` sa tranche.
 
 **Variante migration de rapport.** Lorsque la feature consiste à *migrer un rapport de Conseiller (C++) vers Xpert*,
 le skill `feature` bascule en **mode migration** (voir `../skills/feature/SKILL.md` §1a) : les gates
@@ -38,8 +38,9 @@ restent, mais les workers de phase sont les **agents de migration natifs** de ce
 (`.claude/agents/` : `report-analyst` → explore/plan, `backend-migrator` + `frontend-migrator` → build,
 `migration-reviewer` + `migration-validator` → review), dispatchés en `subagent_type`, et non les
 agents génériques. Leurs règles sont dans `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`.
-Tous les **livrables** d'une migration (analysis, logs, review, PDF, `state.json`) vivent sous
-`.work/{slug}/` — `{slug}` = la clé Jira, sinon le nom interne du rapport ; jamais sous `docs/reports/`.
+Tous les **livrables** d'une migration (analysis, logs, review, PDF) vivent sous
+`.work/{slug}/` — `{slug}` = la clé Jira, sinon le nom interne du rapport. `docs/reports/` n'est qu'une archive
+versionnée des livrables finaux, alimentée sur demande (voir `migration-protocol.md`).
 Les entrées globales partagées restent sous `docs/` (`fields.csv`, `template_ids.csv`).
 
 ---

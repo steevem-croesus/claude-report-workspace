@@ -81,7 +81,7 @@ au §7 (**plafond 3** itérations build↔review), puis signale les problèmes r
 continue.
 
 ## 10. Ship (optionnel, gaté)
-Si l'utilisateur veut ship : **par repo touché** (pas de repo racine partagé), branche (`--no-track`
+Si l'utilisateur veut ship : **par repo git touché** (monolith et/ou pf-web — jamais le repo racine du workspace), branche (`--no-track`
 depuis une réf protégée), commite, `git push -u`, ouvre une PR — selon les règles git de l'org dans
 protocol.md. Saute si refusé.
 

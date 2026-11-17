@@ -6,7 +6,7 @@ _Rédigé par context-gatherer · Date : <YYYY-MM-DD> · Sources citées en lign
 <reformulation en un paragraphe de ce qui est demandé>
 
 ## Jira
-- **Clé / type / statut / priorité :** <FOG-9412 · Bug · In Progress · High>
+- **Clé / type / statut / priorité :** <RPT-12345 · Bug · In Progress · High>
 - **Résumé :** <résumé du ticket>
 - **Critères d'acceptation :** <points, ou « aucun énoncé — voir questions ouvertes »>
 - **Commentaires clés :** <courtes citations qui modifient les exigences, chacune attribuée>
