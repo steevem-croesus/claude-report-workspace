@@ -1,79 +1,78 @@
-# The orchestrator & agent model
+# L'orchestrateur et le modèle d'agents
 
-This page explains *why* the work is split across a skill that orchestrates and many narrow agents,
-instead of one capable assistant doing everything. For what each agent actually is, see
-[Reference: agents](../reference/agents.md).
+Cette page explique *pourquoi* le travail est réparti entre une skill qui orchestre et de nombreux agents étroits,
+au lieu d'un seul assistant capable faisant tout. Pour ce que chaque agent est réellement, voir
+[Reference : agents](../reference/agents.md).
 
-## The two layers
+## Les deux couches
 
-- **The orchestrator** is the workflow skill (`/feature`, `/bug`, …). It owns the *sequence*: which
-  phase runs next, when to stop at a gate, when to loop, how to derive the slug. It talks to *you*.
-- **The agents** are specialists dispatched by the orchestrator via the Agent tool. Each owns one
-  *phase* and one artifact. They talk to the *code and the ticket*, not to you — their output is a
-  file plus a short summary the orchestrator relays.
+- **L'orchestrateur** est la skill de workflow (`/feature`, `/bug`, …). Il possède la *séquence* : quelle
+  phase s'exécute ensuite, quand s'arrêter à un gate, quand reboucler, comment dériver le slug. Il vous parle à *vous*.
+- **Les agents** sont des spécialistes dispatchés par l'orchestrateur via l'outil Agent. Chacun possède une
+  *phase* et un artefact. Ils parlent au *code et au ticket*, pas à vous — leur sortie est un
+  fichier plus un court résumé que l'orchestrateur relaie.
 
-The division is deliberate: control flow (deterministic, gated, human-facing) is kept separate from
-the work itself (specialised, tool-heavy). The orchestrator never writes the plan; the planner never
-decides whether to ship.
+La division est délibérée : le flux de contrôle (déterministe, gated, face à l'humain) est tenu séparé du
+travail lui-même (spécialisé, gourmand en outils). L'orchestrateur n'écrit jamais le plan ; le planner ne
+décide jamais s'il faut shipper.
 
-## Why narrow agents instead of one generalist?
+## Pourquoi des agents étroits plutôt qu'un seul généraliste ?
 
-Three reasons, all about quality:
+Trois raisons, toutes portant sur la qualité :
 
-1. **A focused role produces focused output.** The [`reviewer`](../reference/agents.md#reviewer) is
-   told to be adversarial and terse — no praise, no summaries, no scope creep. That posture produces
-   better reviews than a generalist who also wrote the code and is inclined to defend it. Likewise the
-   [`investigator`](../reference/agents.md#investigator) is told to *try to refute* its own leading
-   hypothesis before accepting it. These stances only make sense as dedicated roles.
+1. **Un rôle focalisé produit une sortie focalisée.** Le [`reviewer`](../reference/agents.md#reviewer) reçoit
+   l'instruction d'être adversarial et laconique — pas d'éloges, pas de résumés, pas de dérive de périmètre. Cette
+   posture produit de meilleures revues qu'un généraliste qui a aussi écrit le code et est enclin à le défendre. De même le
+   [`investigator`](../reference/agents.md#investigator) reçoit l'instruction d'*essayer de réfuter* sa propre
+   hypothèse principale avant de l'accepter. Ces postures n'ont de sens que comme rôles dédiés.
 
-2. **Separation prevents self-marking.** The planner grades its own plan, but the reviewer
-   independently verifies that grade, and the gate depends on the verified result. If the same agent
-   planned, built, reviewed, *and* graded, there'd be no independent check anywhere. Splitting the
-   roles creates the adversarial checks the [build bar](gates-and-the-build-bar.md) relies on.
+2. **La séparation empêche l'auto-notation.** Le planner écrit le plan et déclare seulement s'il est
+   `draft` ou `ready` ; c'est le reviewer qui juge s'il est constructible, critère par critère. Séparer les
+   rôles crée les vérifications adversariales sur lesquelles s'appuie la [barre de build](gates-and-the-build-bar.md).
 
-3. **Least privilege.** Most agents are strictly **read-only** — they physically can't edit code
-   (their tool list omits Edit/Write-to-code). Only the [`implementer`](../reference/agents.md#implementer)
-   and [`cpp-to-csharp-porter`](../reference/agents.md#cpp-to-csharp-porter) can change source. That's
-   why a `explore`/`investigate`/`learn` run is safe to fire off without a second thought.
+3. **Moindre privilège.** La plupart des agents sont strictement **read-only** — ils ne peuvent physiquement pas éditer le code
+   (leur liste d'outils omet Edit/Write-vers-code). Seuls l'[`implementer`](../reference/agents.md#implementer)
+   et le [`cpp-to-csharp-porter`](../reference/agents.md#cpp-to-csharp-porter) peuvent changer la source. C'est
+   pourquoi une exécution `explore`/`investigate`/`learn` est sûre à lancer sans y réfléchir à deux fois.
 
-## Read-only vs editing — the split
+## Read-only vs édition — la répartition
 
-| | Agents | Why |
+| | Agents | Pourquoi |
 |---|---|---|
-| **Read-only** | context-gatherer, explorer, investigator, learning-guide, reviewer, retrospective | understanding and judging the work; must not be able to change it |
-| **Editing** | planner (writes only `plan.md`), implementer, cpp-to-csharp-porter | producing the plan and the code |
+| **Read-only** | context-gatherer, explorer, investigator, learning-guide, reviewer, retrospective | comprendre et juger le travail ; ne doivent pas pouvoir le changer |
+| **Édition** | planner (n'écrit que `plan.md`), implementer, cpp-to-csharp-porter | produire le plan et le code |
 
-Note the planner is a middle case: it *writes*, but only the plan artifact — never production code.
-Design happens before, and separately from, implementation.
+Notez que le planner est un cas intermédiaire : il *écrit*, mais seulement l'artefact de plan — jamais de code de
+production. La conception se produit avant, et séparément de, l'implémentation.
 
-## Why the fixed prompt shape and the task directory?
+## Pourquoi la forme de prompt fixe et le répertoire de tâche ?
 
-Every agent is dispatched with the same tiny contract:
+Chaque agent est dispatché avec le même minuscule contrat :
 
 ```
 Task directory: .work/<slug>/
 Task: <the task text>
 ```
 
-The agent reads the artifacts already in that directory (its predecessors' output) and writes its own.
-This is what lets phases compose without the orchestrator having to thread state through prompts: the
-`planner` reads `context.md` + `exploration.md`; the `reviewer` reads `plan.md`; the `retrospective`
-reads everything. The [task directory](../reference/task-directory.md) *is* the shared memory between
+L'agent lit les artefacts déjà présents dans ce répertoire (la sortie de ses prédécesseurs) et écrit le sien.
+C'est ce qui permet aux phases de se composer sans que l'orchestrateur ait à faire transiter l'état à travers les prompts : le
+`planner` lit `context.md` + `exploration.md` ; le `reviewer` lit `plan.md` ; le `retrospective`
+lit tout. Le [répertoire de tâche](../reference/task-directory.md) *est* la mémoire partagée entre les
 agents.
 
-## Why HALT instead of guessing?
+## Pourquoi HALT plutôt que deviner ?
 
-A producing agent that hits a genuine fork — ambiguous requirement, a decision only the user should
-make — doesn't guess. It returns a **HALT** block (reason, question, proposed default, state), and the
-orchestrator surfaces the question to you, records the answer, and re-dispatches. Guessing past a real
-fork is exactly the failure mode the whole system is built to avoid; HALT is the agent-level version of
-a gate. It's capped (3 round-trips per agent) for the same reason the build↔review loop is capped:
-bounded automation that escalates rather than thrashes.
+Un agent producteur qui atteint une véritable bifurcation — exigence ambiguë, une décision que seul l'utilisateur devrait
+prendre — ne devine pas. Il renvoie un bloc **HALT** (raison, question, défaut proposé, état), et
+l'orchestrateur vous remonte la question, enregistre la réponse et re-dispatche. Deviner au-delà d'une véritable
+bifurcation est exactement le mode de défaillance que tout le système est bâti pour éviter ; HALT est la version au niveau agent d'un
+gate. Il est plafonné (3 allers-retours par agent) pour la même raison que la boucle build↔review est plafonnée :
+automatisation bornée qui escalade plutôt que de s'agiter.
 
-## How this connects to code-fleet
+## Comment cela se connecte à code-fleet
 
-Because the layers are cleanly separated, the *build + review* phases of `feature`/`refactor` can be
-swapped out for the org's `code-fleet` plugin (`/code-fleet:work` and its language-pack agents)
-without disturbing the orchestration or the read-only roles. The workspace agents remain the ones that
-know the multi-repo report topology and the C++→C# port recipe. See
-[Reference: workflows → code-fleet](../reference/workflows.md#relationship-to-code-fleet).
+Parce que les couches sont proprement séparées, les phases *build + review* de `feature`/`refactor` peuvent être
+remplacées par le plugin `code-fleet` de l'organisation (`/code-fleet:work` et ses agents language-pack)
+sans perturber l'orchestration ni les rôles read-only. Les agents du workspace restent ceux qui
+connaissent la topologie de rapports multi-repo et la recette de port C++→C#. Voir
+[Reference : workflows → code-fleet](../reference/workflows.md#relationship-to-code-fleet).

@@ -1,15 +1,16 @@
-# Reference
+# Référence
 
-**Information-oriented.** Dry, factual descriptions you consult mid-task. No hand-holding, no
-opinions — for those see [How-to guides](../how-to/) and [Explanation](../explanation/).
+**Orientée information.** Descriptions factuelles et concises que l'on consulte en cours de tâche.
+Pas d'accompagnement, pas d'opinions — pour cela, voir les [Guides pratiques](../how-to/) et
+l'[Explication](../explanation/).
 
-| Page | Contents |
+| Page | Contenu |
 |---|---|
-| [Workflows](workflows.md) | the seven playbooks, their phase sequences and gates |
-| [Agents](agents.md) | the nine agents — role, tools, inputs, outputs, guardrails |
-| [Skills](skills.md) | the workflow skills and the symlinked monolith skills |
-| [The task directory](task-directory.md) | `.work/<slug>/`, canonical artifact filenames, workspace layout |
-| [Gates & protocol](gates-and-protocol.md) | gate protocol, the build bar, HALT protocol, per-repo commands, git rules |
+| [Workflows](workflows.md) | les sept playbooks, leurs séquences de phases et leurs gates |
+| [Agents](agents.md) | les neuf agents — rôle, outils, entrées, sorties, garde-fous |
+| [Skills](skills.md) | les skills de workflow et les skills monolith symlinkés |
+| [Le répertoire de tâche](task-directory.md) | `.work/<slug>/`, noms de fichiers d'artefacts canoniques, structure du workspace |
+| [Gates & protocole](gates-and-protocol.md) | protocole de gate, barre de build, protocole HALT, commandes par repo, règles git |
 
-**Source of truth:** these pages summarise the files under [`../../.claude/`](../../.claude/). Where
-they disagree, the `.claude/` file wins — see [How to keep docs in sync](../how-to/keep-docs-in-sync.md).
+**Source de vérité :** ces pages résument les fichiers sous [`../../../.claude/`](../../.claude/). En
+cas de désaccord, le fichier `.claude/` l'emporte — voir [Comment garder la doc synchronisée](../how-to/keep-docs-in-sync.md).

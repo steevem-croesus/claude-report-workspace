@@ -1,12 +1,12 @@
-# Explanation
+# Explication
 
-**Understanding-oriented.** These pages discuss *why* the `.claude/` system is shaped the way it is —
-the reasoning, trade-offs, and design decisions behind it. They don't tell you how to do a task (see
-[How-to](../how-to/)) or list facts (see [Reference](../reference/)); they help you form a mental
-model so the rest makes sense.
+**Orientée compréhension.** Ces pages discutent du *pourquoi* le système `.claude/` a la forme qu'il a —
+le raisonnement, les compromis et les décisions de conception qui le sous-tendent. Elles ne vous disent pas comment accomplir une tâche (voir
+[How-to](../how-to/)) ni ne listent des faits (voir [Reference](../reference/)) ; elles vous aident à former un modèle
+mental pour que le reste prenne son sens.
 
-| Page | Discusses |
+| Page | Discute |
 |---|---|
-| [The design philosophy](design-philosophy.md) | why seven workflows, why gates, why one agent per phase — the core ideas |
-| [Gates & the build bar](gates-and-the-build-bar.md) | why work stops for your approval, and why an honest `draft` beats an inflated `ready` |
-| [The orchestrator & agent model](orchestrator-and-agents.md) | why work is split across many narrow agents instead of one, and read-only vs editing roles |
+| [La philosophie de conception](design-philosophy.md) | pourquoi sept workflows, pourquoi des gates, pourquoi un agent par phase — les idées centrales |
+| [Gates et la barre de build](gates-and-the-build-bar.md) | pourquoi le travail s'arrête pour votre approbation, et pourquoi l'auteur d'un plan n'est pas celui qui le juge |
+| [L'orchestrateur et le modèle d'agents](orchestrator-and-agents.md) | pourquoi le travail est réparti sur de nombreux agents étroits plutôt qu'un seul, et les rôles read-only vs édition |

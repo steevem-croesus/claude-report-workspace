@@ -128,7 +128,11 @@ Where things live — the files are the source of truth; consult them rather tha
   there, not into Claude memory** — subagents and teammates only see the repo.
 - **Agents** — `.claude/agents/` (dispatch by `subagent_type`); **templates** —
   `.claude/conventions/templates/`; **migration conventions** —
-  `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`.
+  `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`, with read-on-demand
+  reference material under `.claude/conventions/reference/`.
+- **Scripts** — `.claude/scripts/check-vpf-registration.sh` (unregistered value-provider keys) and
+  `.claude/scripts/gen-reference-docs.py` (regenerates `docs/reference/{agents,skills}.md` from frontmatter —
+  run it after adding or renaming an agent or skill).
 
 Rules that aren't discoverable from those files:
 

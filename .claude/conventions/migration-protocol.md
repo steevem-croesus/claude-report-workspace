@@ -38,8 +38,9 @@ sous `.claude/skills/` servent d'outils aux agents.
 
 ## Les skills (outils des agents)
 
-Les agents n'exécutent pas tout eux-mêmes : ils **dispatchent les skills** de `../skills/`. Ordre
-type d'utilisation (analyse + backend) :
+Les agents n'exécutent pas tout eux-mêmes : ils **dispatchent les skills** de `../skills/` et **lisent**
+les fichiers de référence de `reference/` (documentation, pas des skills). Ordre type d'utilisation
+(analyse + backend) :
 
 1. `locate-report-classes` — trouver RPT_*, la hiérarchie, les `Parameters.cs`
 2. `extract-parameters` — extraire les paramètres depuis `docs/fields.csv`
@@ -47,10 +48,14 @@ type d'utilisation (analyse + backend) :
 4. `locate-cpp-function` — localiser le C++ dans `validation_*.c`
 5. `analyze-cpp-function` — analyser logique + dépendances
 6. `check-implementation` — vérifier si déjà implémenté en C#
-7. `generic-functions-reference` — hiérarchie de décision (déclaratif vs custom)
+7. lire `reference/generic-functions-reference.md` — hiérarchie de décision (déclaratif vs custom)
 8. `implement-report-parameters` / `implement-declarative-radio` — implémenter
 9. `register-parameter` / `register-web-report` / `register-ignore-id-masking` — enregistrer
-10. `estimate-complexity`, `implementation-guide`, `migration-examples`, `read-cpp-patterns` — support
+10. `estimate-complexity` — support
+
+Références à lire au besoin (sous `reference/`) : `implementation-guide.md` (9 patterns de classes VPF),
+`read-cpp-patterns.md` (lecture rapide du C++), `migration-examples.md` (4 migrations commentées),
+`best-practices-analyst.md` (qualité d'une spec de migration).
 
 Le frontend utilise en plus : `get-template-id`, `compare-report-params` (validation).
 

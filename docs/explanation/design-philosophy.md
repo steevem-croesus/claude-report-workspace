@@ -1,90 +1,90 @@
-# The design philosophy
+# La philosophie de conception
 
-This page is about *why* the `.claude/` system exists in this shape. It won't tell you how to run a
-workflow — for that, see the [How-to guides](../how-to/). It's here to give you the mental model that
-makes everything else feel inevitable rather than arbitrary.
+Cette page traite du *pourquoi* le système `.claude/` existe sous cette forme. Elle ne vous dira pas comment exécuter un
+workflow — pour cela, voir les [guides How-to](../how-to/). Elle est là pour vous donner le modèle mental qui
+rend tout le reste inévitable plutôt qu'arbitraire.
 
-## The problem this solves
+## Le problème que cela résout
 
-The Croesus Xpert report pipeline spans five codebases in three languages: two C++ monoliths
-(`CroesusServer`, `ReportServer`), two C# stacks (`ReportFoundations`, `ReportManagerApi`), and an
-Angular frontend (`pf-web`). A single piece of report work — say, adding a report field — can ripple
-through all of them, in a fixed order, each with its own conventions, branch, and PR.
+Le pipeline de rapports Croesus Xpert s'étend sur cinq codebases dans trois langages : deux monolithes C++
+(`CroesusServer`, `ReportServer`), deux stacks C# (`ReportFoundations`, `ReportManagerApi`), et un
+frontend Angular (`pf-web`). Un seul travail de rapport — disons, l'ajout d'un champ de rapport — peut se propager
+à travers chacun d'eux, dans un ordre fixe, chacun avec ses propres conventions, sa branche et sa PR.
 
-That combination is exactly where ad-hoc AI assistance goes wrong: it guesses the wrong repo, invents
-requirements the ticket never stated, writes code before understanding the existing flow, or ships a
-plausible-but-wrong port of subtle C++ date math. The `.claude/` system is a deliberate answer to
-that failure mode. Its through-line is:
+Cette combinaison est exactement là où l'assistance IA ad hoc dérape : elle devine le mauvais repo, invente
+des exigences que le ticket n'a jamais énoncées, écrit du code avant de comprendre le flux existant, ou ship un
+port plausible-mais-faux d'un calcul de dates C++ subtil. Le système `.claude/` est une réponse délibérée à
+ce mode de défaillance. Son fil conducteur est :
 
-> **Make the work legible and reversible.** Every step produces a named artifact you can read; every
-> risky step waits for your approval before it happens.
+> **Rendre le travail lisible et réversible.** Chaque étape produit un artefact nommé que vous pouvez lire ; chaque
+> étape risquée attend votre approbation avant de se produire.
 
-## Idea 1 — Match the *shape* of the process to the *kind* of work
+## Idée 1 — Faire correspondre la *forme* du processus au *type* de travail
 
-There isn't one "do the task" procedure, because the safeguards that matter differ by kind of work:
+Il n'existe pas une seule procédure « faire la tâche », car les garde-fous qui comptent diffèrent selon le type de travail :
 
-- A **bug** fix is worthless — even dangerous — without a reproduction and a regression test, so the
-  `bug` workflow makes those mandatory and puts *diagnosis* before any patch.
-- A **refactor** must not change behaviour, so `refactor` forces characterization tests *before* the
-  first edit and requires the build to stay green after *every* step.
-- A **spike** exists precisely because the approach is unknown, so its output is a *decision*, its
-  prototypes are throwaway, and it's timeboxed.
-- **Explore / investigate / learn** don't change code at all, so they carry no gates and stay cheap.
+- Un correctif de **bug** est sans valeur — voire dangereux — sans une reproduction et un test de régression, donc le
+  workflow `bug` les rend obligatoires et place le *diagnostic* avant tout patch.
+- Un **refactor** ne doit pas changer le comportement, donc `refactor` force des tests de caractérisation *avant* la
+  première modification et exige que le build reste vert après *chaque* étape.
+- Un **spike** existe précisément parce que l'approche est inconnue, donc sa sortie est une *décision*, ses
+  prototypes sont jetables, et il est timeboxé.
+- **Explore / investigate / learn** ne changent aucun code, donc ils ne portent aucun gate et restent bon marché.
 
-Seven workflows, each encoding the discipline that its kind of work actually needs. This is why
-"[choosing a workflow](../how-to/choose-a-workflow.md)" is the first real decision — the workflow
-*is* the safeguard.
+Sept workflows, chacun encodant la discipline dont son type de travail a réellement besoin. C'est pourquoi
+« [choisir un workflow](../how-to/choose-a-workflow.md) » est la première vraie décision — le workflow
+*est* le garde-fou.
 
-## Idea 2 — One artifact per phase, on disk
+## Idée 2 — Un artefact par phase, sur disque
 
-Each phase writes exactly one file into `.work/<slug>/` (`context.md`, `exploration.md`, `plan.md`,
-`build-summary.md`, `review-code.md`, `retro.md`, …). This is not bookkeeping for its own sake:
+Chaque phase écrit exactement un fichier dans `.work/<slug>/` (`context.md`, `exploration.md`, `plan.md`,
+`build-summary.md`, `review-code.md`, `retro.md`, …). Ce n'est pas de la paperasse pour elle-même :
 
-- **It makes the reasoning inspectable.** You can read the plan before any code is written, and the
-  review before you approve shipping.
-- **It survives across sessions.** Because the directory lives at the workspace root (not inside a
-  product repo), a task can be picked up later — the trail is still there.
-- **It keeps the product repos clean.** Nothing about the *process* leaks into the code repos.
+- **Cela rend le raisonnement inspectable.** Vous pouvez lire le plan avant qu'aucun code ne soit écrit, et la
+  revue avant d'approuver le ship.
+- **Cela survit d'une session à l'autre.** Comme le répertoire vit à la racine du workspace (pas à l'intérieur d'un
+  repo produit), une tâche peut être reprise plus tard — la trace est toujours là.
+- **Cela garde les repos produit propres.** Rien du *processus* ne fuit dans les repos de code.
 
-See [Reference: the task directory](../reference/task-directory.md) for the full artifact list.
+Voir [Reference : le répertoire de tâche](../reference/task-directory.md) pour la liste complète des artefacts.
 
-## Idea 3 — Gates put a human at the irreversible moments
+## Idée 3 — Les gates placent un humain aux moments irréversibles
 
-Reading code, mapping it, and planning are all reversible — you can throw the artifact away. Writing
-code, and especially *shipping* it, are not. So the workflows stop for your approval at exactly two
-universal points — after the **plan** and after the **build+review** — and nowhere gratuitously in
-between. This is the subject of its own page: [gates & the build bar](gates-and-the-build-bar.md).
+Lire du code, le cartographier et planifier sont tous réversibles — vous pouvez jeter l'artefact. Écrire du
+code, et surtout le *shipper*, ne le sont pas. Donc les workflows s'arrêtent pour votre approbation à exactement deux
+points universels — après le **plan** et après le **build+review** — et nulle part gratuitement entre les deux.
+C'est le sujet de sa propre page : [gates et la barre de build](gates-and-the-build-bar.md).
 
-## Idea 4 — Narrow agents, each with one job
+## Idée 4 — Des agents étroits, chacun avec un seul métier
 
-Rather than one agent that does everything, the work is split across
-[nine specialists](../reference/agents.md): a locator, a root-cause analyst, a planner, a builder, a
-reviewer, and so on — several of them strictly read-only. A terse adversarial reviewer that only
-reviews produces better reviews than a generalist that also wrote the code. Why this matters is
-discussed in [the orchestrator & agent model](orchestrator-and-agents.md).
+Plutôt qu'un seul agent qui fait tout, le travail est réparti sur
+[neuf spécialistes](../reference/agents.md) : un localisateur, un analyste de cause racine, un planificateur, un constructeur, un
+relecteur, et ainsi de suite — plusieurs d'entre eux strictement read-only. Un relecteur adversarial et laconique qui ne fait que
+relire produit de meilleures revues qu'un généraliste qui a aussi écrit le code. Pourquoi cela importe est
+discuté dans [l'orchestrateur et le modèle d'agents](orchestrator-and-agents.md).
 
-## Idea 5 — Defer to local authority
+## Idée 5 — Déférer à l'autorité locale
 
-Generic advice loses to the repo in front of you. The whole system is built to *defer*: skills defer
-to `workflows.md` + `protocol.md`; agents defer to each repo's own `CLAUDE.md` /
-`copilot-instructions.md`; the C++→C# port defers to `copilot-instructions.md`'s recipe. The
-`.claude/` files deliberately say "cite and follow them — do not restate their rules," so there's one
-source of truth for each thing. (These `docs/` follow the same principle: they explain and index the
-`.claude/` files rather than duplicating them — see
-[how to keep docs in sync](../how-to/keep-docs-in-sync.md).)
+Un conseil générique perd face au repo qui est devant vous. Tout le système est bâti pour *déférer* : les skills défèrent
+à `workflows.md` + `protocol.md` ; les agents défèrent au propre `CLAUDE.md` /
+`copilot-instructions.md` de chaque repo ; le port C++→C# défère à la recette de `copilot-instructions.md`. Les
+fichiers `.claude/` disent délibérément « citez-les et suivez-les — ne réénoncez pas leurs règles », de sorte qu'il y a une
+source unique de vérité pour chaque chose. (Ces `docs/` suivent le même principe : ils expliquent et indexent les
+fichiers `.claude/` plutôt que de les dupliquer — voir
+[comment garder les docs synchronisées](../how-to/keep-docs-in-sync.md).)
 
-## What this buys you
+## Ce que cela vous apporte
 
-- You can trust that a `bug` fix has a real regression test, and a `refactor` didn't change behaviour.
-- You see the plan — with its risks, estimate, and honest grade — *before* code exists.
-- Multi-repo work respects each repo's conventions and lands on separate branches/PRs, as the org's
-  git rules require.
-- The knowledge doesn't evaporate: every gated workflow ends with a retrospective proposing durable
-  learnings.
+- Vous pouvez avoir confiance qu'un correctif de `bug` a un vrai test de régression, et qu'un `refactor` n'a pas changé le comportement.
+- Vous voyez le plan — avec ses risques, son estimation et sa note honnête — *avant* que le code n'existe.
+- Le travail multi-repo respecte les conventions de chaque repo et atterrit sur des branches/PR séparées, comme les
+  règles git de l'organisation l'exigent.
+- La connaissance ne s'évapore pas : chaque workflow gated se termine par une rétrospective proposant des
+  apprentissages durables.
 
-## What it deliberately is *not*
+## Ce qu'il n'est délibérément *pas*
 
-- **Not autonomous.** It's gated on purpose; it asks rather than guessing past a real fork.
-- **Not a replacement for the org's `code-fleet` plugin** — it interoperates with it (the build/review
-  phases can be delegated to `/code-fleet:work`). It adds what the fleet lacks: the report topology
-  awareness, the `cpp-to-csharp-porter`, and the read-only understanding roles.
+- **Pas autonome.** Il est gated à dessein ; il demande plutôt que de deviner au-delà d'une véritable bifurcation.
+- **Pas un remplacement du plugin `code-fleet` de l'organisation** — il interopère avec lui (les phases build/review
+  peuvent être déléguées à `/code-fleet:work`). Il ajoute ce qui manque à la fleet : la conscience de la topologie des
+  rapports, le `cpp-to-csharp-porter`, et les rôles de compréhension read-only.

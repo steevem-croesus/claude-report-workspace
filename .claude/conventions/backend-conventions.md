@@ -2,7 +2,7 @@
 
 Base de connaissances backend pour la migration des paramètres C++ → C#. C'est la **source de
 vérité** pour `backend-migrator` (et `migration-reviewer`). Le pipeline et les chemins sont dans
-`migration-protocol.md` ; la procédure exhaustive dans `../../docs/design/MIGRATION_PROCEDURE.md`.
+`migration-protocol.md`.
 
 ## Classification en 8 catégories (A–A', B–F)
 
@@ -41,9 +41,10 @@ Fonctions génériques triviales (pas besoin de lire le C++) : `CheckTrue`→"1"
   `InitialValue`…), on ne remplace pas l'existant.
 - ⚠️ **Une `ValidationFunction` présente ne veut PAS dire que la VPF C# est enregistrée.** Un
   `ValidationFunction="Xxx"` (ou une clé `vpf:...` dans un `*ParametersImplementation.cs`) peut exister
-  alors qu'**aucune classe VPF n'est enregistrée** dans l'executer → **crash runtime silencieux à la
-  génération** (le build et les tests unitaires passent). Toujours grepper les **deux** executers
-  (`Pre`/`Post`) pour chaque clé touchée avant le build (cf. la vérif automatique plus bas). Ex. vécu
+  alors qu'**aucune classe VPF n'est enregistrée** dans l'executer → **la clé est ignorée en silence à la
+  génération** (`AbstractValueProviderFunctionsExecuter.Execute` renvoie le paramètre intact : le build et
+  les tests unitaires passent, la valeur calculée par le C++ n'est jamais produite). Toujours grepper les **deux** executers
+  (`Pre`/`Post`) pour chaque clé touchée avant le build : `bash .claude/scripts/check-vpf-registration.sh --changed`. Ex. vécu
   RPT-18883 : `CostCalculation` référencée mais jamais enregistrée (aucune classe) — bombe à retardement.
 
 ### Commentaire obligatoire en 3 parties (sur CHAQUE paramètre)
@@ -147,9 +148,9 @@ grep -n "UnimplementedParameter" repos/ReportManagerApi/.../Pre*Executer.cs repo
 # Logique inline dans les nouvelles classes ?
 for f in $(git diff --name-only --diff-filter=A -- "*/ValueProviderFunctions/Parameters/*.cs" | grep -v Tests); do
   grep -n "if \|if(\|switch\|DateTime\.\(Now\|Today\|DaysInMonth\|AddDays\|AddMonths\|AddYears\)" "$f" | grep -v "DateTime.Parse\|\.ToString"; done
-# Chaque VPF de Parameters.cs est-elle enregistrée ?
-grep -oP 'ValueProviderFunction\s*=\s*"(\K[^"]+)' repos/ReportFoundations/.../Reports/**/Parameters.cs | sort -u | while read v; do
-  grep -q "\"$v\"" repos/ReportManagerApi/.../*Executer.cs || echo "MANQUANT: $v"; done
+# Chaque VPF référencée est-elle enregistrée ? (code retour 1 s'il en manque)
+bash .claude/scripts/check-vpf-registration.sh --changed        # fichiers modifiés
+bash .claude/scripts/check-vpf-registration.sh --where <Clé>   # Pre ou Post ?
 ```
 
 ## Conventions apprises (issues des revues)

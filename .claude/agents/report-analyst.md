@@ -21,7 +21,7 @@ répète pas.
 3. **Classifier** (skill `classify-functions`) : Default vs Specific (Specific prioritaire), PRE/POST.
 4. **Vérifier l'existant** (skill `check-implementation`) : pour chaque `Specific_Function`, est-ce déjà
    dans un executer / non-`UnimplementedParameter` ? Lire les `*ParametersImplementation.cs` pertinents.
-5. **Analyser le C++** (skills `locate-cpp-function`, `analyze-cpp-function`, `read-cpp-patterns`) : pour
+5. **Analyser le C++** (skills `locate-cpp-function`, `analyze-cpp-function` ; référence `.claude/conventions/reference/read-cpp-patterns.md`) : pour
    chaque paramètre avec fonction C++, ouvrir le `validation_*.c` selon le Widget (voir protocol),
    vulgariser le comportement, noter les dépendances (voir le tableau de détection du protocol), et
    déterminer le **niveau de complexité 0-4**.

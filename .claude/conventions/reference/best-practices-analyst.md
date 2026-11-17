@@ -1,8 +1,3 @@
----
-name: best-practices-analyst
-description: Best practices pour créer des specs de migration de haute qualité. Éviter les anti-patterns courants et documenter correctement les ambiguïtés et edge cases. Utiliser pendant la phase d'analyse.
----
-
 # Skill: Best Practices for Analyst
 
 Éviter anti-patterns et créer specs migration de qualité.
@@ -173,7 +168,7 @@ Logique: 1) Étape 1  2) Étape 2
 
 ## Ressources
 
-**Skills:** `migration-examples`, `read-cpp-patterns`, `analyze-cpp-function`, `implementation-guide`, `generic-functions-reference`
+**Skills:** `.claude/conventions/reference/migration-examples.md`, `.claude/conventions/reference/read-cpp-patterns.md`, `analyze-cpp-function`, `.claude/conventions/reference/implementation-guide.md`, `.claude/conventions/reference/generic-functions-reference.md`
 
 **Docs:** `MyCustomSnippets.code-snippets`, `README.BusinessBrowserWebApi.md`, `CONTRIBUTING.md`
 

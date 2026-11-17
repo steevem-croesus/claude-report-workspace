@@ -1,74 +1,73 @@
-# Gates & the build bar
+# Gates et la barre de build
 
-This page explains *why* the gated workflows stop for your approval, and why the plan gate has an
-unusual entry condition — the **build bar**. For the mechanics (what buttons you get, how to clear a
-sub-bar plan), see the reference and how-to:
-[gates & protocol](../reference/gates-and-protocol.md),
-[get a plan past the gate](../how-to/pass-the-plan-gate.md).
+Cette page explique *pourquoi* les workflows gated s'arrêtent pour votre approbation, et pourquoi le gate de plan a une
+condition d'entrée inhabituelle — la **barre de build**. Pour la mécanique (quels boutons vous obtenez, comment franchir un
+plan sous la barre), voir la reference et le how-to :
+[gates et protocole](../reference/gates-and-protocol.md),
+[faire passer un plan au gate](../how-to/pass-the-plan-gate.md).
 
-## Why gate at all?
+## Pourquoi gater du tout ?
 
-The workflows draw a line between **reversible** and **irreversible** work:
+Les workflows tracent une ligne entre le travail **réversible** et **irréversible** :
 
-- *Reversible:* gathering context, mapping code, drafting a plan, reviewing a diff. If it's wrong, you
-  discard the artifact and nothing was harmed.
-- *Irreversible (or costly to undo):* writing code, and above all committing/pushing/opening a PR.
+- *Réversible :* rassembler du contexte, cartographier le code, rédiger un plan, relire un diff. Si c'est faux, vous
+  jetez l'artefact et rien n'a été endommagé.
+- *Irréversible (ou coûteux à défaire) :* écrire du code, et surtout committer/pousser/ouvrir une PR.
 
-A gate is placed at each transition from reversible to irreversible: the **plan gate** (before any
-code is written) and the **code gate** (before anything can be shipped). Everywhere else the workflow
-just proceeds — gating the cheap steps would be friction with no payoff. The principle: *spend the
-human's attention where a mistake is expensive to reverse.*
+Un gate est placé à chaque transition du réversible vers l'irréversible : le **gate de plan** (avant qu'aucun
+code ne soit écrit) et le **gate de code** (avant que quoi que ce soit ne puisse être shippé). Partout ailleurs le workflow
+avance simplement — gater les étapes bon marché ne serait que friction sans bénéfice. Le principe : *dépenser
+l'attention de l'humain là où une erreur est coûteuse à défaire.*
 
-Gates are also where the workflow **refuses to guess**. "approve / request changes / cancel" is a real
-fork with real trade-offs — exactly the kind of decision the system hands back to you rather than
-inventing an answer for.
+Les gates sont aussi là où le workflow **refuse de deviner**. « approve / request changes / cancel » est une véritable
+bifurcation avec de vrais compromis — exactement le genre de décision que le système vous redonne plutôt que
+d'en inventer une réponse.
 
-## Why the build bar?
+## Pourquoi la barre de build ?
 
-Here's the subtler design choice. The plan gate won't even *offer* "approve" unless `plan.md` is
-`ready` and graded **A** or **S** (on the scale F < D < C < B < A < S).
+Voici le choix de conception plus subtil. Le gate de plan ne va même pas *offrir* « approve » à moins que
+`plan.md` soit `ready` et que le reviewer ait écrit `Buildable: yes` dans `review-plan.md`.
 
-The reasoning: **the plan is the contract the builder executes.** A vague plan doesn't fail at the
-plan gate — it fails later, silently, when the implementer fills the gaps with guesses. Those guesses
-surface as rework at the *code* gate, which is far more expensive (code has been written) and easier
-to wave through (it looks done). By refusing to build from a sub-A plan, the system moves the failure
-forward to the cheapest place to fix it: the plan, where fixing means editing prose, not code.
+Le raisonnement : **le plan est le contrat que le constructeur exécute.** Un plan vague n'échoue pas au
+gate de plan — il échoue plus tard, silencieusement, quand l'implementer comble les lacunes par des
+suppositions. Ces suppositions refont surface sous forme de reprise au gate de *code*, ce qui est bien plus
+coûteux (du code a été écrit) et plus facile à laisser passer (cela a l'air fini). En refusant de builder
+à partir d'un plan non constructible, le système déplace l'échec vers l'endroit le moins cher pour le
+corriger : le plan, où corriger signifie éditer de la prose, pas du code.
 
-So a `draft` or B-grade plan isn't a nuisance — it's the system telling you, early and cheaply, that
-something isn't decided yet: an open question, a `needs-user` decision point, or a step so
-underspecified the builder would have to guess.
+## Pourquoi ce n'est plus le planner qui se note
 
-## Why an honest `draft` beats an inflated `ready`
+Jusqu'en novembre 2026, le planner attribuait lui-même une note de F à S à son plan, et le gate s'ouvrait à
+partir de A. Sur vingt plans produits dans ce workspace, dix-neuf portaient « ready · A » : une note que son
+auteur sait être le seuil ne mesure rien.
 
-The [`planner`](../reference/agents.md#planner) is explicitly instructed **never to inflate the grade
-or flip to `ready` to get past the gate** — an over-graded plan is considered *worse* than an honest
-`draft`. And the [`reviewer`](../reference/agents.md#reviewer), in plan mode, treats a wrongly-`ready`
-or over-graded plan as a **must-fix**.
+Deux changements en découlent. **Le juge n'est plus l'auteur** : le planner déclare seulement `draft` ou
+`ready`, et c'est le [`reviewer`](../reference/agents.md#reviewer) qui décide. **Le jugement n'est plus une
+lettre** : huit critères binaires, chacun avec une preuve vérifiable (une ligne du plan, un fichier ouvert,
+un grep). On peut gonfler une note ; il est beaucoup plus difficile de répondre « oui » à « chaque fichier
+cité existe-t-il ? » quand la réponse est non. Un critère sans preuve vaut « non ».
 
-Why guard the grade so carefully? Because the entire mechanism depends on the grade being truthful. If
-grades could be inflated to unlock the gate, the bar would protect nothing — it would just add a step
-where the planner marks its own homework as an A. Making the grade adversarially checked (the reviewer
-verifies it) and making dishonesty the *worst* option is what gives "ready + A" its meaning. The bar
-is only as good as the honesty of the grade behind it.
+Un plan `draft` ou `Buildable: no` n'est donc pas une nuisance — c'est le système qui vous dit, tôt et à bon
+marché, ce qui n'est pas encore décidé ou pas encore vérifié, critère par critère.
 
-## Why let you override it, then?
+## Pourquoi alors vous laisser l'outrepasser ?
 
-Because the bar is a *default*, not a cage. Some changes are genuinely trivial and you've already
-judged them fine; forcing an A-grade plan for a one-line change would be bureaucracy. So you can
-explicitly override and approve a sub-bar plan — but the override is **recorded** in
-`_signals/revision-request.md`. The design goal isn't to prevent you from proceeding; it's to make
-proceeding-below-bar a *conscious, auditable* act rather than an accident. Absent an explicit
-override, the bar holds.
+Parce que la barre est un *défaut*, pas une cage. Certains changements sont réellement triviaux et vous avez déjà
+jugé qu'ils étaient corrects ; exiger huit critères à oui pour un changement d'une ligne serait de la bureaucratie. Vous pouvez donc
+explicitement outrepasser et approuver un plan sous la barre — mais l'outrepassement est **enregistré** dans
+`_signals/revision-request.md`. L'objectif de conception n'est pas de vous empêcher de continuer ; c'est de rendre le
+fait de continuer sous la barre un acte *conscient et auditable* plutôt qu'un accident. En l'absence d'un outrepassement
+explicite, la barre tient.
 
-## The loop cap
+## Le plafond de boucle
 
-The code gate's "request changes" can loop back to build, but only **3 times**. This exists so a
-build↔review cycle that isn't converging surfaces to you rather than spinning indefinitely — after 3
-rounds the workflow stops and reports what's still open. It's the same instinct as the HALT cap:
-bounded automation that escalates to a human instead of thrashing.
+Le « request changes » du gate de code peut reboucler vers le build, mais seulement **3 fois**. Cela existe pour qu'un
+cycle build↔review qui ne converge pas remonte jusqu'à vous plutôt que de tourner indéfiniment — après 3
+tours le workflow s'arrête et rapporte ce qui reste ouvert. C'est le même instinct que le plafond de HALT :
+automatisation bornée qui escalade vers un humain au lieu de s'agiter.
 
-## The through-line
+## Le fil conducteur
 
-Every one of these choices — where to gate, the build bar, the grade honesty rules, the override, the
-loop cap — comes back to one idea from the [design philosophy](design-philosophy.md): *put the human's
-judgement at the expensive, irreversible moments, and refuse to fake progress past them.*
+Chacun de ces choix — où gater, la barre de build, la séparation entre l'auteur et le juge du plan, l'outrepassement, le
+plafond de boucle — revient à une idée de la [philosophie de conception](design-philosophy.md) : *placer le jugement de
+l'humain aux moments coûteux et irréversibles, et refuser de simuler un progrès au-delà d'eux.*

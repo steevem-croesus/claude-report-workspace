@@ -1,9 +1,3 @@
----
-name: implementation-guide
-description: Guide complet des 9 patterns d'implémentation C++ vers C# pour ValueProviderParameters avec exemples de code. Utiliser pendant l'implémentation pour choisir le bon pattern et éviter les erreurs courantes.
-allowed-tools: Read
----
-
 # Skill: Implementation Guide
 
 Guide complet de transformation C++ → C# pour ValueProviderParameters - Patterns 1-9.
@@ -493,6 +487,6 @@ parameter.InitialValue = pref.Value;
 - `IndCodeComboParameter.cs:28-65` - Pattern 7 (Construction) + Pattern 8 (return null)
 - `PreParamEntryValueProviderFunctionsExecuter.cs:62-63,132-135` - Pattern 9 (Composition)
 
-**Skills connexes:** `migration-examples`, `analyze-cpp-function`, `best-practices-analyst`, `generic-functions-reference`
+**Skills connexes:** `.claude/conventions/reference/migration-examples.md`, `analyze-cpp-function`, `.claude/conventions/reference/best-practices-analyst.md`, `.claude/conventions/reference/generic-functions-reference.md`
 
 **Documentation:** CLAUDE.md - Section "Adding a ValueProviderParameter"

@@ -1,8 +1,3 @@
----
-name: generic-functions-reference
-description: Hiérarchie de décision et patterns d'implémentation du framework C#. Détermine l'approche optimale (déclarative vs impérative) pour implémenter une fonction de rapport. Référence ValidationFunction, InitialValue, InitialValueDateType, InitialValueFromPref et classes custom.
----
-
 # Skill: Framework Implementation Patterns Reference
 
 **Objectif:** Déterminer la bonne approche pour implémenter une fonction de rapport.
@@ -271,7 +266,7 @@ this.AddParameter(new ParameterJoinEntity(...PARAM_GainLossCost)
 
 **Métriques:** 3 fichiers | 30min-4h | 1 classe | Tests requis (mocks)
 
-**Voir:** Skill `implementation-guide` pour patterns 1-9 détaillés
+**Voir:** Référence `.claude/conventions/reference/implementation-guide.md` pour patterns 1-9 détaillés
 
 ---
 
@@ -461,13 +456,12 @@ Widget 8, Entry POST:
 
 **Skills:**
 - `estimate-complexity` - Classifier fonction C++ (niveaux 0-5)
-- `implementation-guide` - Patterns 1-9 pour classes custom
+- `.claude/conventions/reference/implementation-guide.md` - Patterns 1-9 pour classes custom
 - `classify-functions` - Classification Default/Specific, PRE/POST
 - `analyze-cpp-function` - Analyser dépendances et logique
 
 **Documentation:**
 - CLAUDE.md - Section "Hiérarchie d'Implémentation des Paramètres"
-- MIGRATION_PROCEDURE.md - Workflow migration
 
 ---
 

@@ -1,37 +1,34 @@
-# How to keep these docs in sync
+# Comment garder cette documentation synchronisée
 
-These `docs/` explain and index the files under [`.claude/`](../../.claude/). The `.claude/` files are
-the **source of truth**; the docs must follow them, not the other way round. When you change a
-workflow, agent, or the protocol, update the docs in the same change.
+Ces `docs/` expliquent et indexent les fichiers sous [`.claude/`](../../.claude/). Les fichiers `.claude/` sont
+la **source de vérité** ; la documentation les suit, jamais l'inverse. La documentation existe en une seule
+langue (français) pour qu'il n'y ait qu'une version à tenir.
 
-## The mapping
+## Ce qui est généré
 
-| If you edit… | Update this doc |
-|---|---|
-| `.claude/conventions/workflows.md` | [reference/workflows.md](../reference/workflows.md) (and any affected how-to) |
-| `.claude/conventions/protocol.md` | [reference/gates-and-protocol.md](../reference/gates-and-protocol.md), [reference/task-directory.md](../reference/task-directory.md) |
-| any `.claude/agents/*.md` | [reference/agents.md](../reference/agents.md) |
-| any `.claude/skills/*/SKILL.md` | [reference/skills.md](../reference/skills.md) |
-| the plan grading rubric in `planner.md` | [how-to/pass-the-plan-gate.md](pass-the-plan-gate.md), [explanation/gates-and-the-build-bar.md](../explanation/gates-and-the-build-bar.md) |
-
-## Rules of thumb
-
-- **Reference pages describe; they don't duplicate.** Keep them thin and always link back to the
-  authoritative `.claude/` file. The less you copy verbatim, the less can drift.
-- **Explanation pages age slowly** — they're about *why*, which changes rarely. Revisit them only when
-  the design philosophy itself changes (e.g. a new gate, a dropped workflow).
-- **Tutorials must stay runnable.** If you rename a slash command or change a gate's wording, re-walk
-  [the tutorial](../tutorials/first-workflow.md) to confirm the steps still match reality.
-
-## Quick check for drift
-
-The seven workflows and nine agents are enumerable. If a doc lists a workflow/agent that no longer
-exists in `.claude/`, or misses a new one, that's drift. A fast audit:
+Deux pages sont produites à partir des frontmatters et ne s'éditent pas à la main :
 
 ```bash
-ls .claude/skills/*/SKILL.md          # the seven live workflow skills
-ls .claude/agents/*.md                # the nine agents
+python .claude/scripts/gen-reference-docs.py           # régénère reference/agents.md et reference/skills.md
+python .claude/scripts/gen-reference-docs.py --check   # code retour 1 si une page est périmée
 ```
 
-Compare against [reference/skills.md](../reference/skills.md) and
-[reference/agents.md](../reference/agents.md).
+Lancez la génération dans le même changement dès que vous ajoutez, renommez ou supprimez un agent ou un
+skill, ou que vous modifiez sa `description`.
+
+## Ce qui se tient à la main
+
+| Si vous éditez… | Relisez |
+|---|---|
+| `.claude/conventions/workflows.md` (une chaîne de phases change) | [reference/workflows.md](../reference/workflows.md), qui ne reprend que les chaînes |
+| `.claude/conventions/protocol.md` (gates, critères C1 à C8, artefacts) | [reference/gates-and-protocol.md](../reference/gates-and-protocol.md), [reference/task-directory.md](../reference/task-directory.md), [how-to/pass-the-plan-gate.md](pass-the-plan-gate.md) |
+| le libellé d'un gate ou une commande slash | [le tutoriel](../tutorials/first-workflow.md), qui doit rester exécutable |
+
+## Règles empiriques
+
+- **Les pages de référence renvoient, elles ne recopient pas.** Une table de phases recopiée dérive ; un
+  lien vers le fichier `.claude/` qui fait autorité ne dérive pas.
+- **Les pages d'explication vieillissent lentement** : elles portent sur le *pourquoi*. Ne les revisitez que
+  lorsque la conception elle-même change (un nouveau gate, un workflow abandonné).
+- **Le savoir sur le code ne va pas ici.** Un piège de portage ou un fait d'architecture s'écrit dans
+  `.claude/conventions/known-pitfalls.md` ou `rma-architecture-notes.md`, que les agents lisent.

@@ -344,7 +344,7 @@ if (customFunctions.length === 0) {
 
 **Sous-étape 2.2: Créer Classe Parameter**
 
-→ **Skill:** `implementation-guide` (Patterns 1-9)
+→ **Référence :** `.claude/conventions/reference/implementation-guide.md` (Patterns 1-9)
 
 **Emplacement:**
 ```
@@ -397,7 +397,7 @@ namespace ReportManagerAPI.Infrastructure.Repositories.ValueProviderFunctions.Pa
 
 **Sous-étape 2.3: Créer Tests**
 
-→ **Skill:** `implementation-guide` (Section Tests)
+→ **Référence :** `.claude/conventions/reference/implementation-guide.md` (Section Tests)
 
 **Emplacement:**
 ```
@@ -544,10 +544,10 @@ using System.Collections.Generic;
 ## Références
 
 **Skills complémentaires:**
-- `implementation-guide` - Patterns 1-9 classes custom
+- `.claude/conventions/reference/implementation-guide.md` - Patterns 1-9 classes custom
 - `check-implementation` - Vérifier si déjà implémenté
 - `register-parameter` - Enregistrement Phase 3
-- `generic-functions-reference` - Hiérarchie décision
+- `.claude/conventions/reference/generic-functions-reference.md` - Hiérarchie décision
 
 **Documentation:**
 - Spec: `.work/{slug}/spec.md`

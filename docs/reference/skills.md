@@ -1,62 +1,66 @@
-# Reference — Skills
+<!-- Page générée par .claude/scripts/gen-reference-docs.py — ne pas éditer à la main. -->
 
-Skills are the model-invocable entry points. Two families live here.
+# Référence — Skills
 
-## Workflow skills (owned by this workspace)
+Les skills vivent sous [`.claude/skills/`](../../.claude/skills/) ; chaque `SKILL.md` fait autorité. La documentation de référence qui n'est pas une procédure (patterns d'implémentation, lecture du C++, exemples de migration) vit sous [`.claude/conventions/reference/`](../../.claude/conventions/reference/).
 
-Under [`.claude/skills/`](../../.claude/skills/), one per gated/read-only workflow. Each is
-model-invocable (Claude picks it from the description) or runnable as a slash command. Each **defers
-to** [`workflows.md`](../../.claude/conventions/workflows.md) and
-[`protocol.md`](../../.claude/conventions/protocol.md) for the authoritative rules and orchestrates
-the [agents](agents.md) via the Agent tool.
+## Workflows
 
-| Skill | Slash command | `workflows.md` §  | Details |
-|---|---|---|---|
-| feature | `/feature` | §1 | [reference](workflows.md#1-feature) · [how-to](../how-to/run-the-feature-workflow.md) |
-| bug | `/bug` | §2 | [reference](workflows.md#2-bug) · [how-to](../how-to/fix-a-bug.md) |
-| refactor | `/refactor` | §3 | [reference](workflows.md#3-refactor) |
-| spike | `/spike` | §4 | [reference](workflows.md#4-spike) |
-| explore | `/explore` | §5 | [reference](workflows.md#5-explore) |
-| investigate | `/investigate` | §6 | [reference](workflows.md#6-investigate) |
-| learn | `/learn` | §7 | [reference](workflows.md#7-learn) |
+Sept skills pilotent les workflows décrits dans [`.claude/conventions/workflows.md`](../../.claude/conventions/workflows.md) ; `feature`, `bug` et `refactor` sont gatés (voir [gates & protocole](gates-and-protocol.md)).
 
-**Common shape of every workflow skill:**
-
-- `allowed-tools: Agent, Task, AskUserQuestion, Read, Write, Grep, Glob, Bash`.
-- Dispatches each subagent with the Agent tool, passing its `subagent_type` (the agent name) and a
-  prompt of the form:
-  ```
-  Task directory: .work/<slug>/
-  Task: <the task text>
-  ```
-- **Setup** derives the slug (Jira key if present, else kebab-case of the first ~4 words; confirm if
-  guessed) and `mkdir -p .work/<slug>/_signals/`.
-- The gated ones (`feature`/`bug`/`refactor`) enforce the [build bar](gates-and-protocol.md#the-plan-gate--the-build-bar)
-  at the plan gate and cap build↔review loops at **3**.
-- Read-only ones (`explore`/`investigate`/`learn`) have no gates, no build, no ship, no retro.
-
-## Monolith skills (symlinked in)
-
-Seven CFF-monolith authoring/testing helpers are **symlinked** into `.claude/skills/` from
-`/c/Repos/monolith/.claude/skills/`. They are machine-specific links — **gitignored, not tracked**
-(see [`.gitignore`](../../.gitignore)) — and are (re)created by running `link-monolith-skills.ps1`
-elevated, then restarting Claude Code. The real skills are owned by the monolith repo; **edit them
-there, not here.**
-
-| Skill | Purpose |
+| Skill | Rôle |
 |---|---|
-| `croesus-orm` | create/modify Croesus ORM classes (BOs, Repositories, Flex objects, FlexScenarios) |
-| `create-small-tests` | xUnit + Moq unit tests for a controller/service/BusinessLogic class |
-| `create-medium-tests` | integration tests via `WebApplicationFactory` |
-| `create-large-tests` | Python E2E tests for a CFF product route |
-| `create-internal-route` | scaffold a new internal API route (clean architecture) |
-| `implement-full-story` | full Definition-of-Done: route + all test levels |
-| `croesus-process-conventions` | C# conventions for the CroesusProcess codebase |
+| `/feature` | Build a new feature (or user-facing / API change) in the Croesus report workspace, end to end, following the gated feature workflow — context → explore → plan → [gate] → build → review → [gate] → retrospective → ship?. Pulls context from Jira and GitHub. Use when the user asks to add/implement/build a feature, capability, report field, endpoint, or UI, or hands over a Jira story/ticket to implement. Not for fixing defects (use the bug workflow) or pure restructuring (use refactor). |
+| `/bug` | Fix a defect in the Croesus report workspace, end to end, following the gated bug workflow — context → reproduce → diagnose → plan-fix → [gate] → build → verify+review → [gate] → retrospective → ship?. Pulls context from Jira and GitHub. Use when the user reports something broken/wrong (bad report output, error, crash, incorrect value, regression) or hands over a Jira bug ticket. Enforces no-fix-without-a-reproduction-and-a-regression-test. Not for new capabilities (use feature) or pure restructuring (use refactor). |
+| `/refactor` | Restructure code in the Croesus report workspace without changing behaviour, end to end, following the gated refactor workflow — context → explore → characterize → plan → [gate] → build (small steps) → review → [gate] → retrospective → ship?. Pulls context from Jira and GitHub. Use when the user asks to refactor, clean up, restructure, extract, rename, de-duplicate, or improve the shape of existing code while keeping what it does the same. Enforces characterization-tests-before-edit and behaviour-preservation. Not for new capabilities (use feature) or fixing defects (use bug). |
+| `/spike` | Run a timeboxed investigation in the Croesus report workspace to reduce uncertainty and reach a decision, following the spike workflow — frame + timebox → context → investigate (throwaway) → findings → [gate (decide)]. Use when the approach itself is genuinely unknown and the user wants to evaluate options before committing ("should we…?", "is X feasible?", "which approach?", "spike this"). Produces a recommendation, not shipped code — prototypes are throwaway. Not for building the chosen approach (use feature/refactor) or explaining existing behaviour (use investigate). |
+| `/explore` | Map where something lives or how it flows across the Croesus report repos — read-only, fast, no gates — following the explore workflow (scope → map → answer). Use when the user asks "where is X", "what calls Y", "how does the report pipeline flow through these repos", "map this subsystem", or wants to orient before a feature/refactor. Produces a repo/path:line map, changes no code. Not for "why did this happen" (use investigate) or "teach me this area" (use learn). |
+| `/investigate` | Find out why or how something happened in the Croesus report workspace — read-only, evidence-driven — following the investigate workflow (frame → context → analyze → conclude). Pulls context from Jira and GitHub. Use when the user asks "why did X happen", "how did this reach production", "why is Y behaving this way", or wants a root-cause understanding without a fix. Rules out alternatives with code, git history, and logs. Not for fixing a known defect (use bug, which runs this as its diagnosis) or locating code (use explore). |
+| `/learn` | Build a mental model of an area of the Croesus report workspace — read-only, teaching — following the learn workflow (pick target + level → guided walkthrough → glossary → exercises). Use when the user wants to understand or be onboarded onto a subsystem or concept ("help me understand X", "walk me through the Spooler batch flow", "teach me the C++→C# port mechanism", "explain pf-web's DDD layering"). Produces a walkthrough with a glossary and safe exercises, changes no code. Not for locating code (use explore) or diagnosing why something happened (use investigate). |
 
-These are useful *inside* the build phase of a `feature`/`bug` when working in the monolith C# repos.
+## Outils du workspace
 
-## Related plugin commands
+| Skill | Rôle |
+|---|---|
+| `/activate-web-report-pref` | Active la PREF du rapport (PREF_REPORT_*=YES) dans la BD dev via croesus.sql. Utiliser après register-web-report et avant update-e2e-baselines lors de la migration d'un rapport vers Xpert, sinon le rapport ne sera pas visible sur les BDs dev. |
+| `/analyze-cpp-function` | Analyse en profondeur une fonction C++ de rapport pour identifier patterns, dépendances et logique métier. Utiliser après locate-cpp-function pour créer une spec détaillée d'implémentation C# avec pseudo-code et mapping des repositories. |
+| `/check-implementation` | Vérifie si une fonction ValueProviderParameter est déjà implémentée en C#, son statut (implémenté/TODO/inexistant), et localise le code. Utiliser avant de commencer une nouvelle implémentation pour éviter la duplication. |
+| `/classify-functions` | Classifie les fonctions de rapport extraites (Default/Specific, PRE/POST), détecte patterns déclaratifs (>90% sans classe), et détermine leur statut d'implémentation C#. Utiliser après extract-parameters pour identifier l'approche optimale (déclarative vs custom) et prioriser les analyses C++. |
+| `/compare-report-params` | Compare les paramètres d'un rapport entre Conseiller (XML) et Xpert (JSON) pour identifier les différences de valeurs. Utiliser pour valider qu'une migration backend produit les mêmes paramètres. |
+| `/convert-conseiller-xml-to-xpert-json` | Convertit un TaskSpec XML de génération de rapport Conseiller (WPF legacy) en requête JSON Xpert (corps POST de ReportManagerApi, ex. /api/v1/order-entries/reports). Utiliser pour rejouer côté Xpert une génération capturée dans Conseiller, ou préparer un JSON de validation à partir d'un XML de référence. |
+| `/create-migration-pr` | Crée une PR monolith pour une migration backend Xpert avec une description structurée (Objectif / Changements clés / Validation / À finaliser) calquée sur le format standard des PR de migration. Configure aussi les Prefs (croesus.sql) des rapports gated par une PREF. À exécuter APRÈS la migration backend d'un ou plusieurs rapports (VPFs implémentées, enregistrements faits, build + tests verts). Respecte les conventions git du monolith (commitlint, squash, draft). |
+| `/estimate-complexity` | Évalue la complexité d'une fonction C++ (niveaux 0-4) pour estimer l'effort de migration vers C#. Distingue patterns déclaratifs (Niveau 0, 2min) de patterns impératifs (Niveaux 1-4, 30min-4h). Utiliser après avoir localisé le code C++ pour prédire le temps d'implémentation et identifier les risques. |
+| `/extract-parameters` | Extrait et structure les paramètres de rapport depuis docs/fields.csv. Utiliser quand on analyse un nouveau rapport pour migration C++ vers C# - il suffit de fournir la clé du rapport. |
+| `/get-template-id` | Lookup le template ID d'un rapport dans docs/template_ids.csv à partir du report internal name. Utiliser au début d'une migration (frontend ou backend) quand le template ID est requis. |
+| `/git-commit` | Craft meaningful, convention-respecting git commits in the Croesus report workspace. Use when the user asks to "commit", "commit my changes", "write a commit message", "make a conventional commit", or "commit and split into logical chunks". Detects which repo the changes belong to (the tooling root vs a symlinked product repo under repos/), applies that repo's commit convention (Conventional Commits + commitlint for pf-web, team style for the .NET repos), groups unrelated changes into separate commits, and enforces the org branch/commit guardrails. Does NOT push or open PRs unless explicitly asked. |
+| `/git-conventions-monolith` | Conventions git du monolith Croesus — branches, commits conventionnels, titres de PR. Utiliser lors de la création de branches, commits et PR pour respecter le CI (commitlint) et les standards du repo. |
+| `/git-conventions-pf-web` | Conventions git du repo pf-web (Xpert Angular monorepo) — limite stricte sur la longueur des branches, conventional commits, titres de PR. Utiliser lors de la création de branches, commits et PR sur pf-web pour passer le CI (PR Validator + commitlint). |
+| `/implement-declarative-radio` | Implémente un paramètre radio button ou combobox déclaratif (valeurs fixes + défaut) découvert dans le C++. Configure RadioParametersImplementation.cs ou ComboParametersImplementation.cs, ajoute les traductions .resx, et documente dans Parameters.cs. Aucune classe custom nécessaire. |
+| `/implement-report-parameters` | Implémente tous les paramètres d'un rapport en 2 phases - Configuration Parameters.cs (déclaratifs >90%) puis classes custom (>10%). Workflow complet avec templates et validation. |
+| `/jira-append-to-migration-ticket` | Met à jour la description d'un ticket Jira de migration. Si la description est auto-générée (footer "Description générée par /migrate-to-xpert-*"), elle est REMPLACÉE entièrement par la nouvelle version. Sinon, ajoute une section à la suite SANS effacer le contenu humain existant. Utiliser pour empiler les artefacts produits par les commandes /migrate-to-xpert-* dans le même ticket. |
+| `/jira-create-migration-ticket` | 'Crée une nouvelle Story Jira dans le projet RPT pour suivre la migration Xpert d''un rapport. Titre standardisé "Migrer vers Xpert : {NomFR} ({REPORT_NAME})", format markdown, footer de traçabilité automatique. Demande TOUJOURS confirmation utilisateur avant création.' |
+| `/jira-find-migration-ticket` | Recherche dans Jira un ticket existant pour la migration Xpert d'un rapport, dans le projet RPT. Filtre les projets archivés. Retourne 0 ou plusieurs candidats avec leur statut. Utiliser au début de chaque commande /migrate-to-xpert-* pour savoir si un ticket existe avant de modifier ou créer. |
+| `/locate-cpp-function` | Localise le code source C++ d'une fonction de rapport dans CroesusServer en utilisant stratégies Plans A-E. Utiliser quand on a identifié une fonction à migrer et qu'on doit trouver son implémentation C++ dans les fichiers validation_*.c. |
+| `/locate-report-classes` | Retrouve les classes C# d'un rapport (RPT_*, Parameters.cs, classe parent) à partir de son nom interne (ex FOREIGN_PROPERTY). Utiliser au début d'une migration pour identifier tous les fichiers sources C# du rapport. |
+| `/merge-request` | Draft and open a meaningful merge request / pull request in the Croesus report workspace. Use when the user asks to "open a PR", "create a merge request", "create an MR", "raise a PR", "open a pull request", or "publish this branch". Detects the product repo + branch, picks the base (Gitflow develop), builds a title + structured body from the actual commits and diff, links the Jira issue, and opens it with gh (GitHub) — one MR per repo, never on the tooling root. Does NOT merge. |
+| `/rebuild-before-validation` | Rebuild obligatoire de RTMTester et ReportManagerApi après toute implémentation backend, avant de demander le JSON Xpert et le XML Conseiller pour la validation. Détecte les erreurs de compilation tôt. |
+| `/register-ignore-id-masking` | Ajoute un rapport dans GetDisplayUnmaskedIdParameter (ReportsWithInitialValueZero) et son InlineData de test. Utiliser quand un rapport migré possède le paramètre PARAM_IgnoreIdMasking. |
+| `/register-parameter` | Enregistre automatiquement un IValueProviderParameter dans l'executer approprié (Pre/Post) en respectant l'ordre alphabétique. Utiliser après avoir implémenté une nouvelle classe Parameter pour la rendre accessible dans le système. |
+| `/register-web-report` | Enregistre un rapport dans la liste des rapports Web supportés (WebRTMRunner.cs). Ajoute le ReportName dans ConstructSupportedWebReportList en ordre alphabétique. Utiliser lors de la migration d'un nouveau rapport. |
+| `/review-test-scenario` | Revoit un cas de test QA (scénario CSV/tableau + ticket Jira de test) en le confrontant au code source du monolith, puis produit un document de revue, un scénario corrigé et une mise à jour du ticket Jira. Utiliser quand l'utilisateur demande de « réviser / peaufiner / valider / corriger » des cas de test, des préconditions ou un scénario de test, quand il fournit un CSV de cas de test avec un ticket RPT-/CAR-/MROX-, ou quand il demande si une précondition de test est réalisable. Détecte les attendus impossibles, les préconditions non produisibles par l'application, les étapes qui cliquent un contrôle non affiché, et les noms de champs inexistants. |
+| `/update-e2e-baselines` | Met à jour les baselines des tests E2E d'APIs après l'ajout d'un nouveau rapport dans WebRTMRunner. Rouler update_baselines.py et pousser les JSONs mis à jour. |
+| `/workspace-commands` | Build, test, coverage, Docker and serve commands for the repos in this workspace (ReportManagerApi, ReportFoundations, CroesusServer, ReportServer, pf-web), plus the per-repo gotchas that make them work. Use when you need to build, test, run coverage on, containerize, or serve any repo under repos/, or when a build/test invocation fails and you need the correct path or flags. |
 
-Not part of this workspace's set, but interoperable — see
-[workflows.md → Relationship to code-fleet](workflows.md#relationship-to-code-fleet):
-`/code-fleet:work`, `/code-fleet:review`, and the `code-fleet` language-pack agents.
+## Skills du monolithe (liens symboliques)
+
+Liens vers `/c/Repos/monolith/.claude/skills/`, propres à chaque machine et ignorés par git ([`.gitignore`](../../.gitignore)). Les (re)créer avec `link-monolith-skills.ps1` ; les modifier dans le monolithe, jamais ici.
+
+| Skill | Rôle |
+|---|---|
+| `/create-internal-route` | > |
+| `/create-large-tests` | > |
+| `/create-medium-tests` | > |
+| `/create-small-tests` | > |
+| `/croesus-orm` | Create or modify Croesus ORM classes in the CFF monolith — BusinessObjects (BO), CompositeBusinessObjects, Repositories, Flex objects, FlexScenarios, and Flex Factory join tuning. Trigger when the user asks to create, scaffold, modify, alter, or add a property to a BO/BOs/BusinessObject/CompositeBusinessObject, an entity in the Croesus ORM, a Flex object, a Repository, or a FlexScenario — including phrasings like "create a BO for table X", "add a property to FooBO", "scaffold a flex for Y", "wrap this DDL in a BO", "add a scenario to FooRepository", "always include X when joining Y", or any ORM question about Implementers, Serializers, FilterFunctions, InvokeMethods, MultiEntity Definitions, or Flex Factory decorators. |
+| `/croesus-process-conventions` | C# coding conventions for the CroesusProcess codebase. Use this skill any time you write, edit, or review C# code under CFF/Products/CroesusProcess/ (plugins, applications, tests, common libraries). Apply these rules even when the user does not explicitly ask for them — they are the project's standing conventions and reviewers will flag deviations. |
+| `/implement-full-story` | > |

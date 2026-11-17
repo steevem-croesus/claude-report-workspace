@@ -1,13 +1,13 @@
-# Tutorials
+# Tutoriels
 
-**Learning-oriented.** These take you by the hand through a complete run so you learn *by doing*. A
-tutorial's job is to give you a first success and build confidence — not to cover every option. When
-you want to accomplish a specific task instead, switch to the [How-to guides](../how-to/).
+**Orientés apprentissage.** Ils te prennent par la main à travers un parcours complet pour que tu apprennes *en faisant*. Le
+rôle d'un tutoriel est de te donner un premier succès et de bâtir ta confiance — pas de couvrir chaque option. Quand
+tu veux plutôt accomplir une tâche précise, bascule vers les [Guides how-to](../how-to/).
 
-| Tutorial | You will… |
+| Tutoriel | Tu vas… |
 |---|---|
-| [Your first workflow](first-workflow.md) | run `/explore` to map some code, then run `/feature` end-to-end through its gates — and see exactly what each phase produces |
+| [Ton premier workflow](first-workflow.md) | lancer `/explore` pour cartographier du code, puis lancer `/feature` de bout en bout à travers ses gates — et voir exactement ce que produit chaque phase |
 
-> Prerequisite for all tutorials: Claude Code open in this workspace
-> (`C:\Repos\claude-report-workspace`), with the `repos/` symlinks present. If `repos/` is empty, the
-> symlinks haven't been created on this machine yet — that's a setup step outside these docs.
+> Prérequis pour tous les tutoriels : Claude Code ouvert dans ce workspace
+> (`C:\Repos\claude-report-workspace`), avec les symlinks `repos/` présents. Si `repos/` est vide, les
+> symlinks n'ont pas encore été créés sur cette machine — c'est une étape de setup hors de ces docs.

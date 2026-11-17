@@ -1,71 +1,71 @@
-# How to port a C++ report function to C#
+# Comment porter une fonction de rapport C++ vers C#
 
-Goal: reimplement a C++ report function (from `CroesusServer` **or** `ReportServer`) as a C#
-`IValueProviderParameter` in `ReportManagerApi`. This is the workspace's most recurring cross-repo
-task, and it has a dedicated agent: [`cpp-to-csharp-porter`](../reference/agents.md#cpp-to-csharp-porter).
+Objectif : réimplémenter une fonction de rapport C++ (issue de `CroesusServer` **ou** de `ReportServer`) en tant que
+`IValueProviderParameter` C# dans `ReportManagerApi`. C'est la tâche cross-repo la plus récurrente du workspace,
+et elle a un agent dédié : [`cpp-to-csharp-porter`](../reference/agents.md#cpp-to-csharp-porter).
 
-**Authoritative recipe:** [`repos/ReportManagerApi/copilot-instructions.md`](../../repos/ReportManagerApi/copilot-instructions.md).
-This guide orients you; that file is the source of truth for folders and registration.
+**Recette faisant autorité :** [`repos/ReportManagerApi/copilot-instructions.md`](../../repos/ReportManagerApi/copilot-instructions.md).
+Ce guide vous oriente ; ce fichier est la source de vérité pour les dossiers et l'enregistrement.
 
-## When to use which entry point
+## Quand utiliser quel point d'entrée
 
-- **Inside a feature/bug** — the `feature`/`bug` workflow automatically dispatches
-  `cpp-to-csharp-porter` (instead of the generic `implementer`) when a plan step is a value-provider
-  port. You don't do anything special.
-- **Standalone** — dispatch the agent directly (or describe the port task) when the whole job *is* a
+- **À l'intérieur d'un feature/bug** — le workflow `feature`/`bug` dépêche automatiquement
+  `cpp-to-csharp-porter` (au lieu de l'`implementer` générique) quand une étape de plan est un port de value-provider.
+  Vous n'avez rien de spécial à faire.
+- **Autonome** — dépêchez l'agent directement (ou décrivez la tâche de port) quand tout le travail *est* un
   port.
 
-## What the porter does (so you can check its work)
+## Ce que fait le porter (pour que vous puissiez vérifier son travail)
 
-1. **Finds & confirms the C++ source.** Searches **both** `repos/CroesusServer/Src/` and
-   `repos/ReportServer/Src/` — the function may live in either — reads it fully, and states its
-   semantics (inputs, outputs, edge cases, and especially date/period math) with the `repo/path:line`
-   it came from.
+1. **Trouve & confirme la source C++.** Cherche dans **les deux** `repos/CroesusServer/Src/` et
+   `repos/ReportServer/Src/` — la fonction peut se trouver dans l'un ou l'autre — la lit entièrement, et énonce sa
+   sémantique (entrées, sorties, cas limites, et surtout le calcul de dates/périodes) avec le `repo/path:line`
+   d'où elle provient.
 
-2. **Chooses the injected dependencies from C++ signals:**
+2. **Choisit les dépendances injectées à partir des signaux C++ :**
 
-   | C++ signal | Inject |
+   | Signal C++ | Injecter |
    |---|---|
    | `PREF_` / preference / config | `IPreferencesRepository` |
    | `PARAM_` / parameter | `IReportCommandAndQueryContextRepository` |
-   | date / period logic | `IParameterDateValueService` / `IDateTimeService` |
+   | logique de date / période | `IParameterDateValueService` / `IDateTimeService` |
    | repartitions | `IRepartitionRepository` |
    | transactions | `ITransactionsRepository` |
    | industry codes | `IIndustryCodeRepository` |
    | indexes | `IIndexesRepository` |
 
-3. **Creates the parameter class** `<FunctionName>Parameter` with a `ProvideValue` method, placed in:
-   - general/pre: `ReportManagerAPI.Infrastructure/Repositories/ValueProviderFunctions/Parameters/`
-   - date-related: `.../Parameters/Date/`
+3. **Crée la classe de paramètre** `<FunctionName>Parameter` avec une méthode `ProvideValue`, placée dans :
+   - général/pre : `ReportManagerAPI.Infrastructure/Repositories/ValueProviderFunctions/Parameters/`
+   - liée aux dates : `.../Parameters/Date/`
 
-4. **Registers it — alphabetically —** in the matching executer:
-   - pre: `PreParamEntryValueProviderFunctionsExecuter.cs`
-   - post: `PostParamEntryValueProviderFunctionsExecuter.cs`
-   as `implementationsDictionary["<FunctionName>"] = () => new <FunctionName>Parameter();`
+4. **L'enregistre — par ordre alphabétique —** dans l'executer correspondant :
+   - pre : `PreParamEntryValueProviderFunctionsExecuter.cs`
+   - post : `PostParamEntryValueProviderFunctionsExecuter.cs`
+   sous la forme `implementationsDictionary["<FunctionName>"] = () => new <FunctionName>Parameter();`
 
-5. **Adds date helpers** to `IDateTimeService` (Domain) + `DateTimeService.cs` if new date ops are
-   needed.
+5. **Ajoute des helpers de date** à `IDateTimeService` (Domain) + `DateTimeService.cs` si de nouvelles opérations de date sont
+   nécessaires.
 
-6. **Writes tests (mandatory)** mirroring `GetStartYearFromSelectedYMParameter` style, covering the
-   C++ edge cases — parameter tests under `ReportManagerAPI.Infrastructure.SmallTests/...` and
-   date-service tests in `ReportManagerAPI.Domain.SmallTests/Services/DateTimeServiceTests.cs`.
+6. **Écrit des tests (obligatoire)** en miroir du style `GetStartYearFromSelectedYMParameter`, couvrant les
+   cas limites C++ — tests de paramètre sous `ReportManagerAPI.Infrastructure.SmallTests/...` et
+   tests du service de date dans `ReportManagerAPI.Domain.SmallTests/Services/DateTimeServiceTests.cs`.
 
-7. **Builds and tests** before returning:
+7. **Construit et teste** avant de retourner :
    `dotnet build /c/Repos/monolith/CFF/Products/ReportManagerApi/ReportManagerAPI.sln` + `dotnet test <the *.SmallTests project>`.
 
-## What to double-check as the reviewer/approver
+## Ce qu'il faut revérifier en tant que reviewer/approbateur
 
-- **Fidelity.** The C# must match the C++ semantics. Any deliberate divergence must be called out
-  explicitly with the source line — the [`reviewer`](../reference/agents.md#reviewer) flags silent
-  divergences as must-fix.
-- **Right repository interface injected** (per the table above).
-- **Alphabetical registration** in the correct pre/post executer.
-- **Edge cases covered** — especially date/period boundaries (year rollover, fiscal vs calendar).
+- **Fidélité.** Le C# doit correspondre à la sémantique du C++. Toute divergence délibérée doit être signalée
+  explicitement avec la ligne source — le [`reviewer`](../reference/agents.md#reviewer) signale les divergences
+  silencieuses comme must-fix.
+- **La bonne interface de repository injectée** (selon la table ci-dessus).
+- **Enregistrement alphabétique** dans le bon executer pre/post.
+- **Cas limites couverts** — surtout les bornes de date/période (passage d'année, fiscal vs calendaire).
 
-If the porter can't find the function, the semantics are ambiguous, or the correct repository
-interface is unclear, it **HALTs** and asks rather than guessing financial/date logic.
+Si le porter ne peut pas trouver la fonction, que la sémantique est ambiguë, ou que la bonne interface de
+repository n'est pas claire, il **HALT** et demande plutôt que de deviner une logique financière/de date.
 
-## Reference
+## Référence
 
-- Mapping cues also summarised in the root [`CLAUDE.md`](../../CLAUDE.md).
-- Agent spec: [`.claude/agents/cpp-to-csharp-porter.md`](../../.claude/agents/cpp-to-csharp-porter.md)
+- Les indices de mapping sont aussi résumés dans le [`CLAUDE.md`](../../CLAUDE.md) racine.
+- Spécification de l'agent : [`.claude/agents/cpp-to-csharp-porter.md`](../../.claude/agents/cpp-to-csharp-porter.md)

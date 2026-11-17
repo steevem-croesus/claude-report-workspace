@@ -1,58 +1,58 @@
 # Your first workflow
 
-This tutorial walks you through two runs, smallest first, so you can *see* how the workflows behave
-before you rely on one for real work:
+Ce tutoriel te fait parcourir deux exécutions, la plus petite d'abord, pour que tu *voies* comment les workflows se comportent
+avant de compter sur l'un d'eux pour du vrai travail :
 
-1. a **read-only `/explore`** — no gates, no risk, produces a code map;
-2. a **`/feature`** run — the full gated sequence, so you meet the plan gate, the build, the code
-   gate, and the retrospective.
+1. un **`/explore` en lecture seule** — pas de gates, pas de risque, produit une carte du code ;
+2. une exécution de **`/feature`** — la séquence gated complète, pour que tu rencontres le plan gate, le build, le code
+   gate, et la retrospective.
 
-By the end you'll recognise the phase-by-phase rhythm and know where every artifact lands. Nothing
-here mutates a product repo without your approval.
+À la fin, tu reconnaîtras le rythme phase par phase et sauras où atterrit chaque artefact. Rien
+ici ne modifie un repo produit sans ton approbation.
 
-> This is a *lesson*, not a reference. Follow it in order. Once it clicks, the
-> [How-to guides](../how-to/) are the faster path for real tasks.
+> C'est une *leçon*, pas une référence. Suis-la dans l'ordre. Une fois que ça fait tilt, les
+> [Guides how-to](../how-to/) sont le chemin le plus rapide pour les vraies tâches.
 
 ---
 
 ## Part 1 — Map some code with `/explore`
 
-`explore` is the safest workflow: read-only, no gates, fast. Perfect for a first run.
+`explore` est le workflow le plus sûr : lecture seule, pas de gates, rapide. Parfait pour une première exécution.
 
 ### Step 1 — Invoke it
 
-In the Claude Code prompt, type:
+Dans le prompt de Claude Code, tape :
 
 ```
 /explore where does the report generation request enter ReportManagerApi and what does it call?
 ```
 
-You can also just *ask* in plain language ("where does…?") and Claude will pick the `explore`
-workflow — but typing `/explore` makes the choice explicit while you're learning.
+Tu peux aussi simplement *demander* en langage naturel (« where does…? ») et Claude choisira le workflow `explore`
+— mais taper `/explore` rend le choix explicite pendant que tu apprends.
 
 ### Step 2 — Watch the phases
 
-The `explore` skill runs a short sequence (see
-[Reference: workflows §5](../reference/workflows.md#5-explore)):
+Le skill `explore` exécute une courte séquence (voir
+[Référence : workflows §5](../reference/workflows.md#5-explore)) :
 
-1. **Scope** — Claude restates your question in one line and names the *candidate repos* it thinks
-   are in play (here: `ReportManagerApi`, maybe `ReportFoundations`).
-2. **Map** — it dispatches the [`explorer`](../reference/agents.md#explorer) agent, which searches
-   across the repos and returns a `repo/path:line` map plus a short prose flow.
+1. **Scope** — Claude reformule ta question en une ligne et nomme les *repos candidats* qu'il pense
+   être en jeu (ici : `ReportManagerApi`, peut-être `ReportFoundations`).
+2. **Map** — il dispatche l'agent [`explorer`](../reference/agents.md#explorer), qui cherche
+   à travers les repos et retourne une carte `repo/path:line` plus un court flux en prose.
 
 ### Step 3 — Read the result
 
-You get a map of clickable `repo/path:line` entries and a plain-English description of the flow. That
-is the entire deliverable — there is **no plan, no build, no gate**. Notice how cheap that was.
+Tu obtiens une carte d'entrées `repo/path:line` cliquables et une description du flux en langage clair. C'est
+là tout le livrable — il n'y a **pas de plan, pas de build, pas de gate**. Remarque comme c'était peu coûteux.
 
-✅ **You've learned:** a read-only workflow just answers and stops. Now let's meet a gated one.
+✅ **Tu as appris :** un workflow en lecture seule ne fait que répondre puis s'arrête. Passons maintenant à un workflow gated.
 
 ---
 
 ## Part 2 — Build something with `/feature`
 
-`feature` is the full gated playbook. Even for a trivial change it runs the same phases, so it's the
-best one to learn on. (See [Reference: workflows §1](../reference/workflows.md#1-feature).)
+`feature` est le playbook gated complet. Même pour un changement trivial, il exécute les mêmes phases, c'est donc le
+meilleur pour apprendre. (Voir [Référence : workflows §1](../reference/workflows.md#1-feature).)
 
 ### Step 1 — Invoke it
 
@@ -60,73 +60,76 @@ best one to learn on. (See [Reference: workflows §1](../reference/workflows.md#
 /feature add a `reportFormat` query parameter to GET /api/v1/reports/{generationId} so callers can request PDF or XLSX
 ```
 
-(You don't have to *ship* this — you'll cancel before the change is committed. The point is to see
-the machinery.)
+(Tu n'as pas à *ship* ceci — tu annuleras avant que le changement soit commité. Le but est de voir
+la machinerie.)
 
 ### Step 2 — Setup & Context
 
-Claude derives a **slug** for the task (a Jira key if your text contains one like `RPT-12345`,
-otherwise a kebab-case name) and creates a task directory: `.work/<slug>/`. This is where every
-artifact for this task lives — see [Reference: the task directory](../reference/task-directory.md).
+Claude dérive un **slug** pour la tâche (une clé Jira si ton texte en contient une comme `RPT-12345`,
+sinon un nom en kebab-case) et crée un répertoire de tâche : `.work/<slug>/`. C'est là que vit chaque
+artefact de cette tâche — voir [Référence : le répertoire de tâche](../reference/task-directory.md).
 
-Then it dispatches [`context-gatherer`](../reference/agents.md#context-gatherer), which pulls any
-Jira/GitHub context and writes `context.md`. With no ticket, it says so and works from local
-evidence — it never invents ticket contents.
+Puis il dispatche [`context-gatherer`](../reference/agents.md#context-gatherer), qui tire tout
+contexte Jira/GitHub et écrit `context.md`. Sans ticket, il le dit et travaille depuis les preuves
+locales — il n'invente jamais le contenu d'un ticket.
 
 ### Step 3 — Explore
 
-Next it dispatches [`explorer`](../reference/agents.md#explorer) (the same agent from Part 1) to map
-the affected code, writing `exploration.md`.
+Ensuite il dispatche [`explorer`](../reference/agents.md#explorer) (le même agent que dans la Part 1) pour cartographier
+le code affecté, en écrivant `exploration.md`.
 
 ### Step 4 — Plan, and meet the **plan gate**
 
-[`planner`](../reference/agents.md#planner) writes `plan.md` — with a requirements-coverage table,
-ordered steps, tests, risks, and an estimate. Crucially, the plan carries a header like:
+[`planner`](../reference/agents.md#planner) écrit `plan.md` — avec une table de couverture des exigences,
+des étapes ordonnées, des tests, des risques, et une estimation. Point crucial, le plan porte un en-tête comme :
+
+Deux fichiers comptent ici. `plan.md` s'ouvre par le statut que le planner déclare, et `review-plan.md` par le
+verdict du reviewer :
 
 ```
-**Status:** ready · **Grade:** A
+**Status:** ready          ← plan.md
+**Buildable:** yes         ← review-plan.md
 ```
 
-This is the **build bar**. Claude will *only* let you approve-to-build a plan that is `ready` **and**
-graded **A** or **S**. If the plan comes back `draft` or a lower grade, the gate won't even offer
-"approve" — it'll show you why (open questions, decisions only you can make) and route you to request
-changes. That's by design; see
-[Explanation: gates & the build bar](../explanation/gates-and-the-build-bar.md).
+C'est la **barre de build**. Claude te laissera *seulement* approuver-pour-build un plan `ready` **et** jugé
+`Buildable: yes` — le reviewer répond oui ou non à huit critères, preuve à l'appui. Si l'un est à « non », le
+gate ne propose pas approve : il te montre lequel et pourquoi. Voir
+[Explication : les gates & la barre de build](../explanation/gates-and-the-build-bar.md).
 
-At the gate you'll be asked (via a multiple-choice prompt): **approve / request changes / cancel**.
+Au gate on te demandera (via un prompt à choix multiple) : **approve / request changes / cancel**.
 
-- Try **request changes** once — type something like "also mention how the format maps to the S3
-  content-type". Watch Claude re-dispatch the planner and return to the gate with a revised plan.
-- This time, if it's `ready` + A/S, choose **approve**.
+- Essaie **request changes** une fois — tape quelque chose comme « also mention how the format maps to the S3
+  content-type ». Regarde Claude re-dispatcher le planner et revenir au gate avec un plan révisé.
+- Cette fois, s'il est `ready` + `Buildable: yes`, choisis **approve**.
 
 ### Step 5 — Build
 
-[`implementer`](../reference/agents.md#implementer) picks up the plan's steps, writes the code and
-tests, **builds and runs the tests**, and writes `build-summary.md` with the real command output. It
-stages new files with `git add` but does **not** commit.
+[`implementer`](../reference/agents.md#implementer) reprend les étapes du plan, écrit le code et
+les tests, **build et exécute les tests**, et écrit `build-summary.md` avec la vraie sortie des commandes. Il
+stage les nouveaux fichiers avec `git add` mais ne commit **pas**.
 
 ### Step 6 — Review, and the **code gate**
 
-[`reviewer`](../reference/agents.md#reviewer) reviews the diff and writes `review-code.md` — one
-terse line per finding, severity-tagged (🔴 must-fix / 🟡 should-fix / 🟢 consider). You reach the
-**code gate**: **approve / request changes / cancel**. If there are must-fix findings, requesting
-changes loops back to build (capped at 3 iterations).
+[`reviewer`](../reference/agents.md#reviewer) revoit le diff et écrit `review-code.md` — une
+ligne concise par constat, taggée par sévérité (🔴 must-fix / 🟡 should-fix / 🟢 consider). Tu atteins le
+**code gate** : **approve / request changes / cancel**. S'il y a des constats must-fix, demander des
+changements reboucle vers le build (plafonné à 3 itérations).
 
 ### Step 7 — Ship? (decline it)
 
-Claude asks whether to ship. **Decline** — this was a practice run. Nothing gets committed or pushed.
-(When you *do* ship, it branches per-repo with `--no-track`, commits, and opens a PR following the
-[org git rules](../reference/gates-and-protocol.md#branch-commit--ship-rules).)
+Claude demande s'il faut ship. **Décline** — c'était une exécution d'entraînement. Rien n'est commité ni pushé.
+(Quand tu *ship* pour de vrai, il branche par repo avec `--no-track`, commit, et ouvre une PR en suivant les
+[règles git de l'org](../reference/gates-and-protocol.md#règles-de-branch-commit--ship).)
 
 ### Step 8 — Retrospective
 
-Finally [`retrospective`](../reference/agents.md#retrospective) writes `retro.md` and *proposes* a
-checklist of durable learnings and doc updates. It never writes to memory or edits docs on its own —
-it hands you the checklist to approve.
+Enfin [`retrospective`](../reference/agents.md#retrospective) écrit `retro.md` et *propose* une
+checklist d'apprentissages durables et de mises à jour de docs. Il n'écrit jamais en mémoire ni n'édite les docs de lui-même —
+il te remet la checklist pour approbation.
 
 ### Step 9 — Look at what you produced
 
-Open the task directory and see the trail:
+Ouvre le répertoire de tâche et vois la trace :
 
 ```
 .work/<slug>/
@@ -141,14 +144,14 @@ Open the task directory and see the trail:
     └── revision-request.md   ← your "request changes" feedback, recorded
 ```
 
-✅ **You've learned the core loop:** *context → explore → plan → [GATE] → build → review → [GATE] →
-ship? → retrospective*, each phase owned by a named agent, each artifact a file, and the two gates
-where **you** decide.
+✅ **Tu as appris la boucle de base :** *context → explore → plan → [GATE] → build → review → [GATE] →
+ship? → retrospective*, chaque phase possédée par un agent nommé, chaque artefact un fichier, et les deux gates
+où **c'est toi** qui décides.
 
 ---
 
 ## Where to go next
 
-- Understand *why* it's shaped this way → [Explanation: design philosophy](../explanation/design-philosophy.md)
-- Get real work done → [How-to: choose a workflow](../how-to/choose-a-workflow.md)
-- Look up an agent's exact job → [Reference: agents](../reference/agents.md)
+- Comprendre *pourquoi* c'est façonné ainsi → [Explication : philosophie de conception](../explanation/design-philosophy.md)
+- Accomplir du vrai travail → [How-to : choisir un workflow](../how-to/choose-a-workflow.md)
+- Chercher le rôle exact d'un agent → [Référence : agents](../reference/agents.md)

@@ -34,6 +34,12 @@ Chaque exécution de workflow non triviale crée un répertoire par tâche à la
 | `retro.md` | retrospective | Rétrospective + apprentissages proposés |
 | `clarifications.md` | orchestrateur | Q→R résolues avant la planification |
 
+**Itérations.** Un artefact révisé **remplace** le précédent sous le même nom ; l'historique vit dans
+`_signals/` (`revision-request.md`, complété à chaque tour avec la date). Quand il faut garder
+plusieurs versions côte à côte, un seul schéma : `<nom>.<n>.md` pour le tour n (`review-code.2.md`),
+`<nom>.a.md` / `<nom>.b.md` pour un double passage, `<nom>-<repo>.md` pour une tranche par repo
+(`build-summary-pf-web.md`). Pas d'autres suffixes libres.
+
 > **Toute revue de code produit un fichier, pas seulement une réponse en chat.** Quelle que soit la
 > voie utilisée — la skill intégrée `/code-review`, l'agent `reviewer`, `migration-reviewer`, ou une
 > revue improvisée — écrire les constats dans `.work/<slug>/review-code.md` (`review-plan.md` pour un
@@ -110,25 +116,45 @@ implémenteurs sur la même tranche.
 - **cancel** → arrêter le workflow.
 
 Ne jamais franchir automatiquement un gate. Les deux gates universels sont le **gate de plan** (après `plan.md`) et
-le **gate de code** (après `build-summary.md` + `review-code.md`) ; certains workflows ajoutent le leur
+le **gate de code** (après `build-summary.md` + `review-code.md`, suivi de la rétrospective) ; certains workflows ajoutent le leur
 (ex. le gate de *décision* du spike).
 
 ### Gate de plan — la barre de build
 
-Le gate de plan a une condition d'entrée supplémentaire et non négociable. `plan.md` porte un en-tête
-`**Status:** <draft|ready> · **Grade:** <F|D|C|B|A|S>` (échelle **F < D < C < B < A < S** ; barème
-détenu par `../agents/planner.md`). Le workflow ne peut builder **que** depuis un plan qui est **`ready`**
-**et** noté **A ou S**.
+Le gate de plan a une condition d'entrée non négociable, et **ce n'est pas l'auteur du plan qui la
+constate**. Deux conditions, toutes deux requises :
 
-- Si le plan est `draft` ou noté **en dessous de A**, le gate n'offre **pas** *approve*. Fais ressortir la
-  note + le pourquoi (questions ouvertes bloquantes, points de décision `needs-user`), et achemine vers **changes** —
-  redispatche le planner (en résolvant éventuellement d'abord les points de décision `needs-user` via `AskUserQuestion`)
-  jusqu'à ce qu'il atteigne `ready` + (A|S), ou **cancel**.
-- Ce n'est que lorsque le plan est `ready` + (A|S) que l'utilisateur obtient le choix normal *approve / changes / cancel*.
-  L'approbation reste requise — une note qualifiante déverrouille le gate, elle ne le franchit pas automatiquement.
-- L'utilisateur peut **passer outre** et approuver explicitement un plan sous la barre (ex. un changement délibérément petit
-  qu'il a jugé correct) ; consigne le passage outre dans `revision-request.md` pour qu'il soit auditable. En l'absence d'un
-  passage outre explicite, la barre tient.
+1. `plan.md` porte l'en-tête `**Status:** ready` — le planner déclare qu'il ne reste ni point de
+   décision `needs-user` ni question ouverte bloquante. Tant qu'il en reste, le plan est `draft`.
+2. `review-plan.md`, écrit par le **reviewer** (jamais par le planner), porte `**Buildable:** yes`.
+   Le reviewer répond **oui / non / n.a.** à chacun des critères ci-dessous, avec la preuve (ligne du
+   plan, fichier vérifié). `Buildable` vaut `yes` seulement si **tous** les critères sont à oui ou n.a.
+
+| # | Critère (bloquant) | Ce qui fait répondre « non » |
+|---|---|---|
+| C1 | **Couverture** — chaque exigence de `context.md` renvoie à une étape, ou à un report explicite | une exigence absente du tableau, ou « couverte » par une étape qui ne la traite pas |
+| C2 | **Contrats concrets** — tout endpoint, DTO/entité ou méthode publique créé ou modifié a sa route, son schéma (types, nullabilité) ou sa signature | un contrat en prose (« ajouter un endpoint », « créer le DTO ») |
+| C3 | **Décisions résolues** — aucun point `needs-user`, aucune question ouverte bloquante | il en reste une, même si le plan se dit `ready` |
+| C4 | **Emplacements vérifiés** — chaque fichier, classe ou méthode cité existe là où le plan le dit (vérifié par lecture ou grep) | un chemin ou un symbole introuvable |
+| C5 | **Tests** — chaque étape qui change un comportement nomme son test et son niveau | une étape sans test, ou « ajouter des tests » sans cas nommés |
+| C6 | **Pièges connus** — le plan traite les entrées de `known-pitfalls.md` qui s'appliquent (route de discovery, flux parallèle, enregistrement de VPF, `spAddColumn`, pref booléenne…) | un piège applicable ignoré |
+| C7 | **Sécurité / intégrité** — si le plan porte une telle contrainte, les canaux d'entrée sont énumérés un par un (n.a. sinon) | une garantie « par construction » énoncée pour le seul chemin nominal |
+| C8 | **Estimation cohérente** — la confiance annoncée reflète les `⚠ à confirmer` et les zones non explorées | une estimation ferme sur un plan qui comporte des inconnues |
+
+Règles du gate :
+
+- Si le plan est `draft`, ou si `review-plan.md` dit `Buildable: no`, le gate n'offre **pas** *approve*.
+  Présente les critères à « non » avec leur preuve et achemine vers **changes** — redispatche le planner
+  avec ces constats (en résolvant d'abord les points `needs-user` via `AskUserQuestion`), puis refais
+  passer le reviewer — ou **cancel**.
+- Ce n'est que lorsque le plan est `ready` **et** `Buildable: yes` que l'utilisateur obtient le choix
+  normal *approve / changes / cancel*. L'approbation reste requise : la revue déverrouille le gate, elle
+  ne le franchit pas.
+- En double passage (voir plus haut), un critère n'est à « oui » que si **les deux** reviewers répondent
+  oui ; un désaccord est présenté tel quel à l'utilisateur.
+- L'utilisateur peut **passer outre** et approuver un plan sous la barre (changement délibérément petit
+  qu'il a jugé correct) ; consigne le passage outre dans `revision-request.md` pour qu'il soit auditable.
+  Sans passage outre explicite, la barre tient.
 
 ## Protocole HALT (agent → orchestrateur)
 

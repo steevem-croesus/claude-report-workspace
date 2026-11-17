@@ -21,7 +21,7 @@ Implémente un paramètre radio button ou combobox (dropdown) purement déclarat
 - Chaque valeur a un label à afficher (traduit EN/FR)
 
 **Ne PAS utiliser si:**
-- Les valeurs sont dynamiques (chargées depuis BD, préférences, ou conditions) → utiliser `implementation-guide` Pattern 7
+- Les valeurs sont dynamiques (chargées depuis BD, préférences, ou conditions) → utiliser `.claude/conventions/reference/implementation-guide.md` Pattern 7
 - Le paramètre nécessite un filtrage conditionnel → classe custom requise
 - Le paramètre n'est ni un radio button ni un combobox
 
@@ -249,5 +249,5 @@ Fournir:
 
 **Skills connexes:**
 - `analyze-cpp-function` — pour découvrir les valeurs dans le C++
-- `generic-functions-reference` — pour confirmer que l'approche déclarative est la bonne
+- `.claude/conventions/reference/generic-functions-reference.md` — pour confirmer que l'approche déclarative est la bonne
 - `classify-functions` — pour identifier le type de widget

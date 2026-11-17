@@ -1,8 +1,3 @@
----
-name: migration-examples
-description: Exemples concrets de 4 migrations complètes C++ vers C# avec temps réels et leçons apprises. Utiliser comme référence pour estimer le temps et comprendre les patterns de migration réussis.
----
-
 # Skill: Migration Examples
 
 Guide pratique avec 4 migrations complètes C++ → C# du début à la fin.
@@ -297,4 +292,4 @@ implementationsDictionary["GetBoolFromPrefReportHideCurrency"] =
 - `PreParamEntryValueProviderFunctionsExecuter.cs:180-184` - Period1-5
 - `GetBoolFromPrefBase.cs` - Template pattern
 
-**Skills:** `estimate-complexity`, `implementation-guide`, `read-cpp-patterns`
+**Skills:** `estimate-complexity`, `.claude/conventions/reference/implementation-guide.md`, `.claude/conventions/reference/read-cpp-patterns.md`

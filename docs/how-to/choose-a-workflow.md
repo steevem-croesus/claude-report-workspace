@@ -1,33 +1,33 @@
-# How to choose a workflow
+# Comment choisir un workflow
 
-There are seven. Pick by the *kind* of work, not by the repo. This is the decision table from
-[`.claude/conventions/workflows.md`](../../.claude/conventions/workflows.md), which is authoritative.
+Il y en a sept. Choisissez selon le *type* de travail, pas selon le repo. Voici la table de décision
+issue de [`.claude/conventions/workflows.md`](../../.claude/conventions/workflows.md), qui fait autorité.
 
-| If the task is… | Use | Gated? | Changes code? |
+| Si la tâche est… | Utiliser | Gaté ? | Modifie le code ? |
 |---|---|---|---|
-| add/change user-facing or API behaviour | **`feature`** | ✅ | ✅ |
-| something is broken / wrong output | **`bug`** | ✅ | ✅ |
-| improve structure, keep behaviour identical | **`refactor`** | ✅ | ✅ |
-| "should we…?" / unknown approach / evaluate options | **`spike`** | ✅ (decision) | ✗ (throwaway only) |
-| "where is / how does X flow?" | **`explore`** | ✗ | ✗ |
-| "why did / how did this happen?" | **`investigate`** | ✗ | ✗ |
-| "help me understand this area" | **`learn`** | ✗ | ✗ |
+| ajouter/changer un comportement visible par l'utilisateur ou une API | **`feature`** | ✅ | ✅ |
+| quelque chose est cassé / sortie erronée | **`bug`** | ✅ | ✅ |
+| améliorer la structure, garder le comportement identique | **`refactor`** | ✅ | ✅ |
+| « devrait-on… ? » / approche inconnue / évaluer des options | **`spike`** | ✅ (décision) | ✗ (jetable seulement) |
+| « où est / comment circule X ? » | **`explore`** | ✗ | ✗ |
+| « pourquoi / comment est-ce arrivé ? » | **`investigate`** | ✗ | ✗ |
+| « aide-moi à comprendre ce domaine » | **`learn`** | ✗ | ✗ |
 
-## The tricky boundaries
+## Les frontières délicates
 
-- **`bug` vs `investigate`** — already know it's broken and want it *fixed* → `bug` (it runs
-  `investigate`'s diagnosis as its phase 3). Only want to *understand* a behaviour → `investigate`.
-- **`explore` vs `investigate`** — `explore` answers *where/what* (a code map). `investigate` answers
-  *why/how* and rules out alternatives with git history and logs. `explore` is cheaper; reach for it
-  first when you just need to locate things.
-- **`feature` vs `refactor`** — new/changed behaviour → `feature`. Same behaviour, better shape →
-  `refactor` (it enforces characterization tests *before* any edit).
-- **`spike` first?** — if the *approach itself* is unknown (not just the details), run `spike` to
-  reach a decision, then feed that decision into a `feature` or `refactor`.
+- **`bug` vs `investigate`** — vous savez déjà que c'est cassé et vous voulez que ce soit *corrigé* → `bug` (il exécute
+  le diagnostic d'`investigate` comme sa phase 3). Vous voulez seulement *comprendre* un comportement → `investigate`.
+- **`explore` vs `investigate`** — `explore` répond au *où/quoi* (une carte du code). `investigate` répond au
+  *pourquoi/comment* et écarte les alternatives à l'aide de l'historique git et des logs. `explore` est moins coûteux ; utilisez-le
+  en premier quand vous avez juste besoin de localiser des choses.
+- **`feature` vs `refactor`** — comportement nouveau/modifié → `feature`. Même comportement, meilleure forme →
+  `refactor` (il impose des tests de caractérisation *avant* toute modification).
+- **`spike` d'abord ?** — si l'*approche elle-même* est inconnue (pas seulement les détails), exécutez `spike` pour
+  aboutir à une décision, puis alimentez cette décision dans un `feature` ou un `refactor`.
 
-## How to invoke
+## Comment invoquer
 
-Type the slash command with your task inline:
+Tapez la commande slash avec votre tâche en ligne :
 
 ```
 /feature add a reportFormat query parameter to the download endpoint
@@ -35,13 +35,13 @@ Type the slash command with your task inline:
 /explore how does a queued report reach S3?
 ```
 
-Or just describe the task in plain language — Claude matches it to a workflow from the skill
-descriptions. Slash commands make the choice explicit; useful when the task sits near a boundary
-above.
+Ou décrivez simplement la tâche en langage clair — Claude la fait correspondre à un workflow à partir des
+descriptions de skills. Les commandes slash rendent le choix explicite ; utile quand la tâche se situe près d'une frontière
+ci-dessus.
 
-## What you get either way
+## Ce que vous obtenez dans tous les cas
 
-Every workflow shares the [protocol](../reference/gates-and-protocol.md): a `.work/<slug>/` task
-directory, named agents per phase, and (for the gated ones) interactive **approve / request changes /
-cancel** stops you control. See [Reference: workflows](../reference/workflows.md) for the exact phase
-list of each.
+Chaque workflow partage le [protocole](../reference/gates-and-protocol.md) : un répertoire de tâche `.work/<slug>/`,
+des agents nommés par phase, et (pour ceux qui sont gatés) des arrêts interactifs **approve / request changes /
+cancel** que vous contrôlez. Voir [Référence : workflows](../reference/workflows.md) pour la liste exacte des phases
+de chacun.

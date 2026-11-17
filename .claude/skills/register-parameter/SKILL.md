@@ -137,7 +137,7 @@ Demander à l'utilisateur:
 ### Build et tests
 
 ```bash
-cd /home/lab/projects/reports/../monolith/CFF/Products/ReportManagerApi
+cd /c/Repos/monolith/CFF/Products/ReportManagerApi
 
 # Build
 dotnet build ReportManagerAPI.sln
@@ -180,6 +180,5 @@ Fournir:
 
 ## Références
 
-- Guide migration: `/home/lab/projects/reports/MIGRATION_PROCEDURE_HUMAN.md` (Étape 6)
 - CLAUDE.md: Section "Adding a ValueProviderParameter"
 - Skills: `implement-parameter`, `analyze-cpp-function`

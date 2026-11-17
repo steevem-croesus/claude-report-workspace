@@ -1,8 +1,3 @@
----
-name: read-cpp-patterns
-description: Guide de lecture rapide du code C++ legacy sans être expert. Identifie ce qui est important (logique métier) vs ce qu'il faut ignorer (boilerplate, UI). Utiliser pour analyser rapidement le code C++ source.
----
-
 # Skill: Read C++ Patterns
 
 Guide pratique pour lire et comprendre le code C++ legacy **sans être expert en C++**.
@@ -278,6 +273,6 @@ if (sPref == "YES") {
 
 ## Références
 
-**Skills:** `estimate-complexity` (utilise ces patterns), `analyze-cpp-function` (analyse approfondie), `migration-examples` (exemples concrets)
+**Skills:** `estimate-complexity` (utilise ces patterns), `analyze-cpp-function` (analyse approfondie), `.claude/conventions/reference/migration-examples.md` (exemples concrets)
 
 **Fichiers C++:** `repos/CroesusServer/Src/ReportApi/ReportCtr/ReportCtrParam/validation_*.c`

@@ -1,0 +1,57 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Repos/monolith/**)",
+      "Read(//c/Repos/pf-web/**)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet test *)",
+      "Bash(npx nx *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh pr list *)",
+      "Bash(bash .claude/scripts/check-vpf-registration.sh*)",
+      "mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources",
+      "mcp__plugin_atlassian_atlassian__getJiraIssue",
+      "mcp__plugin_atlassian_atlassian__listJiraIssueComments",
+      "mcp__plugin_atlassian_atlassian__searchJiraIssuesUsingJql",
+      "mcp__claude_ai_Atlassian__getAccessibleAtlassianResources",
+      "mcp__claude_ai_Atlassian__getJiraIssue",
+      "mcp__claude_ai_Atlassian__getJiraIssueRemoteIssueLinks",
+      "mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql"
+    ],
+    "deny": [
+      "Bash(aws)",
+      "Bash(aws *)",
+      "Bash(terraform apply*)",
+      "Bash(terraform destroy*)",
+      "Bash(tofu apply*)",
+      "Bash(tofu destroy*)",
+      "Bash(assume)",
+      "Bash(assume *)",
+      "Bash(granted)",
+      "Bash(granted *)",
+      "PowerShell(aws)",
+      "PowerShell(aws *)",
+      "PowerShell(terraform apply*)",
+      "PowerShell(terraform destroy*)",
+      "PowerShell(tofu apply*)",
+      "PowerShell(tofu destroy*)",
+      "PowerShell(assume *)",
+      "PowerShell(granted *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/confirm-cpp-edit.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

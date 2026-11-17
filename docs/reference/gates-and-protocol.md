@@ -1,57 +1,64 @@
-# Reference — Gates & protocol
+# Référence — Gates & protocole
 
-The shared foundation every workflow builds on. **Authoritative source:**
+La fondation partagée sur laquelle chaque workflow s'appuie. **Source faisant autorité :**
 [`.claude/conventions/protocol.md`](../../.claude/conventions/protocol.md).
 
-## Gate protocol (interactive)
+## Protocole de gate (interactif)
 
-This workspace runs **gated**. At each gate the orchestrator stops and asks you (via a multiple-choice
-prompt): *approve / request changes / cancel*.
+Ce workspace fonctionne en mode **gated**. À chaque gate, l'orchestrateur s'arrête et te demande (via une
+invite à choix multiple) : *approve / request changes / cancel*.
 
-- **approve** → proceed to the next phase.
-- **request changes** → your feedback is written verbatim to
-  `.work/<slug>/_signals/revision-request.md`; the phase's agent is re-dispatched (it reads its prior
-  artifact + the revision request); then you return to the same gate with the revised artifact.
-- **cancel** → stop the workflow.
+- **approve** → passer à la phase suivante.
+- **request changes** → ton retour est écrit verbatim dans
+  `.work/<slug>/_signals/revision-request.md` ; l'agent de la phase est re-dispatché (il lit son artefact
+  précédent + la demande de révision) ; puis tu reviens au même gate avec l'artefact révisé.
+- **cancel** → arrêter le workflow.
 
-The orchestrator **never auto-proceeds past a gate.** The two universal gates are the **plan gate**
-(after `plan.md`) and the **code gate** (after `build-summary.md` + `review-code.md`). Some workflows
-add their own (the spike's *decision* gate).
+L'orchestrateur **ne dépasse jamais un gate automatiquement.** Les deux gates universels sont le **gate de plan**
+(après `plan.md`) et le **gate de code** (après `build-summary.md` + `review-code.md`), suivi de la rétrospective. Certains workflows
+ajoutent le leur (le gate de *décision* du spike).
 
-## The plan gate — the build bar
+## Le gate de plan — la barre de build
 
-The plan gate has an extra, non-negotiable entry condition. `plan.md` carries a header:
+Le gate de plan a une condition d'entrée non négociable, et ce n'est pas l'auteur du plan qui la constate :
 
-```
-**Status:** <draft | ready> · **Grade:** <F | D | C | B | A | S>
-```
+1. `plan.md` porte `**Status:** ready` — le planner déclare qu'il ne reste ni point `needs-user` ni question
+   ouverte bloquante ;
+2. `review-plan.md`, écrit par le **reviewer**, porte `**Buildable:** yes` — tous les critères ci-dessous sont
+   à oui ou n.a., chacun avec sa preuve.
 
-Scale: **F < D < C < B < A < S**. The workflow may build **only** from a plan that is **`ready`** *and*
-graded **A or S**.
+| # | Critère | Répond « non » quand… |
+|---|---|---|
+| C1 | Couverture des exigences | une exigence du contexte n'est reliée à aucune étape ni à un report explicite |
+| C2 | Contrats concrets | un endpoint, un DTO ou une méthode publique reste décrit en prose |
+| C3 | Décisions résolues | il reste un point `needs-user` ou une question ouverte bloquante |
+| C4 | Emplacements vérifiés | un fichier, une classe ou une méthode cité est introuvable |
+| C5 | Tests nommés | une étape qui change un comportement n'a pas de test nommé avec son niveau |
+| C6 | Pièges connus | une entrée applicable de `known-pitfalls.md` est ignorée |
+| C7 | Sécurité / intégrité | une garantie « par construction » ne couvre que le chemin nominal (n.a. sans contrainte) |
+| C8 | Estimation cohérente | la confiance annoncée ignore les inconnues du plan |
 
-- **`draft` or below A** → the gate does **not** offer *approve*. It surfaces the grade + blockers
-  (open questions, `needs-user` decision points) and routes to **request changes** (re-dispatch the
-  planner) or **cancel**.
-- **`ready` + A/S** → normal *approve / changes / cancel*. A qualifying grade *unlocks* the gate; it
-  does not auto-pass it — approval is still required.
-- **Override** → you may explicitly approve a sub-bar plan (e.g. a deliberately tiny change). The
-  override is recorded in `revision-request.md` so it's auditable. Absent an explicit override, the
-  bar holds.
+- **`draft` ou `Buildable: no`** → le gate n'offre **pas** *approve*. Il présente les critères à « non » et
+  route vers **request changes** (re-dispatcher le planner, puis le reviewer) ou **cancel**.
+- **`ready` + `Buildable: yes`** → *approve / changes / cancel* normal. L'approbation reste requise.
+- **Double passage** → quand deux reviewers relisent le plan, un critère n'est à « oui » que si les deux
+  répondent oui.
+- **Override** → tu peux approuver explicitement un plan sous la barre. L'override est enregistré dans
+  `revision-request.md`. Sans override explicite, la barre tient.
 
-The rubric is owned by [`planner.md`](../../.claude/agents/planner.md); how-to:
-[get a plan past the gate](../how-to/pass-the-plan-gate.md); rationale:
-[gates & the build bar](../explanation/gates-and-the-build-bar.md).
+Guide pratique : [faire passer un plan au gate](../how-to/pass-the-plan-gate.md) ; justification :
+[gates & la barre de build](../explanation/gates-and-the-build-bar.md).
 
-## The code gate
+## Le gate de code
 
-After build + review, present the reviewer's verdict + the `build-summary.md` outcome. *approve /
-changes / cancel*. **changes** (or any `must-fix` finding) loops back to build against the review —
-capped at **3 build↔review iterations**, after which the workflow stops and reports remaining issues.
+Après build + review, présenter le verdict du reviewer + le résultat de `build-summary.md`. *approve /
+changes / cancel*. **changes** (ou tout constat `must-fix`) reboucle vers build contre la review —
+plafonné à **3 itérations build↔review**, après quoi le workflow s'arrête et rapporte les problèmes restants.
 
-## HALT protocol (agent → orchestrator)
+## Protocole HALT (agent → orchestrateur)
 
-Any producing agent (planner, implementer, porter, context-gatherer, investigator) may stop mid-run
-and return a HALT block on a genuine user decision:
+Tout agent producteur (planner, implementer, porter, context-gatherer, investigator) peut s'arrêter en cours
+d'exécution et retourner un bloc HALT sur une véritable décision utilisateur :
 
 ```
 HALT: need user decision
@@ -61,49 +68,49 @@ Proposed default: <recommendation>
 State: <progress so far, to resume>
 ```
 
-The orchestrator surfaces the question, writes the answer to `_signals/resume.<agent>.md`, and
-re-dispatches. **Cap: 3 HALT round-trips per agent**; after that, proceed with the stated default or
-stop with a clear message.
+L'orchestrateur fait remonter la question, écrit la réponse dans `_signals/resume.<agent>.md`, et
+re-dispatche. **Plafond : 3 allers-retours HALT par agent** ; après cela, procéder avec le default indiqué ou
+s'arrêter avec un message clair.
 
-## Per-repo build / test / lint
+## Build / test / lint par repo
 
-| Repo | Build | Test (single) | Lint |
+| Repo | Build | Test (unique) | Lint |
 |---|---|---|---|
 | ReportManagerApi | `dotnet build /c/Repos/monolith/CFF/Products/ReportManagerApi/ReportManagerAPI.sln` | `dotnet test <proj> --filter "FullyQualifiedName~<Name>"` | — |
 | ReportFoundations | `dotnet build <lib .sln/.csproj>` | `dotnet test <proj.SmallTests>` | — |
 | pf-web | `nx build <project>` | `nx test <project> --testFile=<path>` | `nx lint <project>` |
-| CroesusServer | CMake / Visual Studio | (usually read-only reference) | — |
-| ReportServer | CMake / Visual Studio | (usually read-only reference) | — |
+| CroesusServer | CMake / Visual Studio | (généralement référence read-only) | — |
+| ReportServer | CMake / Visual Studio | (généralement référence read-only) | — |
 
-Test tiers: C# `*.SmallTests` (unit, no external deps) / `*.MediumTests` (integration), xUnit + Moq;
-Angular: Vitest. The runnable API web project is `ReportManager.API/ReportManagerAPI.csproj`.
+Tiers de test : C# `*.SmallTests` (unit, sans deps externes) / `*.MediumTests` (intégration), xUnit + Moq ;
+Angular : Vitest. Le projet web API exécutable est `ReportManager.API/ReportManagerAPI.csproj`.
 
-## Branch, commit & ship rules
+## Règles de branch, commit & ship
 
-Product commits/PRs happen **in the real repo behind the symlink**, never in the workspace-root repo. There are
-only two product repos: the `monolith` monorepo (every symlink except pf-web — one branch/PR covers C# + C++) and `pf-web`. Agents `git add`-stage new files but **do not commit** unless the task explicitly
-asks; committing is the workflow's final, gated *ship* step.
+Les commits/PRs de produit se font **dans le repo réel derrière le symlink**, jamais dans le repo racine du workspace. Il n'y a
+que deux repos produit : le monorepo `monolith` (tous les symlinks sauf pf-web — une branche/PR couvre C# + C++) et `pf-web`. Les agents `git add`-stagent les nouveaux fichiers mais **ne committent
+pas** sauf si la tâche le demande explicitement ; le commit est l'étape finale et gatée de *ship* du workflow.
 
-- Branch from a protected ref (`main`, `master`, `develop`, `release/*`, `support/*`) with
-  **`--no-track`**: `git switch -c <name> --no-track origin/develop`.
-- First push of a new branch: **`git push -u origin <branch>`** — never a bare `git push`.
-- `pf-web` enforces **Conventional Commits** via commitlint; the .NET repos follow standard team
-  conventions.
+- Brancher depuis une référence protégée (`main`, `master`, `develop`, `release/*`, `support/*`) avec
+  **`--no-track`** : `git switch -c <name> --no-track origin/develop`.
+- Premier push d'une nouvelle branche : **`git push -u origin <branch>`** — jamais un `git push` nu.
+- `pf-web` impose les **Conventional Commits** via commitlint ; les repos .NET suivent les conventions
+  d'équipe standard.
 
-> These mirror the org-level git guardrails: never let a new branch silently track a protected ref;
-> always make the destination explicit on first push.
+> Celles-ci reflètent les garde-fous git au niveau org : ne jamais laisser une nouvelle branche suivre
+> silencieusement une référence protégée ; toujours rendre la destination explicite au premier push.
 
-## Guardrails (every agent, every phase)
+## Garde-fous (chaque agent, chaque phase)
 
-- **Never** run org-denied CLIs: `aws`, `terraform`/`tofu`, or wrappers around them (`assume`,
-  `granted`). ReportManagerApi uses AWS via the SDK/config only — never the CLI.
-- Read-only agents (explorer, investigator, learning-guide, reviewer, retrospective) never edit code.
-- Respect each repo's own `CLAUDE.md` / `copilot-instructions.md` — they override generic advice.
+- **Ne jamais** exécuter de CLI org-denied : `aws`, `terraform`/`tofu`, ou des wrappers autour d'eux (`assume`,
+  `granted`). ReportManagerApi utilise AWS via le SDK/la config uniquement — jamais la CLI.
+- Les agents read-only (explorer, investigator, learning-guide, reviewer, retrospective) ne modifient jamais le code.
+- Respecter le `CLAUDE.md` / `copilot-instructions.md` propre à chaque repo — ils l'emportent sur les conseils génériques.
 
-## Context gathering
+## Collecte de contexte
 
-Always dispatch [`context-gatherer`](agents.md#context-gatherer) first in
-`feature`/`bug`/`refactor`/`spike`/`investigate`. It resolves the Jira ticket via the Atlassian MCP,
-resolves GitHub context via `gh` inside the relevant repo, and writes `context.md`. If Jira/GitHub is
-unreachable (headless/auth), the workflow proceeds on local evidence and says so — it never fabricates
-ticket content.
+Toujours dispatcher [`context-gatherer`](agents.md#context-gatherer) en premier dans
+`feature`/`bug`/`refactor`/`spike`/`investigate`. Il résout le ticket Jira via l'Atlassian MCP,
+résout le contexte GitHub via `gh` dans le repo pertinent, et écrit `context.md`. Si Jira/GitHub est
+injoignable (headless/auth), le workflow procède sur les preuves locales et le dit — il ne fabrique jamais
+le contenu d'un ticket.

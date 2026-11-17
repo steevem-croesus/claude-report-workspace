@@ -1,6 +1,6 @@
 ---
 name: bug
-description: Fix a defect in the Croesus report workspace, end to end, following the gated bug workflow — context → reproduce → diagnose → plan-fix → [gate] → build → verify+review → [gate] → ship? → retrospective. Pulls context from Jira and GitHub. Use when the user reports something broken/wrong (bad report output, error, crash, incorrect value, regression) or hands over a Jira bug ticket. Enforces no-fix-without-a-reproduction-and-a-regression-test. Not for new capabilities (use feature) or pure restructuring (use refactor).
+description: Fix a defect in the Croesus report workspace, end to end, following the gated bug workflow — context → reproduce → diagnose → plan-fix → [gate] → build → verify+review → [gate] → retrospective → ship?. Pulls context from Jira and GitHub. Use when the user reports something broken/wrong (bad report output, error, crash, incorrect value, regression) or hands over a Jira bug ticket. Enforces no-fix-without-a-reproduction-and-a-regression-test. Not for new capabilities (use feature) or pure restructuring (use refactor).
 allowed-tools: Agent, Task, AskUserQuestion, Read, Write, Grep, Glob, Bash
 ---
 
@@ -49,15 +49,20 @@ racine → confiance). Il ajoute à `bug-diagnosis.md`. Distingue le déclencheu
 
 ## 5. Planifier le correctif  →  `plan.md`
 Dispatche **planner** (cadré sur le correctif, minimal — le plan doit inclure le test de régression dans
-sa section Tests). Il écrit un `plan.md` noté et estampillé d'un statut. Boucle HALT/point de décision
+sa section Tests). Il écrit un `plan.md` estampillé d'un statut (`draft`/`ready`). Boucle HALT/point de décision
 comme dans protocol.md.
 
-## 6. Gate de plan — faire respecter la barre de build
-Présente `plan.md` (commence par **Status** + **Grade**). Applique la **barre de build** de protocol.md :
-approuvable uniquement lorsque `ready` + noté **A ou S**. Sous la barre → fais remonter + **changements**
-(re-dispatche le planner) ou **annuler** ; passage-outre explicite de l'utilisateur consigné dans
-`_signals/revision-request.md`. À/au-dessus de la barre → demande *approuver / changements / annuler*.
-Les petits correctifs peuvent obtenir une note vite, mais la barre tient sauf passage-outre.
+## 6. Review du plan + gate de plan  →  `review-plan.md`
+Dispatche **reviewer** en mode plan sur `plan.md` : il écrit `review-plan.md` (critères C1 à C8 de
+protocol.md, puis `Buildable: yes/no`). Cette revue est **systématique** — le plan n'est jamais jugé
+par son auteur. Présente ensuite `plan.md` (son **Status**) et `review-plan.md` (son **Buildable** et
+les critères à « non »), puis applique la **barre de build** de protocol.md :
+- `draft` ou `Buildable: no` → **ne propose pas** *approuver*. Fais remonter les critères à « non » avec
+  leur preuve, puis **changements** (écris-les dans `_signals/revision-request.md`, re-dispatche le
+  planner, refais passer le reviewer, reviens à ce gate) ou **annuler**. L'utilisateur peut passer outre
+  explicitement — consigne-le dans `_signals/revision-request.md`.
+- `ready` + `Buildable: yes` → demande *approuver / changements / annuler* via `AskUserQuestion`.
+  L'approbation reste requise. **annuler** → arrête (« annulé au gate de plan »).
 
 ## 7. Construire le correctif  →  `build-summary.md`
 Dispatche **implementer** (ou **cpp-to-csharp-porter** si le correctif est dans un port de
@@ -75,14 +80,14 @@ Demande *approuver / changements / annuler*. **changements** ou `must-fix` prés
 dans `_signals/revision-request.md`, reboucle au §7 (**plafond 3** itérations build↔review), puis signale
 les problèmes restants. **approuver** → continue.
 
-## 10. Ship (optionnel, gaté)
+## 10. Rétrospective  →  `retro.md`
+Lance-la **dès que le gate de code est approuvé**, que l'on ship ensuite ou non. Dispatche **retrospective**. Son `retro.md` **doit** inclure la *classe* de cause racine (pour que des
+bugs similaires soient attrapés plus tôt) et proposer des ajouts aux conventions du repo et des mises à jour de doc sous forme de
+checklist pour approbation de l'utilisateur — ne les écris pas automatiquement.
+
+## 11. Ship (optionnel, gaté)
 Si l'utilisateur veut ship : **par repo touché**, branche (`--no-track` depuis une réf protégée),
 commite, `git push -u`, ouvre une PR — selon les règles git de l'org dans protocol.md. Saute si refusé.
-
-## 11. Rétrospective  →  `retro.md`
-Dispatche **retrospective**. Son `retro.md` **doit** inclure la *classe* de cause racine (pour que des
-bugs similaires soient attrapés plus tôt) et proposer des mises à jour mémoire/doc sous forme de
-checklist pour approbation de l'utilisateur — ne les écris pas automatiquement.
 
 Termine par un court résumé : la cause racine, le correctif + le test de régression, le résultat
 vérification/review, les PR (le cas échéant), et les apprentissages proposés en attente d'approbation.

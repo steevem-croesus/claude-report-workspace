@@ -1,172 +1,134 @@
-# Reference — Agents
+<!-- Page générée par .claude/scripts/gen-reference-docs.py — ne pas éditer à la main. -->
 
-Nine agents live under [`.claude/agents/`](../../.claude/agents/), dispatched via the Agent tool by
-the workflow skills. Each carries a distinguished/fellow-level engineering persona and a narrow role.
-They split into **read-only** (never edit code) and **editing**.
+# Référence — Agents
 
-| Agent | Role | Read-only? | Model | Writes |
-|---|---|---|---|---|
-| [`context-gatherer`](#context-gatherer) | Jira + GitHub intel | ✅ | Sonnet | `context.md` |
-| [`explorer`](#explorer) | cross-repo code map | ✅ | Sonnet | `exploration.md` |
-| [`investigator`](#investigator) | root-cause analysis | ✅ | Opus | `investigation.md` / `bug-diagnosis.md` |
-| [`learning-guide`](#learning-guide) | teaching walkthrough | ✅ | Sonnet | `learning-notes.md` |
-| [`reviewer`](#reviewer) | plan/code review | ✅ | Opus | `review-plan.md` / `review-code.md` |
-| [`retrospective`](#retrospective) | capture learnings | ✅ (code) | Sonnet | `retro.md` |
-| [`planner`](#planner) | implementation plan | writes `plan.md` only | Opus | `plan.md` |
-| [`implementer`](#implementer) | build + test | ✏️ edits code | Opus | code, tests, `build-summary.md` |
-| [`cpp-to-csharp-porter`](#cpp-to-csharp-porter) | C++→C# value-provider port | ✏️ edits code | Opus | code, tests, `build-summary.md` |
+Un agent par fichier sous [`.claude/agents/`](../../.claude/agents/) ; on le dispatche par son nom (`subagent_type`). Le fichier de l'agent fait autorité : cette page n'en reprend que l'en-tête.
 
-All agents obey the shared [guardrails](gates-and-protocol.md#guardrails): never run org-denied CLIs
-(`aws`, `terraform`/`tofu`), respect each repo's own `CLAUDE.md`, and read-only agents never edit.
+| Agent | Modèle | Écrit du code |
+|---|---|---|
+| [`backend-migrator`](#backend-migrator) | opus | oui |
+| [`context-gatherer`](#context-gatherer) | sonnet | non |
+| [`cpp-to-csharp-porter`](#cpp-to-csharp-porter) | opus | oui |
+| [`explorer`](#explorer) | sonnet | non |
+| [`frontend-migrator`](#frontend-migrator) | opus | oui |
+| [`implementer`](#implementer) | opus | oui |
+| [`investigator`](#investigator) | opus | non |
+| [`learning-guide`](#learning-guide) | sonnet | non |
+| [`migration-reviewer`](#migration-reviewer) | opus | non |
+| [`migration-validator`](#migration-validator) | sonnet | non |
+| [`planner`](#planner) | opus | non |
+| [`report-analyst`](#report-analyst) | opus | non |
+| [`retrospective`](#retrospective) | sonnet | non |
+| [`reviewer`](#reviewer) | opus | non |
 
-## Per-agent model
+## backend-migrator
 
-Each agent pins its own model via a `model:` field in its
-[`.claude/agents/*.md`](../../.claude/agents/) frontmatter, tiered by what the role actually demands:
+Migre le backend d'un rapport de Conseiller (C++) vers Xpert (C#, ReportManagerApi). Localise les classes, extrait/classifie les paramètres, analyse le C++, implémente Parameters.cs (InitialValue, ValueProviderFunction, radio/combo déclaratifs), crée les classes VPF custom + tests, enregistre dans les executers et WebRTMRunner, build et teste. Pour du frontend, utiliser frontend-migrator.
 
-- **Opus** — `planner`, `implementer`, `cpp-to-csharp-porter`, `reviewer`, `investigator`: anything
-  that designs the change, writes or ports code, judges quality, or does root-cause reasoning. These
-  are the correctness-critical, high-stakes roles — the plan that gates the build, the financial/date
-  C++→C# port, the review the build bar depends on.
-- **Sonnet** — `context-gatherer`, `explorer`, `learning-guide`, `retrospective`: the read-only
-  gather / map / teach / summarise roles. Plenty capable, faster, and cheaper.
-
-To change a tier, edit that agent's `model:` value (`opus` / `sonnet` / `haiku`, or `inherit` to
-follow your session model). Because the field lives in the agent frontmatter, the choice applies
-everywhere the agent is dispatched, in every workflow.
-
----
+- **Modèle :** opus
+- **Outils :** `Read`, `Glob`, `Grep`, `Edit`, `Write`, `Bash`, `Skill`, `mcp__ide__getDiagnostics`
+- **Définition :** [`.claude/agents/backend-migrator.md`](../../.claude/agents/backend-migrator.md)
 
 ## context-gatherer
 
-- **Role:** assemble a faithful, cited Context brief before anyone writes code. Does *not* design,
-  estimate, or write production code.
-- **Invoked:** first, in every `feature`/`bug`/`refactor`/`spike`/`investigate` run.
-- **Inputs:** a Jira key, a GitHub ref (`#123` / URL), or free-text task.
-- **Tools:** Read, Write, Grep, Glob, Bash, WebFetch, and Atlassian MCP (`getAccessibleAtlassianResources`,
-  `getJiraIssue`, `searchJiraIssuesUsingJql`, `getJiraIssueRemoteIssueLinks`, Confluence fetch).
-- **Procedure:** resolve the Jira ticket (summary, description, comments, acceptance criteria, links,
-  referenced Confluence specs) → resolve GitHub context via `gh` inside the relevant repo → cross-
-  reference asked-vs-existing and flag contradictions.
-- **Output:** `context.md` (template:
-  [`templates/context.md`](../../.claude/conventions/templates/context.md)) + a summary naming the
-  target repo(s) and top 3 open questions.
-- **Guardrail:** read-only on Jira/GitHub too — never comments on or transitions a ticket, never opens
-  a PR. If it can't reach Jira/GitHub, it says so and works from local evidence; never fabricates.
+Read-only. Given a Jira key (e.g. RPT-12345), a GitHub PR/issue ref (#123 or URL), or a free-text task, pulls the ticket, its comments and links, and any related GitHub PRs/issues/commits into a single Context brief. Invoke this FIRST in every feature/bug/refactor/spike/investigate workflow. Does not plan or propose fixes — it only assembles facts.
 
-## explorer
-
-- **Role:** locate and map code across the repos so others can orient fast. Maps; does not judge or
-  propose fixes.
-- **Invoked:** `explore` workflow; start of `feature`/`refactor`; anywhere a code map is needed.
-- **Tools:** Read, Grep, Glob, Bash.
-- **Notable heuristic:** when a feature reads config/"default"/setup data, it doesn't stop at the
-  obvious helper — it also traces the **repository / Flex "scenario" discovery path**
-  (`I*Repository.BuildScenarioData`, `Get*SetupConfig`), because the generation path often resolves
-  data through a scenario the query-side helper hides. It also flags shared surfaces (interfaces that
-  might need to become generic, base classes to extract) when a feature adds a flow **alongside** an
-  existing one.
-- **Output:** a `repo/path:line` table grouped by repo + prose flow + 2–3 best entry points →
-  `exploration.md` (or inline for quick questions).
-
-## investigator
-
-- **Role:** find the *root cause* of a defect/behaviour with evidence, not plausibility. Explains;
-  does not fix.
-- **Invoked:** `investigate` workflow; the diagnose phase of `bug`.
-- **Tools:** Read, Grep, Glob, Bash, WebFetch.
-- **Procedure:** frame → gather evidence (code, `git log`/`git blame`/`git log -S`, tickets/PRs,
-  logs) → hypothesize → **verify adversarially** (try to refute the leading hypothesis; distinguish
-  trigger from root cause) → conclude with confidence (high/medium/low).
-- **Output:** `investigation.md` (or `bug-diagnosis.md` in a bug): symptom → evidence → hypotheses
-  (with verdicts) → root cause → confidence → open questions. Every claim cited.
-
-## learning-guide
-
-- **Role:** make a newcomer productive in a chosen area, teaching from the real code.
-- **Invoked:** `learn` workflow.
-- **Tools:** Read, Grep, Glob, Bash, WebFetch.
-- **Output:** `learning-notes.md` — big picture → happy-path trace (`repo/path:line`) → key
-  abstractions → glossary (`PREF_`, `PARAM_`, spooler, value-provider, `generationId`, …) → 2–4 safe,
-  read-only/throwaway exercises → where to go next.
-
-## reviewer
-
-- **Role:** adversarial, terse review. No praise, no summaries, no scope creep.
-- **Invoked:** the plan gate (plan mode) and code gate (code mode) of `feature`/`bug`/`refactor`.
-- **Tools:** Read, Grep, Glob, Bash (may build/run tests to verify a finding — non-mutating).
-- **Two modes:**
-  - **Plan review** — does the plan satisfy its requirements-coverage table? Is placement/layering
-    correct, are risks/tests/estimate realistic, and — critically — **is the self-assigned Grade +
-    Status honest?** An over-graded or wrongly-`ready` plan is a must-fix, because the build bar
-    depends on it.
-  - **Code review** — correctness bugs, layering violations, weak/missing tests, cross-repo contract
-    drift, C++→C# fidelity.
-- **Output:** one line per finding — `repo/path:line: <emoji> <severity>: <problem>. <fix>.` —
-  severities 🔴 must-fix / 🟡 should-fix / 🟢 consider; a **Don't miss** line; a verdict (`clean` /
-  `should-fix only` / `must-fix present`) → `review-plan.md` or `review-code.md`.
-
-## retrospective
-
-- **Role:** turn finished work into durable knowledge. Does not modify production code.
-- **Invoked:** last phase of `feature`/`bug`/`refactor`.
-- **Tools:** Read, Glob, Grep, Bash, Write.
-- **Output:** `retro.md` (template:
-  [`templates/retro.md`](../../.claude/conventions/templates/retro.md)) — what shipped, plan vs
-  reality, what went well/hard, root-cause *class* (bugs only), follow-ups, and 1–4 **proposed**
-  durable learnings (memory entries + doc/CLAUDE.md edits) as a checklist. **Never writes memory or
-  edits docs itself** — it surfaces the checklist for you to approve.
-
-## planner
-
-- **Role:** design the change before a line is written. Does not write production code.
-- **Invoked:** the plan phase of `feature`/`bug`/`refactor` (after context + exploration).
-- **Tools:** Read, Grep, Glob, Bash, Write.
-- **Honours architecture rules:** pf-web DDD layering; ReportManagerApi clean architecture + the
-  value-provider recipe; ReportFoundations breaking-surface call-outs (and the discovery-route
-  check — verify whether the *generation* path resolves data via a Flex scenario before scoping RF
-  out); parallel-flow shared-base/interface-reshape as a first-class decision point.
-- **Output:** `plan.md` (template:
-  [`templates/plan.md`](../../.claude/conventions/templates/plan.md)) with a **Status/Grade header**,
-  Problem, Requirements coverage, Affected areas, **Contracts & interfaces**, Steps (grouped `#### <repo>`
-  for multi-repo), Tests, Risks, Decision points (`resolved`/`needs-user`), Estimate (T-shirt sizes +
-  confidence), Open questions.
-- **Contracts & interfaces:** the concrete design the implementer writes as-is — endpoints (route, auth,
-  request/response, status codes, controller), DTO/entity/model schemas as code blocks (types + nullability,
-  C# and its TS mirror), exact public method signatures, columns/`spAddColumn` migrations, `PARAM_`/`PREF_`/
-  `RPT_mgr_*` keys. Only what the change creates or modifies; anything not verified in code is flagged
-  `⚠ à confirmer` and lowers the estimate's confidence. A contract left as prose caps the plan at **B**.
-- **The build bar:** grades on **F < D < C < B < A < S**; marks `draft` unless honestly `ready` +
-  (A|S). **Never inflates the grade to pass the gate** — see
-  [gates & the build bar](../explanation/gates-and-the-build-bar.md).
-- **HALT:** stops and asks on a genuine fork rather than guessing.
-
-## implementer
-
-- **Role:** turn an approved plan into working, tested code across C#/.NET, Angular/TypeScript, or
-  C++. Does not re-plan or exceed the plan's scope.
-- **Invoked:** the build (and refactor characterize) phase, per repo slice — *except* value-provider
-  ports, which go to the porter.
-- **Tools:** Read, Glob, Grep, Edit, Write, Bash, `mcp__ide__getDiagnostics`.
-- **Discipline:** match the target repo's `CLAUDE.md` conventions exactly; write tests in the repo's
-  tier/style; **always build then run the authored tests before returning** and report real command
-  output; `git add`-stage new files but **do not commit**.
-- **Output:** `build-summary.md` — files changed per repo, tests added, exact commands + outcomes,
-  deviations. Outcome ∈ `ok` / `tests-failed` / `build-failed`.
-- **HALT:** stops if the plan is ambiguous or contradicts the code.
+- **Modèle :** sonnet
+- **Outils :** `Read`, `Write`, `Grep`, `Glob`, `Bash`, `WebFetch`, `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources`, `mcp__plugin_atlassian_atlassian__getJiraIssue`, `mcp__plugin_atlassian_atlassian__listJiraIssueComments`, `mcp__plugin_atlassian_atlassian__searchJiraIssuesUsingJql`, `mcp__plugin_atlassian_atlassian__getConfluenceContent`, `mcp__plugin_atlassian_atlassian__searchConfluence`, `mcp__plugin_atlassian_atlassian__search`, `mcp__claude_ai_Atlassian__getAccessibleAtlassianResources`, `mcp__claude_ai_Atlassian__getJiraIssue`, `mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql`, `mcp__claude_ai_Atlassian__getJiraIssueRemoteIssueLinks`, `mcp__claude_ai_Atlassian__getConfluencePage`, `mcp__claude_ai_Atlassian__searchConfluenceUsingCql`, `mcp__claude_ai_Atlassian__fetch`
+- **Définition :** [`.claude/agents/context-gatherer.md`](../../.claude/agents/context-gatherer.md)
 
 ## cpp-to-csharp-porter
 
-- **Role:** the specialist for reimplementing a C++ report function as a C# `IValueProviderParameter`
-  in ReportManagerApi. Follows [`copilot-instructions.md`](../../repos/ReportManagerApi/copilot-instructions.md)
-  exactly.
-- **Invoked:** the build phase when a step is a value-provider port (inside `feature`/`bug`), or
-  standalone.
-- **Tools:** Read, Glob, Grep, Edit, Write, Bash, `mcp__ide__getDiagnostics`.
-- **Procedure & dependency mapping:** see the how-to,
-  [port a C++ function to C#](../how-to/port-cpp-to-csharp.md).
-- **Output:** `build-summary.md` — C++ source (`repo/path:line`) + semantics, the C# class + injected
-  deps, the executer line added, any `IDateTimeService` addition, tests, build/test results, and any
-  C++ behaviour it could **not** faithfully reproduce.
-- **Guardrail:** fidelity first — the C# must match the C++ semantics; deliberate divergences are
-  called out. HALTs rather than guessing financial/date logic.
+Specialist for the recurring cross-repo task — porting a C++ report function from repos/CroesusServer OR repos/ReportServer into a C# IValueProviderParameter in repos/ReportManagerApi. Follows the recipe in repos/ReportManagerApi/copilot-instructions.md exactly: locate + analyze the C++, convert semantics to C#, place the class, register it in the correct executer, add any date-service methods, and write unit tests. Use whenever a report parameter/value must be reimplemented from the C++ monolith or the C++ report engine.
+
+- **Modèle :** opus
+- **Outils :** `Read`, `Glob`, `Grep`, `Edit`, `Write`, `Bash`, `mcp__ide__getDiagnostics`
+- **Définition :** [`.claude/agents/cpp-to-csharp-porter.md`](../../.claude/agents/cpp-to-csharp-porter.md)
+
+## explorer
+
+Read-only cross-repo code locator and mapper for the report workspace. Answers "where is X", "what calls Y", "how does the report pipeline flow through these repos", "map this subsystem". Returns a file:line map spanning CroesusServer (C++), ReportFoundations + ReportManagerApi (C#), and pf-web (Angular). Use at the start of feature/refactor work and for the `explore` workflow. Does not propose fixes or write code.
+
+- **Modèle :** sonnet
+- **Outils :** `Read`, `Grep`, `Glob`, `Bash`
+- **Définition :** [`.claude/agents/explorer.md`](../../.claude/agents/explorer.md)
+
+## frontend-migrator
+
+Crée le composant Angular de paramétrage d'un rapport migré dans pf-web. Extrait les paramètres PRE, reproduit la logique C++ (patterns Observer inter-champs, validateurs de dates, visibilité conditionnelle), implémente le composant TypeScript + template HTML, l'enregistre (factory, listes de types, cleanParamType, rapports exclusifs), crée les tests e2e Cypress + fixtures, et vérifie la compilation. Pour le backend C#, utiliser backend-migrator.
+
+- **Modèle :** opus
+- **Outils :** `Read`, `Glob`, `Grep`, `Edit`, `Write`, `Bash`, `Skill`, `mcp__ide__getDiagnostics`
+- **Définition :** [`.claude/agents/frontend-migrator.md`](../../.claude/agents/frontend-migrator.md)
+
+## implementer
+
+Implements an approved plan.md in the report workspace, adapting to whichever repo/stack it edits (C# .NET, Angular/NX, or C++). Reads the target repo's CLAUDE.md/copilot-instructions, writes code + tests, and always builds (and runs the tests it authored) before returning. Use for the build phase of feature/bug/refactor workflows, after the plan gate. For C++→C# value-provider ports, defer to cpp-to-csharp-porter.
+
+- **Modèle :** opus
+- **Outils :** `Read`, `Glob`, `Grep`, `Edit`, `Write`, `Bash`, `mcp__ide__getDiagnostics`
+- **Définition :** [`.claude/agents/implementer.md`](../../.claude/agents/implementer.md)
+
+## investigator
+
+Read-only root-cause analyst for the report workspace. Answers "why did X happen / why is Y broken / how did this bug reach production". Gathers evidence from code, git history, Jira, GitHub, and logs; forms hypotheses; verifies or refutes each; concludes with the most-supported root cause. Use for the `investigate` workflow and the diagnose phase of the `bug` workflow. Does not fix — it explains.
+
+- **Modèle :** opus
+- **Outils :** `Read`, `Grep`, `Glob`, `Bash`, `WebFetch`
+- **Définition :** [`.claude/agents/investigator.md`](../../.claude/agents/investigator.md)
+
+## learning-guide
+
+Read-only teaching agent for the report workspace. Given a subsystem, concept, or repo area, produces a guided walkthrough that builds a mental model — entry points, data flow, key files, glossary, and hands-on exercises. Use for the `learn` workflow when onboarding onto the report pipeline or a specific area. Teaches; does not change code.
+
+- **Modèle :** sonnet
+- **Outils :** `Read`, `Grep`, `Glob`, `Bash`, `WebFetch`
+- **Définition :** [`.claude/agents/learning-guide.md`](../../.claude/agents/learning-guide.md)
+
+## migration-reviewer
+
+Relecteur (lecture seule) d'une migration de rapport. Audite le diff backend et/ou frontend contre les conventions de migration — fidélité C++→C#, catégories/registrations, ordre alphabétique, séparateurs, logique de dates, VPF divergentes, patterns Observer, tests. Une ligne par finding, sévérité taguée, sans complaisance. À utiliser après backend-migrator / frontend-migrator, avant PR.
+
+- **Modèle :** opus
+- **Outils :** `Read`, `Grep`, `Glob`, `Bash`, `Write`
+- **Définition :** [`.claude/agents/migration-reviewer.md`](../../.claude/agents/migration-reviewer.md)
+
+## migration-validator
+
+Validateur post-migration (lecture seule). Compare la sortie Xpert (JSON) avec la sortie Conseiller (XML) d'un même rapport pour valider l'équivalence fonctionnelle des paramètres. Classe chaque différence (identique / attendue / fonctionnelle) et propose des pistes d'investigation. À utiliser après une migration backend. Ne modifie aucun code.
+
+- **Modèle :** sonnet
+- **Outils :** `Read`, `Grep`, `Glob`, `Bash`, `Write`, `Skill`
+- **Définition :** [`.claude/agents/migration-validator.md`](../../.claude/agents/migration-validator.md)
+
+## planner
+
+Produces an implementation plan for a feature/refactor/bug-fix in the report workspace. Reads context.md + exploration.md, respects each repo's architecture (DDD in pf-web, clean architecture in ReportManagerApi, the value-provider recipe in copilot-instructions.md), and writes a brief, coverage-mapped plan.md with per-repo steps. Its output gates the build. Invoke after context + exploration, before any code is written.
+
+- **Modèle :** opus
+- **Outils :** `Read`, `Grep`, `Glob`, `Bash`, `Write`
+- **Définition :** [`.claude/agents/planner.md`](../../.claude/agents/planner.md)
+
+## report-analyst
+
+Analyste de rapport (lecture seule) pour la migration C++ → Xpert. Extrait et classifie les paramètres d'un rapport, localise et analyse le code C++ source, estime la complexité, vérifie les implémentations C# existantes, et produit une spec de migration. À utiliser AVANT d'implémenter quand on veut une analyse revue, ou pour estimer/planifier. Ne modifie aucun code.
+
+- **Modèle :** opus
+- **Outils :** `Read`, `Grep`, `Glob`, `Bash`, `Write`, `Skill`
+- **Définition :** [`.claude/agents/report-analyst.md`](../../.claude/agents/report-analyst.md)
+
+## retrospective
+
+Runs at the end of a feature/bug/refactor workflow. Reads the task artifacts (context, plan, reviews, build summary, and the final diff) and produces a retrospective — what shipped, what went well, what was surprising, and concrete follow-ups. Proposes durable learnings to save to Claude memory and doc/CLAUDE.md updates. Captures knowledge; does not change production code.
+
+- **Modèle :** sonnet
+- **Outils :** `Read`, `Glob`, `Grep`, `Bash`, `Write`
+- **Définition :** [`.claude/agents/retrospective.md`](../../.claude/agents/retrospective.md)
+
+## reviewer
+
+Reviews a plan.md (plan gate) or a code diff (code gate) in the report workspace. One line per finding, severity-tagged, no praise, no scope creep. Checks correctness, architecture/layering compliance, test adequacy, and cross-repo contract drift. Use at the review gates of the feature/bug/refactor workflows.
+
+- **Modèle :** opus
+- **Outils :** `Read`, `Grep`, `Glob`, `Bash`
+- **Définition :** [`.claude/agents/reviewer.md`](../../.claude/agents/reviewer.md)

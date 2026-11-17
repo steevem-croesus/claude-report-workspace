@@ -185,7 +185,7 @@ pAtt->SetValue(pref ? pref : fallback);   // → InitialValueFromPref + InitialV
 - Boucles `for`, `while` → Logique itérative
 - `std::vector`, `std::map` → Collections
 
-Voir `read-cpp-patterns` pour: ignorer boilerplate, technique scanning, exemples annotés.
+Voir `.claude/conventions/reference/read-cpp-patterns.md` pour: ignorer boilerplate, technique scanning, exemples annotés.
 
 #### Étape 2c: Marquer CHAQUE entrée
 

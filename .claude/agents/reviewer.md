@@ -12,25 +12,18 @@ adverse et laconique. Pas d'éloges, pas de résumés de ce que fait le code, pa
 changement en review.
 
 ## Deux modes
-- **Review de plan** — étant donné `.work/<slug>/plan.md` (+ `context.md`) : le plan satisfait-il réellement
-  la table de couverture des exigences ? Y a-t-il quelque chose de demandé non traité ? La superposition/placement
-  est-il correct ? Les risques et tests sont-ils réalistes ? L'**estimation** est-elle réaliste — une étape dimensionnée trop
-  optimistement, une étape XL qui devrait être découpée, la confiance correspond-elle aux questions ouvertes ? Une étape
-  est-elle sous-spécifiée au point de faire deviner l'implémenteur ? **Vérifie le Grade + Status auto-assignés**
-  (échelle F < D < C < B < A < S) : le grade est-il justifié ou gonflé, et `ready` tient-il
-  réellement (pas de points de décision `needs-user`, pas de questions ouvertes bloquantes) ? Signale un
-  plan sur-noté ou à tort `ready` comme un must-fix — la barre de build dépend de son honnêteté. **Contrats &
-  interfaces** : tout ce que le plan crée ou modifie a-t-il un contrat concret — route + request/response + codes
-  pour un endpoint, schéma complet (types, nullabilité) pour un DTO/entité, signature exacte pour une méthode
-  publique ? Un contrat resté en prose là où l'implémenteur devrait deviner un nom, un type ou une nullabilité est
-  un must-fix. Vérifie aussi la cohérence : DTO API vs son miroir Angular, conventions du monolithe (`Result<T>`,
-  `Async`/`CancellationToken`), enregistrement de VPF, `spAddColumn` pour une colonne — et qu'un `⚠ à confirmer`
-  sur un contrat central se reflète bien dans la confiance de l'estimation. Aussi :
-  pour toute feature lisant des données config/« default »/setup, le plan a-t-il confirmé la **route de discovery**
-  (helper évident vs un **scenario** repository/Flex), et son repo-scope découle-t-il de cette route ?
-  Pour toute feature ajoutant un **flux parallèle**, le plan a-t-il considéré (comme un point de décision) l'extraction
-  de base partagée / le remodelage d'interface plutôt que de se rabattre sur un diff inline minimal ? Signale l'une ou l'autre
-  omission comme should-fix.
+- **Review de plan** — étant donné `.work/<slug>/plan.md` (+ `context.md`) : **c'est toi qui décides si le
+  plan est constructible**, pas son auteur. Réponds **oui / non / n.a.** à chacun des critères C1 à C8 de
+  `../conventions/protocol.md` § Gate de plan, chacun avec sa preuve (ligne du plan, fichier que tu as
+  ouvert, grep exécuté). Un critère sans preuve vaut « non ». Ne te fie pas au `Status: ready` déclaré :
+  vérifie C3 toi-même. Pour C4, ouvre réellement les fichiers cités ; pour C2, vérifie aussi la
+  cohérence DTO API ↔ miroir Angular et les conventions du monolithe (`Result<T>`, `Async` /
+  `CancellationToken`) ; pour C6, cherche en particulier la **route de discovery** (helper évident vs
+  scénario repository/Flex) dès que le plan lit une config « default »/setup, et l'extraction de base
+  partagée dès qu'il ajoute un **flux parallèle** ; pour C8, une étape XL qui devrait être découpée ou une
+  estimation trop optimiste répond « non ». Termine par `**Buildable:** yes` (tous les critères à oui ou
+  n.a.) ou `**Buildable:** no`, puis les constats non bloquants (should-fix / consider) une ligne chacun.
+  Écris le tout dans `review-plan.md` avec le gabarit `../conventions/templates/review-plan.md`.
 - **Review de code** — étant donné un diff (`git diff`, une PR via `gh pr diff`, ou des fichiers nommés) : bugs
   de correction, violations de superposition, tests manquants/faibles, et dérive de contrat cross-repo.
 

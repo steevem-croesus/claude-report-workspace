@@ -43,7 +43,8 @@ dans `backend-conventions.md` / `frontend-conventions.md` — ici ne figurent qu
   différentes. *(spike pref-use-external-doc-path : déclarée `NO`, baseline `YES`)*
 
 Déjà couverts ailleurs, à ne pas redoubler : `ValidationFunction` ≠ `ValueProviderFunction` et clé
-VPF non enregistrée = crash silencieux à la génération (`backend-conventions.md`) ; rapport frère sur
+VPF non enregistrée = ignorée en silence à la génération (`backend-conventions.md` ; contrôle :
+`bash .claude/scripts/check-vpf-registration.sh --changed`) ; rapport frère sur
 le même `TPL_` comme oracle des clés radio/combo (`CLAUDE.md`, `backend-conventions.md`).
 
 ## B. Validation Xpert (JSON) vs Conseiller (XML)
@@ -65,7 +66,8 @@ cet ordre avant de toucher au câblage :
    plus. → Pour tout drapeau ou constante attendu en sortie, poser un `InitialValue` explicite dans le
    `Parameters.cs` du rapport (`InitialValue="0"` pour forcer un `0`), en gardant la VPF pour la
    surcharge contextuelle. *(RPT-18883)*
-3. **Clé VPF non enregistrée** dans l'executer Pre/Post (voir `backend-conventions.md`).
+3. **Clé VPF non enregistrée** dans l'executer Pre/Post : la VPF ne s'exécute pas et le paramètre garde
+   sa valeur initiale. → `bash .claude/scripts/check-vpf-registration.sh --where <Clé>`.
 
 Une comparaison verte n'élimine pas la divergence : elle peut réapparaître sur une firme aux prefs
 différentes. Le dire dans le rapport de validation.

@@ -12,7 +12,7 @@ rendent un rapport compatible Xpert. Réponds en **français** (termes technique
 vérité, à citer et suivre sans les répéter : `../conventions/migration-protocol.md` (pipeline, chemins,
 build, HALT, garde-fous) et surtout **`../conventions/backend-conventions.md`** (catégories A–F,
 `ValidationFunction`/`ValueProviderFunction`, commentaire 3 parties, checklist, conventions apprises,
-anti-patterns). Procédure exhaustive : `../../docs/design/MIGRATION_PROCEDURE.md`.
+anti-patterns).
 
 Si `report-analyst` a produit `.work/{slug}/analysis.md`, le lire d'abord et l'utiliser
 comme plan. Sinon, faire l'analyse inline (étapes 2-4).
@@ -39,7 +39,7 @@ comme plan. Sinon, faire l'analyse inline (étapes 2-4).
    - Ne **jamais** modifier une `ValidationFunction` existante ; on ajoute des propriétés.
    - Radio/Combo déclaratifs (cat. E) : skill `implement-declarative-radio` (config + 3 fichiers .resx,
      traductions **réelles**, jamais inventées).
-   - Classes VPF custom (cat. F) : skill `implementation-guide`. Classe = orchestrateur léger, **aucune
+   - Classes VPF custom (cat. F) : référence `.claude/conventions/reference/implementation-guide.md`. Classe = orchestrateur léger, **aucune
      logique de date inline** (→ `DateTimeService` + tests). ≥ 3 tests héritant de
      `ValueProvidedParameterTestBase`. Enregistrer via skill `register-parameter` (executer Pre/Post
      approprié, ordre alphabétique). Éviter `UnimplementedParameter`.

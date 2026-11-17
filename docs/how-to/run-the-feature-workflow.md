@@ -1,52 +1,52 @@
-# How to run the feature workflow
+# Comment exécuter le workflow feature
 
-Goal: take a new capability (report field, endpoint, UI, API change) from a ticket to working, tested
-code — and optionally to a PR — through the gated `feature` playbook.
+Objectif : mener une nouvelle capacité (champ de rapport, endpoint, UI, changement d'API) d'un ticket à du code
+fonctionnel et testé — et optionnellement jusqu'à une PR — via le playbook `feature` gaté.
 
-**Prerequisites:** a task description or Jira key; Claude Code open in the workspace. Not for defects
-(use [`bug`](fix-a-bug.md)) or pure restructuring (use `refactor`).
+**Prérequis :** une description de tâche ou une clé Jira ; Claude Code ouvert dans le workspace. Pas pour les défauts
+(utilisez [`bug`](fix-a-bug.md)) ni la pure restructuration (utilisez `refactor`).
 
-## Steps
+## Étapes
 
-1. **Invoke it.** `/feature <what you want built>` — include the Jira key if there is one; it becomes
-   the task slug and pulls ticket context automatically.
+1. **Invoquez-le.** `/feature <ce que vous voulez construire>` — incluez la clé Jira s'il y en a une ; elle devient
+   le slug de la tâche et tire automatiquement le contexte du ticket.
 
-2. **Let context + exploration run.** `context-gatherer` writes `context.md`; `explorer` writes
-   `exploration.md`. If Claude asks a clarifying question here, answer it — it only asks when a wrong
-   guess would derail the plan.
+2. **Laissez le contexte + l'exploration s'exécuter.** `context-gatherer` écrit `context.md` ; `explorer` écrit
+   `exploration.md`. Si Claude pose une question de clarification ici, répondez-y — il ne demande que quand une
+   mauvaise supposition ferait dérailler le plan.
 
-3. **At the plan gate, read the header first.** `plan.md` opens with `**Status:** … · **Grade:** …`.
-   You can only approve-to-build a `ready` + **A/S** plan (the *build bar*). If it's below bar, see
-   [How to get a plan past the gate](pass-the-plan-gate.md). Otherwise choose **approve / request
+3. **Au gate de plan, lisez d'abord l'en-tête.** `plan.md` s'ouvre par `**Status:** …` et `review-plan.md` par `**Buildable:** …`.
+   Vous ne pouvez approuver-pour-construire qu'un plan `ready` + **`Buildable: yes`** (la *barre de build*). S'il est sous la barre, voir
+   [Comment faire passer un plan au gate](pass-the-plan-gate.md). Sinon choisissez **approve / request
    changes / cancel**.
 
-4. **Let the build run.** For a cross-repo feature, builders run in **pipeline order** —
-   C++ analysis → C#/API → Angular UI — one per repo slice named under the plan's `#### <repo>`
-   sub-sections. Each builds and runs its tests and writes/updates `build-summary.md`.
+4. **Laissez le build s'exécuter.** Pour une feature cross-repo, les builders s'exécutent en **ordre de pipeline** —
+   analyse C++ → C#/API → UI Angular — un par tranche de repo nommée sous les
+   sous-sections `#### <repo>` du plan. Chacun construit et exécute ses tests et écrit/met à jour `build-summary.md`.
 
-5. **At the code gate**, review `review-code.md`'s verdict. Must-fix findings → **request changes**
-   (loops back to build, capped at 3 rounds). Clean → **approve**.
+5. **Au gate de code**, revoyez le verdict de `review-code.md`. Les constats must-fix → **request changes**
+   (reboucle vers le build, plafonné à 3 tours). Propre → **approve**.
 
-6. **Ship (optional).** If you say yes, Claude branches **per touched repo** (`--no-track` from a
-   protected ref), commits, `git push -u`, and opens a PR — following the
-   [org git rules](../reference/gates-and-protocol.md#branch-commit--ship-rules). Say no and nothing
-   is committed.
+6. **Ship (optionnel).** Si vous dites oui, Claude crée une branche **par repo touché** (`--no-track` depuis une
+   ref protégée), commit, `git push -u`, et ouvre une PR — en suivant les
+   [règles git de l'organisation](../reference/gates-and-protocol.md#règles-de-branch-commit--ship). Dites non et rien
+   n'est commité.
 
-7. **Retrospective.** `retro.md` proposes durable learnings and doc updates as a checklist. Approve
-   the ones worth keeping — Claude won't write memory or edit docs unasked.
+7. **Rétrospective.** `retro.md` propose des apprentissages durables et des mises à jour de docs sous forme de checklist. Approuvez
+   ceux qui valent la peine d'être gardés — Claude n'écrira pas en mémoire ni n'éditera de docs sans qu'on le lui demande.
 
-## Tips
+## Astuces
 
-- **Cross-stack work is at most two branches/PRs** — one in the `monolith` monorepo (C# + C++ together), one in
-  `pf-web`. Never commit product code at the workspace root.
-- **Delegating to `code-fleet`.** The build+review phases can instead be handed to `/code-fleet:work`
-  if you prefer its language packs; the workspace agents add the multi-repo topology awareness and the
-  `cpp-to-csharp-porter`. See [`workflows.md` → Relationship to code-fleet](../../.claude/conventions/workflows.md).
-- **Value-provider ports** inside a feature are handled by
-  [`cpp-to-csharp-porter`](port-cpp-to-csharp.md), not the generic implementer.
+- **Le travail cross-stack, c'est au plus deux branches/PR** — une dans le monorepo `monolith` (C# + C++ ensemble), une dans
+  `pf-web`. Jamais de code produit commité à la racine du workspace.
+- **Déléguer à `code-fleet`.** Les phases build+review peuvent à la place être confiées à `/code-fleet:work`
+  si vous préférez ses language packs ; les agents du workspace ajoutent la conscience de la topologie multi-repo et le
+  `cpp-to-csharp-porter`. Voir [`workflows.md` → Relationship to code-fleet](../../.claude/conventions/workflows.md).
+- **Les ports de value-provider** à l'intérieur d'une feature sont gérés par
+  [`cpp-to-csharp-porter`](port-cpp-to-csharp.md), pas par l'implementer générique.
 
-## Reference
+## Référence
 
-- Phase table: [Reference: workflows §1](../reference/workflows.md#1-feature)
-- Gate mechanics: [Reference: gates & protocol](../reference/gates-and-protocol.md)
-- The full skill spec: [`.claude/skills/feature/SKILL.md`](../../.claude/skills/feature/SKILL.md)
+- Table des phases : [Référence : workflows §1](../reference/workflows.md#1-feature)
+- Mécanique des gates : [Référence : gates & protocole](../reference/gates-and-protocol.md)
+- La spécification complète du skill : [`.claude/skills/feature/SKILL.md`](../../.claude/skills/feature/SKILL.md)

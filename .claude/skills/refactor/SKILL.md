@@ -1,6 +1,6 @@
 ---
 name: refactor
-description: Restructure code in the Croesus report workspace without changing behaviour, end to end, following the gated refactor workflow — context → explore → characterize → plan → [gate] → build (small steps) → review → [gate] → ship? → retrospective. Pulls context from Jira and GitHub. Use when the user asks to refactor, clean up, restructure, extract, rename, de-duplicate, or improve the shape of existing code while keeping what it does the same. Enforces characterization-tests-before-edit and behaviour-preservation. Not for new capabilities (use feature) or fixing defects (use bug).
+description: Restructure code in the Croesus report workspace without changing behaviour, end to end, following the gated refactor workflow — context → explore → characterize → plan → [gate] → build (small steps) → review → [gate] → retrospective → ship?. Pulls context from Jira and GitHub. Use when the user asks to refactor, clean up, restructure, extract, rename, de-duplicate, or improve the shape of existing code while keeping what it does the same. Enforces characterization-tests-before-edit and behaviour-preservation. Not for new capabilities (use feature) or fixing defects (use bug).
 allowed-tools: Agent, Task, AskUserQuestion, Read, Write, Grep, Glob, Bash
 ---
 
@@ -51,16 +51,20 @@ non-déterminisme) comme une lacune. Ce filet est ce qui prouve que le refactor 
 ## 5. Plan  →  `plan.md`
 Dispatche **planner**. Le plan doit être une séquence d'**étapes ordonnées, individuellement sûres et
 préservant le comportement**, et doit explicitement pointer toute surface à changement cassant (API
-publique, contrat, format de fil). Il écrit un `plan.md` noté et estampillé d'un statut. Boucle
+publique, contrat, format de fil). Il écrit un `plan.md` estampillé d'un statut (`draft`/`ready`). Boucle
 HALT/point de décision selon protocol.md.
 
-## 6. Gate de plan — faire respecter la barre de build
-Présente `plan.md` (commence par son en-tête **Status** + **Grade**). Applique la **barre de build** de
-protocol.md : approuvable **uniquement** lorsque `ready` **et** noté **A ou S**. Sous la barre → ne
-propose pas *approuver* ; fais remonter la note + les bloqueurs, puis **changements** (écris le retour
-dans `_signals/revision-request.md`, re-dispatche le planner, reviens ici) ou **annuler**. Un
-passage-outre explicite de l'utilisateur est consigné dans `_signals/revision-request.md`. À/au-dessus
-de la barre → demande *approuver / changements / annuler* via `AskUserQuestion`. **annuler** → arrête.
+## 6. Review du plan + gate de plan  →  `review-plan.md`
+Dispatche **reviewer** en mode plan sur `plan.md` : il écrit `review-plan.md` (critères C1 à C8 de
+protocol.md, puis `Buildable: yes/no`). Cette revue est **systématique** — le plan n'est jamais jugé
+par son auteur. Présente ensuite `plan.md` (son **Status**) et `review-plan.md` (son **Buildable** et
+les critères à « non »), puis applique la **barre de build** de protocol.md :
+- `draft` ou `Buildable: no` → **ne propose pas** *approuver*. Fais remonter les critères à « non » avec
+  leur preuve, puis **changements** (écris-les dans `_signals/revision-request.md`, re-dispatche le
+  planner, refais passer le reviewer, reviens à ce gate) ou **annuler**. L'utilisateur peut passer outre
+  explicitement — consigne-le dans `_signals/revision-request.md`.
+- `ready` + `Buildable: yes` → demande *approuver / changements / annuler* via `AskUserQuestion`.
+  L'approbation reste requise. **annuler** → arrête (« annulé au gate de plan »).
 
 ## 7. Build  →  `build-summary.md`
 Pour chaque repo/tranche nommé dans les sous-sections `#### <repo>` du plan, dispatche **implementer** et
@@ -80,16 +84,16 @@ Présente le verdict + le résultat de `build-summary.md`. Demande *approuver / 
 au §7 (**plafond 3** itérations build↔review), puis signale les problèmes restants. **approuver** →
 continue.
 
-## 10. Ship (optionnel, gaté)
+## 10. Rétrospective  →  `retro.md`
+Lance-la **dès que le gate de code est approuvé**, que l'on ship ensuite ou non. Dispatche **retrospective**. Il propose des ajouts aux conventions du repo (`known-pitfalls.md`, `rma-architecture-notes.md`) + des mises à jour doc/CLAUDE.md
+sous forme de checklist. Fais remonter la checklist à l'utilisateur pour approbation — **n'écris pas**
+automatiquement la mémoire et ne modifie pas les docs.
+
+## 11. Ship (optionnel, gaté)
 Si l'utilisateur veut ship : **par repo git touché** (monolith et/ou pf-web — jamais le repo racine du workspace), branche (`--no-track`
 depuis une réf protégée), commite, `git push -u`, ouvre une PR — selon les règles git de l'org dans
 protocol.md. Saute si refusé.
 
-## 11. Rétrospective  →  `retro.md`
-Dispatche **retrospective**. Il propose des entrées de mémoire durables + des mises à jour doc/CLAUDE.md
-sous forme de checklist. Fais remonter la checklist à l'utilisateur pour approbation — **n'écris pas**
-automatiquement la mémoire et ne modifie pas les docs.
-
-Termine par un court résumé : ce qui a été restructuré, la note du plan, si le filet de sécurité a tenu
+Termine par un court résumé : ce qui a été restructuré, le verdict de la revue du plan, si le filet de sécurité a tenu
 au vert tout du long, le résultat de la review, les PR (le cas échéant), et les apprentissages proposés
 en attente d'approbation.

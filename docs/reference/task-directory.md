@@ -1,50 +1,50 @@
-# Reference — The task directory & workspace layout
+# Référence — Le répertoire de tâche & la structure du workspace
 
 ## `.work/<slug>/`
 
-Every non-trivial workflow run creates a per-task directory at the **workspace root**:
+Chaque exécution de workflow non triviale crée un répertoire par tâche à la **racine du workspace** :
 `C:\Repos\claude-report-workspace\.work\<slug>\`.
 
-- **slug** = the Jira key when detected (`RPT-12345`, `CAR-1234`); otherwise the kebab-case of the
-  first ~4 words of the task. Re-running the same task **reuses** the directory.
-- It lives at the workspace root on purpose: it does **not** pollute the symlinked repos and it
-  survives across sessions. It is **gitignored** here (`/.work/` in [`.gitignore`](../../.gitignore)).
+- **slug** = la clé Jira quand détectée (`RPT-12345`, `CAR-1234`) ; sinon le kebab-case des
+  ~4 premiers mots de la tâche. Ré-exécuter la même tâche **réutilise** le répertoire.
+- Il vit à la racine du workspace intentionnellement : il ne pollue **pas** les repos symlinkés et il
+  survit d'une session à l'autre. Il est **gitignoré** ici (`/.work/` dans [`.gitignore`](../../.gitignore)).
 
-### Canonical artifact filenames (one artifact = one file)
+### Noms de fichiers d'artefacts canoniques (un artefact = un fichier)
 
-| File | Written by | Purpose |
+| Fichier | Écrit par | Objet |
 |---|---|---|
-| `task.md` | orchestrator | the raw task text |
-| `context.md` | [context-gatherer](agents.md#context-gatherer) | Jira + GitHub intel brief |
-| `exploration.md` | [explorer](agents.md#explorer) | code map for the task |
-| `investigation.md` | [investigator](agents.md#investigator) | root-cause analysis |
-| `bug-diagnosis.md` | investigator | reproduction + root cause for a bug |
-| `learning-notes.md` | [learning-guide](agents.md#learning-guide) | walkthrough / mental model |
-| `spike.md` | orchestrator + explorer | spike findings + recommendation |
-| `plan.md` | [planner](agents.md#planner) | implementation plan (gates the build) |
-| `review-plan.md` | [reviewer](agents.md#reviewer) | plan-gate findings |
-| `build-summary.md` | [implementer](agents.md#implementer) / [porter](agents.md#cpp-to-csharp-porter) | what was built + build/test results |
-| `review-code.md` | reviewer | code-gate findings |
-| `retro.md` | [retrospective](agents.md#retrospective) | retrospective + proposed learnings |
-| `clarifications.md` | orchestrator | Q→A resolved before planning |
+| `task.md` | orchestrateur | le texte brut de la tâche |
+| `context.md` | [context-gatherer](agents.md#context-gatherer) | brief d'intel Jira + GitHub |
+| `exploration.md` | [explorer](agents.md#explorer) | carte de code pour la tâche |
+| `investigation.md` | [investigator](agents.md#investigator) | analyse de cause racine |
+| `bug-diagnosis.md` | investigator | reproduction + cause racine pour un bug |
+| `learning-notes.md` | [learning-guide](agents.md#learning-guide) | walkthrough / modèle mental |
+| `spike.md` | orchestrateur + explorer | constats de spike + recommandation |
+| `plan.md` | [planner](agents.md#planner) | plan d'implémentation (gate le build) |
+| `review-plan.md` | [reviewer](agents.md#reviewer) | constats du gate de plan |
+| `build-summary.md` | [implementer](agents.md#implementer) / [porter](agents.md#cpp-to-csharp-porter) | ce qui a été buildé + résultats de build/test |
+| `review-code.md` | reviewer | constats du gate de code |
+| `retro.md` | [retrospective](agents.md#retrospective) | rétrospective + apprentissages proposés |
+| `clarifications.md` | orchestrateur | Q→R résolues avant la planification |
 
-### The `_signals/` subdirectory
+### Le sous-répertoire `_signals/`
 
-Control-flow breadcrumbs the orchestrator writes when looping a phase:
+Miettes de contrôle de flux que l'orchestrateur écrit quand il reboucle une phase :
 
-| File | Written when |
+| Fichier | Écrit quand |
 |---|---|
-| `_signals/revision-request.md` | you choose **request changes** at a gate (feedback recorded verbatim; also records an explicit build-bar override) |
-| `_signals/resume.<agent>.md` | an agent HALTs and you answer its question (the answer, so the agent can resume) |
+| `_signals/revision-request.md` | tu choisis **request changes** à un gate (retour enregistré verbatim ; enregistre aussi un override explicite de la barre de build) |
+| `_signals/resume.<agent>.md` | un agent fait HALT et tu réponds à sa question (la réponse, pour que l'agent puisse reprendre) |
 
-**Templates** for the artifacts live in
+**Les templates** des artefacts vivent dans
 [`.claude/conventions/templates/`](../../.claude/conventions/templates/): `context.md`, `plan.md`,
 `review.md`, `spike.md`, `bug-diagnosis.md`, `retro.md`.
 
-## Workspace layout
+## Structure du workspace
 
-This workspace is a thin root holding symlinks to the real product checkouts. Full topology is in the
-root [`CLAUDE.md`](../../CLAUDE.md); in brief:
+Ce workspace est une racine mince qui contient des symlinks vers les checkouts de produit réels. La topologie
+complète est dans le [`CLAUDE.md`](../../CLAUDE.md) racine ; en bref :
 
 ```
 C:\Repos\claude-report-workspace\
@@ -63,7 +63,7 @@ C:\Repos\claude-report-workspace\
     └── pf-web            → TypeScript / Angular 21 + NX frontend
 ```
 
-> **Two levels of git.** The workspace root is its own repo (tracking `.claude/`, `docs/`, `CLAUDE.md`,
-> etc.). The symlinks under `repos/` resolve to only two product repos: the `monolith` monorepo (all but pf-web) and `pf-web`. Commits
-> and PRs for product changes happen **inside the specific symlinked repo**, never at the root — see
-> the [branch/commit/ship rules](gates-and-protocol.md#branch-commit--ship-rules).
+> **Deux niveaux de git.** La racine du workspace est son propre repo (trackant `.claude/`, `docs/`, `CLAUDE.md`,
+> etc.). Les symlinks sous `repos/` ne résolvent que vers deux repos produit : le monorepo `monolith` (tous sauf pf-web) et `pf-web`. Les commits
+> et PRs pour les changements de produit se font **à l'intérieur du repo symlinké spécifique**, jamais à la racine — voir
+> les [règles de branch/commit/ship](gates-and-protocol.md#règles-de-branch-commit--ship).

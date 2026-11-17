@@ -47,7 +47,7 @@ zones affectées, et la §A (conventions de code) pour que les étapes soient co
 
 ## Sortie — écris `.work/<slug>/plan.md`
 Utilise le template dans `../conventions/templates/plan.md`. Il ouvre sur un **header** portant le
-**Status** et le **Grade** du plan (voir *Notation & statut* ci-dessous), puis doit inclure :
+**Status** du plan (voir *Statut* ci-dessous), puis doit inclure :
 1. **Problème** — un paragraphe ; nomme le(s) repo(s) et le(s) langage(s) cibles.
 2. **Couverture des exigences** — une table faisant correspondre chaque élément demandé (issu du context/des critères
    d'acceptation) à l'étape qui le couvre, ou une ligne explicite *deferred / out-of-scope*. Rien de
@@ -113,35 +113,20 @@ Ancre chaque contrat dans du code réellement lu (le type existant, le controlle
 n'as pas pu vérifier se marque `⚠ à confirmer` sur la ligne concernée et pèse sur la **confiance** de l'estimation ;
 si une signature dépend d'un choix non tranché, c'est un point de décision, pas une invention.
 
-## Notation & statut (le header)
-Note le plan honnêtement contre une grille et estampille un statut — cela détermine si le workflow peut
-builder à partir de lui. Mets les deux dans le header du plan, p. ex. `**Status:** ready · **Grade:** A`.
+## Statut (le header)
+Mets dans le header du plan `**Status:** draft` ou `**Status:** ready`. Tu ne notes pas ton plan : c'est
+le **reviewer** qui juge s'il est constructible, critère par critère (C1 à C8, `../conventions/protocol.md`
+§ Gate de plan), dans `review-plan.md`.
 
-**Grade** — une lettre sur l'échelle **F < D < C < B < A < S** (S est le plafond) :
-- **S** — exceptionnel : chaque exigence couverte, étapes non ambiguës et correctement placées, **contrats
-  complets et vérifiés** (aucun `⚠ à confirmer` sur un contrat central), risques + tests + estimation tous solides,
-  **tous les points de décision resolved**, **aucune question ouverte**.
-- **A** — excellent et buildable : complet et actionnable, superposition correcte, **endpoints / schémas /
-  signatures spécifiés pour tout ce que le changement crée ou modifie**, tests + estimation sains ; au plus un
-  polissage cosmétique ; **aucune question ouverte bloquante ni point de décision `needs-user`**.
-- **B** — bon mais pas encore buildable : une étape est sous-spécifiée, un contrat manque ou reste en prose
-  (« ajouter un endpoint », « créer le DTO ») là où l'implémenteur devrait deviner un nom, un type ou une
-  nullabilité, ou une question ouverte / point de décision affecte la portée.
-- **C** — partiel : lacunes de couverture notables ou décisions non résolues.
-- **D** — faible : couverture manquante significative ou mauvaise approche.
-- **F** — non viable.
+- **`draft`** — il reste un point de décision `needs-user` ou une question ouverte bloquante. C'est le
+  défaut tant que quelque chose est ouvert.
+- **`ready`** — plus rien d'ouvert de ton côté : chaque point de décision est resolved, aucune question
+  bloquante.
 
-**Status** — exactement l'un de :
-- **`draft`** — pas prêt à builder : grade sous A, et/ou un point de décision non résolu (`needs-user`)
-  ou une question ouverte bloquante subsiste. C'est le défaut tant que quelque chose est ouvert.
-- **`ready`** — complet et auto-noté **A ou S**, sans question ouverte bloquante et chaque
-  point de décision resolved. Seul un plan `ready` + (A|S) est buildable.
-
-**La barre de build (imposée au gate du plan) :** le workflow ne builde **que** un plan qui est
-`ready` **et** noté **A ou S**. Si tu ne peux honnêtement pas atteindre cette barre, marque le plan `draft`,
-note-le avec exactitude, et soit (a) résous ce que tu peux et liste les bloquants dans Questions ouvertes, soit
-(b) HALT pour une décision `needs-user`. N'inflate jamais le grade ni ne bascule vers `ready` pour passer le
-gate — un plan sur-noté est pire qu'un `draft` honnête.
+Avant de déclarer `ready`, relis les critères C1 à C8 et corrige ce qui y répondrait « non » : un
+contrat resté en prose, un chemin non vérifié, une étape sans test nommé te reviendront en révision.
+Ne bascule jamais vers `ready` pour passer le gate — un `draft` honnête avec ses bloquants listés (ou un
+HALT pour une décision `needs-user`) coûte moins cher qu'un aller-retour de revue.
 
 ## Pièges connus
 Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
@@ -163,5 +148,5 @@ Proposed default: <your recommendation>
 State: <what you've decided so far, so you can resume>
 ```
 Ne devine pas au-delà d'une vraie bifurcation. Sinon, écris `plan.md` et renvoie un résumé d'une ligne
-(status, grade, nombre d'étapes, repos touchés, s'il est multi-repo, et l'estimation globale +
+(status, nombre d'étapes, repos touchés, s'il est multi-repo, et l'estimation globale +
 confiance).

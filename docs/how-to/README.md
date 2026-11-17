@@ -1,17 +1,17 @@
-# How-to guides
+# Guides pratiques
 
-**Task-oriented.** Each guide assumes you already know your way around and just want to get a
-specific job done. If you're still learning the machinery, start with the
-[Tutorial](../tutorials/first-workflow.md) instead.
+**Orientés tâche.** Chaque guide suppose que vous connaissez déjà les lieux et que vous voulez
+simplement accomplir un travail précis. Si vous apprenez encore la mécanique, commencez plutôt par le
+[Tutoriel](../tutorials/first-workflow.md).
 
-| Guide | Use it to… |
+| Guide | À utiliser pour… |
 |---|---|
-| [Choose a workflow](choose-a-workflow.md) | pick the right one of the seven for the task in front of you |
-| [Run the feature workflow](run-the-feature-workflow.md) | drive a new capability from ticket to (optional) PR |
-| [Fix a bug](fix-a-bug.md) | diagnose and fix a defect with a mandatory regression test |
-| [Port a C++ report function to C#](port-cpp-to-csharp.md) | reimplement a C++ function as an `IValueProviderParameter` |
-| [Get a plan past the gate](pass-the-plan-gate.md) | handle a `draft` / sub-A plan and the build bar |
-| [Keep these docs in sync](keep-docs-in-sync.md) | update the docs when `.claude/` changes |
+| [Choisir un workflow](choose-a-workflow.md) | choisir le bon parmi les sept pour la tâche qui vous attend |
+| [Exécuter le workflow feature](run-the-feature-workflow.md) | mener une nouvelle capacité du ticket à la PR (optionnelle) |
+| [Corriger un bug](fix-a-bug.md) | diagnostiquer et corriger un défaut avec un test de régression obligatoire |
+| [Porter une fonction de rapport C++ vers C#](port-cpp-to-csharp.md) | réimplémenter une fonction C++ en tant qu'`IValueProviderParameter` |
+| [Faire passer un plan au gate](pass-the-plan-gate.md) | gérer un plan `draft` ou `Buildable: no` et la barre de build |
+| [Garder cette documentation synchronisée](keep-docs-in-sync.md) | mettre à jour la documentation quand `.claude/` change |
 
-For the *why* behind any of this, see [Explanation](../explanation/). For exact agent/artifact
-definitions, see [Reference](../reference/).
+Pour le *pourquoi* derrière tout cela, voir [Explication](../explanation/). Pour les définitions
+exactes des agents/artefacts, voir [Référence](../reference/).

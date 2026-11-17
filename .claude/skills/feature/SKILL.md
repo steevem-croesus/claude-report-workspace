@@ -1,6 +1,6 @@
 ---
 name: feature
-description: Build a new feature (or user-facing / API change) in the Croesus report workspace, end to end, following the gated feature workflow — context → explore → plan → [gate] → build → review → [gate] → ship? → retrospective. Pulls context from Jira and GitHub. Use when the user asks to add/implement/build a feature, capability, report field, endpoint, or UI, or hands over a Jira story/ticket to implement. Not for fixing defects (use the bug workflow) or pure restructuring (use refactor).
+description: Build a new feature (or user-facing / API change) in the Croesus report workspace, end to end, following the gated feature workflow — context → explore → plan → [gate] → build → review → [gate] → retrospective → ship?. Pulls context from Jira and GitHub. Use when the user asks to add/implement/build a feature, capability, report field, endpoint, or UI, or hands over a Jira story/ticket to implement. Not for fixing defects (use the bug workflow) or pure restructuring (use refactor).
 allowed-tools: Agent, Task, AskUserQuestion, Read, Write, Grep, Glob, Bash
 ---
 
@@ -74,8 +74,8 @@ l'état (`docs/…`) résolvent depuis la racine de CE workspace. Réponds en fr
 | 6. Build | dispatche **`backend-migrator`**, puis **`frontend-migrator`** (ordre backend → frontend) |
 | 7. Review | dispatche **`migration-reviewer`** (audit vs conventions) + **`migration-validator`** (JSON Xpert vs XML Conseiller, quand les sorties sont disponibles) |
 | 8. GATE de code | comme d'habitude |
-| 9. Ship | par repo touché (monolith + pf-web), règles git de l'org comme d'habitude |
-| 10. Rétrospective | garde le `retrospective` de ce workspace |
+| 9. Rétrospective | garde le `retrospective` de ce workspace, dès l'approbation du gate de code |
+| 10. Ship | par repo touché (monolith + pf-web), règles git de l'org comme d'habitude |
 
 Tout ce qui suit est le flux feature **standard (non-migration)** ; en mode migration, applique la
 correspondance ci-dessus à chaque phase numérotée.
@@ -100,37 +100,26 @@ la tâche est claire. Ne pose pas de questions défensives « es-tu sûr ? ».
 > est désormais un skill, alors lance `/spike` puis reprends cette feature avec la décision en entrée.
 
 ## 4. Plan  →  `plan.md`
-Dispatche **planner**. Il écrit un `plan.md` noté et estampillé d'un statut (tableau de couverture des
+Dispatche **planner**. Il écrit un `plan.md` estampillé d'un statut (`draft`/`ready`) (tableau de couverture des
 exigences, étapes, tests, risques, points de décision, estimation). Exécute la boucle HALT s'il en
 renvoie une. Résous tout point de décision `needs-user` qu'il fait remonter via `AskUserQuestion` avant
 de re-dispatcher.
 
-### 4a. Relecture adverse du plan (obligatoire si contrainte de sécurité ou d'intégrité)
+## 5. Review du plan + gate de plan  →  `review-plan.md`
+Dispatche **reviewer** en mode plan sur `plan.md` : il écrit `review-plan.md` (critères C1 à C8 de
+protocol.md, puis `Buildable: yes/no`). Cette revue est **systématique** — le plan n'est jamais jugé
+par son auteur. Présente ensuite `plan.md` (son **Status**) et `review-plan.md` (son **Buildable** et
+les critères à « non »), puis applique la **barre de build** de protocol.md :
+- `draft` ou `Buildable: no` → **ne propose pas** *approuver*. Fais remonter les critères à « non » avec
+  leur preuve, puis **changements** (écris-les dans `_signals/revision-request.md`, re-dispatche le
+  planner, refais passer le reviewer, reviens à ce gate) ou **annuler**. L'utilisateur peut passer outre
+  explicitement — consigne-le dans `_signals/revision-request.md`.
+- `ready` + `Buildable: yes` → demande *approuver / changements / annuler* via `AskUserQuestion`.
+  L'approbation reste requise. **annuler** → arrête (« annulé au gate de plan »).
 
-Si le plan porte une **contrainte de sécurité ou d'intégrité** — contrôle d'accès, donnée à laquelle
-il ne faut pas faire confiance, invariant de cohérence, secret, droit — dispatche **reviewer** sur
-`plan.md` avant le gate. Il écrit `review-plan.md`.
-
-Le plan est noté par son propre auteur : sans relecteur adverse, une faiblesse de conception atteint
-le gate avec la caution d'un Grade A, puis se paie en itérations de revue de code.
-
-Exige en particulier que toute garantie formulée comme « fermée par construction » soit énoncée
-**canal d'entrée par canal d'entrée** : lister tous les points par lesquels la donnée dangereuse
-peut arriver (grep du symbole dans le repo), et pour chacun l'invariant qui la neutralise. Une
-garantie vraie du chemin nominal n'est pas une garantie du système, et une garde posée derrière un
-feature flag désactivé ne protège rien. Préférer un **point de passage unique** à une garde répétée ;
-quand la répétition est inévitable, documenter l'**invariant** et non la duplication.
-
-## 5. Gate de plan — faire respecter la barre de build
-Présente `plan.md` (commence par son en-tête **Status** + **Grade**), et `review-plan.md` s'il existe.
-Applique la **barre de build** de protocol.md : un plan n'est approuvable **que** lorsqu'il est
-`ready` **et** noté **A ou S**.
-- Si `draft` ou en-dessous de A → **ne propose pas** *approuver*. Fais remonter la note + les bloqueurs,
-  puis **changements** (écris le retour dans `_signals/revision-request.md`, re-dispatche le planner,
-  reviens à ce gate) ou **annuler**. L'utilisateur peut explicitement passer outre pour approuver un
-  plan sous la barre — consigne le passage-outre dans `_signals/revision-request.md`.
-- Si `ready` + A/S → demande *approuver / changements / annuler* via `AskUserQuestion`. L'approbation
-  reste requise. **annuler** → arrête (« annulé au gate de plan »).
+Si le plan porte une **contrainte de sécurité ou d'intégrité** (contrôle d'accès, donnée à laquelle il
+ne faut pas faire confiance, invariant de cohérence, secret, droit), rappelle au reviewer le critère
+C7 : toute garantie « fermée par construction » doit être énoncée **canal d'entrée par canal d'entrée**.
 
 ## 6. Build  →  `build-summary.md`
 Pour chaque repo/tranche nommé dans les sous-sections `#### <repo>` du plan, dispatche un builder dans
@@ -152,15 +141,16 @@ Présente le verdict + le résultat de `build-summary.md`. Demande *approuver / 
   et signale les problèmes restants.
 - **approuver** → continue.
 
-## 9. Ship (optionnel, gaté)
+## 9. Rétrospective  →  `retro.md`
+Lance-la **dès que le gate de code est approuvé**, que l'on ship ensuite ou non. Dispatche
+**retrospective**. Il écrit `retro.md` et propose des ajouts aux conventions du repo
+(`known-pitfalls.md`, `rma-architecture-notes.md`) + des mises à jour doc/CLAUDE.md sous forme de checklist. Fais remonter cette checklist à l'utilisateur pour
+approbation — **n'écris pas** automatiquement la mémoire et ne modifie pas les docs.
+
+## 10. Ship (optionnel, gaté)
 Demande s'il faut ship. Si oui, **par repo git touché** (monolith et/ou pf-web — jamais le repo racine du workspace) : crée une
 branche de feature (`--no-track` depuis une réf protégée), commite, `git push -u`, ouvre une PR. Suis
 les règles git de l'org dans protocol.md à la lettre. Saute entièrement si l'utilisateur refuse.
 
-## 10. Rétrospective  →  `retro.md`
-Dispatche **retrospective**. Il écrit `retro.md` et propose des entrées de mémoire durables + des mises
-à jour doc/CLAUDE.md sous forme de checklist. Fais remonter cette checklist à l'utilisateur pour
-approbation — **n'écris pas** automatiquement la mémoire et ne modifie pas les docs.
-
-Termine par un court résumé : ce qui a été shippé/construit, la note du plan, le résultat build/review,
+Termine par un court résumé : ce qui a été shippé/construit, le verdict de la revue du plan, le résultat build/review,
 les PR (le cas échéant), et les apprentissages proposés en attente d'approbation.

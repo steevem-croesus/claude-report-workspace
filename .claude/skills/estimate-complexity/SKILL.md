@@ -30,7 +30,7 @@ OU référence fonction via skill `locate-cpp-function`
 
 **⚠️ VÉRIFIER EN PRIORITÉ AVANT de créer classe Parameter custom.**
 
-**Référence:** Voir CLAUDE.md section "Hiérarchie d'Implémentation des Paramètres" et skill `generic-functions-reference`
+**Référence:** Voir CLAUDE.md section "Hiérarchie d'Implémentation des Paramètres" et référence `.claude/conventions/reference/generic-functions-reference.md`
 
 **Sous-niveaux déclaratifs:**
 
@@ -257,8 +257,8 @@ Ajuster estimations futures selon écarts observés.
 
 **Hiérarchie déclarative (LIRE EN PREMIER):**
 - **CLAUDE.md** - Section "Hiérarchie d'Implémentation des Paramètres" (principes + arbre de décision)
-- Skill `generic-functions-reference` - Référence complète des 6 niveaux avec exemples détaillés
-- Skill `read-cpp-patterns` - Guide de lecture rapide du code C++ (scan 10-60s)
+- Référence `.claude/conventions/reference/generic-functions-reference.md` - Référence complète des 6 niveaux avec exemples détaillés
+- Référence `.claude/conventions/reference/read-cpp-patterns.md` - Guide de lecture rapide du code C++ (scan 10-60s)
 
 **Workflow:**
 - Skill `classify-functions` (avant) - Détection patterns déclaratifs
@@ -267,4 +267,3 @@ Ajuster estimations futures selon écarts observés.
 - Skill `analyze-cpp-function` (après) - Analyse approfondie
 
 **Documentation:**
-- Guide: `MIGRATION_PROCEDURE_HUMAN.md` - Section "Les 5 niveaux de complexité"

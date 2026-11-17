@@ -180,7 +180,7 @@ public class {FunctionName}Parameter : IValueProviderParameter
 ✅ Aucune action - fonction opérationnelle
 
 {Si ⚠️ TODO:}
-→ Utiliser skill `implementation-guide` pour patterns
+→ Utiliser référence `.claude/conventions/reference/implementation-guide.md` pour patterns
 → Utiliser skill `locate-cpp-function` pour trouver le code source
 
 {Si 🔴 Inexistant:}
@@ -220,6 +220,6 @@ Ce skill peut être appelé par:
 - `locate-cpp-function` - Trouver le code C++ source
 - `analyze-cpp-function` - Analyser la logique C++
 - `classify-functions` - Vue d'ensemble de toutes les fonctions
-- `generic-functions-reference` - Vérifier si fonction devrait être générique
-- `best-practices-analyst` - Valider la qualité de l'implémentation
-- `implementation-guide` - Patterns d'implémentation
+- `.claude/conventions/reference/generic-functions-reference.md` - Vérifier si fonction devrait être générique
+- `.claude/conventions/reference/best-practices-analyst.md` - Valider la qualité de l'implémentation
+- `.claude/conventions/reference/implementation-guide.md` - Patterns d'implémentation

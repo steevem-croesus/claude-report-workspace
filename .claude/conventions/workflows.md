@@ -14,7 +14,7 @@ l'outil Agent et défère à ce fichier (son `§N`) et à `protocol.md` pour les
 
 ## 1. `feature` — construire quelque chose de nouveau
 
-> **spike ? → context → explore → plan → [GATE] → build → review → [GATE] → ship ? → retrospective**
+> **spike ? → context → explore → plan → review-plan → [GATE] → build → review → [GATE] → retrospective → ship ?**
 
 | Phase | Agent | Sortie |
 |---|---|---|
@@ -22,12 +22,13 @@ l'outil Agent et défère à ce fichier (son `§N`) et à `protocol.md` pour les
 | 1. Context | `context-gatherer` | `context.md` |
 | 2. Explore | `explorer` | `exploration.md` |
 | 3. Plan | `planner` | `plan.md` (avec table de couverture d'exigences) |
-| **GATE de plan** | — | barre de build : le plan doit être `ready` + noté **A/S** pour être approuvable (voir protocol.md) ; sinon approve / changes / cancel |
+| Review du plan | `reviewer` (mode plan) | `review-plan.md` — critères C1 à C8, `Buildable: yes/no` |
+| **GATE de plan** | — | barre de build : `plan.md` `ready` **et** `review-plan.md` `Buildable: yes` (voir protocol.md) ; sinon approve / changes / cancel |
 | 4. Build | `implementer` (ou `cpp-to-csharp-porter` pour les ports de value-provider ; un par repo/tranche) | code + tests, `build-summary.md` |
 | 5. Review | `reviewer` (mode code) | `review-code.md` |
 | **GATE de code** | — | approve / changes (boucle vers build, plafond 3) / cancel |
-| 6. Ship (optionnel, gaté) | orchestrateur | branche + commit + PR **par repo git** — monolith et/ou pf-web (règles git de l'org) |
-| 7. Retrospective | `retrospective` | `retro.md` + apprentissages proposés |
+| 6. Retrospective (dès l'approbation du gate de code) | `retrospective` | `retro.md` + apprentissages proposés |
+| 7. Ship (optionnel, gaté) | orchestrateur | branche + commit + PR **par repo git** — monolith et/ou pf-web (règles git de l'org) |
 
 Notes : les features cross-repo exécutent la phase 4 dans l'ordre du pipeline (analyse C++ → C#/API → UI Angular). Le C++
 et le C# partagent **une seule** branche/PR (monorepo `monolith`) ; pf-web a la sienne. Les sous-sections `#### <repo>` du plan indiquent à chaque `implementer` sa tranche.
@@ -47,7 +48,7 @@ Les entrées globales partagées restent sous `docs/` (`fields.csv`, `template_i
 
 ## 2. `bug` — corriger un défaut
 
-> **context → reproduce → diagnose → plan-fix → [GATE] → build → verify+review → [GATE] → ship ? → retrospective**
+> **context → reproduce → diagnose → plan-fix → review-plan → [GATE] → build → verify+review → [GATE] → retrospective → ship ?**
 
 | Phase | Agent | Sortie |
 |---|---|---|
@@ -55,12 +56,13 @@ Les entrées globales partagées restent sous `docs/` (`fields.csv`, `template_i
 | 2. Reproduce | orchestrateur (+ `explorer` pour localiser) | un test en échec ou une repro documentée dans `bug-diagnosis.md` |
 | 3. Diagnose | `investigator` | cause racine + preuves dans `bug-diagnosis.md` |
 | 4. Plan fix | `planner` (portée sur la correction, minimale) | `plan.md` |
-| **GATE de plan** | — | barre de build : le plan doit être `ready` + noté **A/S** (voir protocol.md) ; allégé pour les petites corrections, mais la barre tient toujours sauf passage outre explicite |
+| Review du plan | `reviewer` (mode plan) | `review-plan.md` — critères C1 à C8, `Buildable: yes/no` |
+| **GATE de plan** | — | barre de build : `plan.md` `ready` **et** `review-plan.md` `Buildable: yes` (voir protocol.md) ; sinon approve / changes / cancel |
 | 5. Build | `implementer` / `cpp-to-csharp-porter` | correction + **test de régression qui échoue avant, passe après**, `build-summary.md` |
 | 6. Verify + review | `reviewer` (mode code) | confirme que la repro a disparu ; `review-code.md` |
 | **GATE de code** | — | approve / changes / cancel |
-| 7. Ship (optionnel) | orchestrateur | branche + commit + PR |
-| 8. Retrospective | `retrospective` | `retro.md` — **doit** inclure la classe de cause racine pour que des bugs similaires soient attrapés plus tôt |
+| 7. Retrospective (dès l'approbation du gate de code) | `retrospective` | `retro.md` — **doit** inclure la classe de cause racine pour que des bugs similaires soient attrapés plus tôt |
+| 8. Ship (optionnel) | orchestrateur | branche + commit + PR |
 
 La règle distinctive : **pas de correction sans une reproduction et un test de régression**. Le diagnostic
 (phase 3) est obligatoire et séparé de la correction — ne rafistole pas les symptômes.
@@ -69,7 +71,7 @@ La règle distinctive : **pas de correction sans une reproduction et un test de 
 
 ## 3. `refactor` — changer la structure, pas le comportement
 
-> **context → explore → characterize → plan → [GATE] → build (petites étapes) → review → [GATE] → ship ? → retrospective**
+> **context → explore → characterize → plan → review-plan → [GATE] → build (petites étapes) → review → [GATE] → retrospective → ship ?**
 
 | Phase | Agent | Sortie |
 |---|---|---|
@@ -77,12 +79,13 @@ La règle distinctive : **pas de correction sans une reproduction et un test de 
 | 2. Explore | `explorer` | `exploration.md` — cartographier le rayon d'impact / les consommateurs |
 | 3. Characterize | orchestrateur + `implementer` | un **filet de sécurité de tests** capturant le comportement actuel *avant* d'y toucher ; noter les lacunes |
 | 4. Plan | `planner` | `plan.md` — étapes ordonnées, **préservant le comportement** ; surfaces de changement cassant explicites |
-| **GATE de plan** | — | barre de build : le plan doit être `ready` + noté **A/S** pour être approuvable (voir protocol.md) ; sinon approve / changes / cancel |
+| Review du plan | `reviewer` (mode plan) | `review-plan.md` — critères C1 à C8, `Buildable: yes/no` |
+| **GATE de plan** | — | barre de build : `plan.md` `ready` **et** `review-plan.md` `Buildable: yes` (voir protocol.md) ; sinon approve / changes / cancel |
 | 5. Build | `implementer` | petites étapes vérifiées individuellement ; **build+tests verts après chacune** |
 | 6. Review | `reviewer` | `review-code.md` — vérifier l'absence de changement de comportement + l'absence de dérive de contrat |
 | **GATE de code** | — | approve / changes / cancel |
-| 7. Ship (optionnel) | orchestrateur | branche + commit + PR |
-| 8. Retrospective | `retrospective` | `retro.md` |
+| 7. Retrospective (dès l'approbation du gate de code) | `retrospective` | `retro.md` |
+| 8. Ship (optionnel) | orchestrateur | branche + commit + PR |
 
 Règle distinctive : **le comportement ne doit pas changer**. Les tests de caractérisation (phase 3) viennent *avant*
 toute édition ; les refactors de ReportFoundations doivent signaler chaque consommateur en aval.

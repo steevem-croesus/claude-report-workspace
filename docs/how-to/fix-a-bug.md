@@ -1,53 +1,53 @@
-# How to fix a bug
+# Comment corriger un bug
 
-Goal: fix a defect through the `bug` workflow, which enforces one hard rule:
+Objectif : corriger un défaut via le workflow `bug`, qui impose une règle stricte :
 
-> **No fix ships without a reproduction and a regression test** that fails *before* the fix and passes
-> *after*. Diagnosis is mandatory and separate from the fix — you don't patch symptoms.
+> **Aucune correction n'est shippée sans une reproduction et un test de régression** qui échoue *avant* la correction et passe
+> *après*. Le diagnostic est obligatoire et distinct de la correction — on ne rustine pas les symptômes.
 
-**Prerequisites:** a bug report or Jira key describing wrong/broken behaviour.
+**Prérequis :** un rapport de bug ou une clé Jira décrivant un comportement erroné/cassé.
 
-## Steps
+## Étapes
 
-1. **Invoke it.** `/bug <symptom or Jira key>` — e.g. `/bug RPT-12345` or `/bug the year-to-date
+1. **Invoquez-le.** `/bug <symptôme ou clé Jira>` — p. ex. `/bug RPT-12345` ou `/bug the year-to-date
    parameter returns last year's start date for January reports`.
 
-2. **Context.** `context-gatherer` captures the report, repro steps, and any linked PRs → `context.md`.
+2. **Contexte.** `context-gatherer` capture le rapport, les étapes de repro et toute PR liée → `context.md`.
 
-3. **Reproduce — this comes before diagnosing.** Claude establishes a reproduction, preferring a
-   **failing test** that captures the defect; otherwise documented repro steps. Status is recorded in
-   `bug-diagnosis.md` as reliable / intermittent / not-yet-reproduced.
-   - If it **can't** reproduce, it stops and asks you (via a prompt) for more detail or permission to
-     proceed on best evidence — it won't blindly patch.
+3. **Reproduire — cela vient avant le diagnostic.** Claude établit une reproduction, en préférant un
+   **test qui échoue** qui capture le défaut ; sinon des étapes de repro documentées. Le statut est consigné dans
+   `bug-diagnosis.md` comme reliable / intermittent / not-yet-reproduced.
+   - S'il **ne peut pas** reproduire, il s'arrête et vous demande (via une invite) plus de détails ou la permission de
+     poursuivre sur la meilleure preuve disponible — il ne rustine pas aveuglément.
 
-4. **Diagnose.** `investigator` works the evidence (code, `git log`/`git blame`, tickets, logs), forms
-   hypotheses, refutes them adversarially, and appends the **root cause + confidence** to
-   `bug-diagnosis.md`. It distinguishes the *trigger* from the underlying *cause*.
+4. **Diagnostiquer.** `investigator` travaille les preuves (code, `git log`/`git blame`, tickets, logs), forme
+   des hypothèses, les réfute de façon adversariale, et ajoute la **cause racine + confiance** à
+   `bug-diagnosis.md`. Il distingue le *déclencheur* de la *cause* sous-jacente.
 
-5. **Plan the fix.** `planner` writes a minimal, fix-scoped `plan.md` whose Tests section **includes
-   the regression test**. Same [build bar](pass-the-plan-gate.md) applies at the plan gate — small
-   fixes may grade quickly, but the bar still holds unless you explicitly override it.
+5. **Planifier la correction.** `planner` écrit un `plan.md` minimal, cadré sur la correction, dont la section Tests **inclut
+   le test de régression**. La même [barre de build](pass-the-plan-gate.md) s'applique au gate de plan — les petites
+   corrections passent vite la revue du plan, mais la barre tient toujours à moins que vous ne la surchargiez explicitement.
 
-6. **Build the fix.** `implementer` (or [`cpp-to-csharp-porter`](port-cpp-to-csharp.md) if the fix is
-   in a port) writes the fix **and** the regression test, then builds and runs tests.
+6. **Construire la correction.** `implementer` (ou [`cpp-to-csharp-porter`](port-cpp-to-csharp.md) si la correction est
+   dans un port) écrit la correction **et** le test de régression, puis construit et exécute les tests.
 
-7. **Verify + review.** Claude re-runs the failing test/repro to confirm it's gone, then `reviewer`
-   checks the diff — and specifically that the regression test covers the **root cause, not just the
-   symptom**. Code gate: **approve / request changes / cancel** (changes loops back, cap 3).
+7. **Vérifier + review.** Claude ré-exécute le test/repro qui échouait pour confirmer qu'il a disparu, puis `reviewer`
+   vérifie le diff — et spécifiquement que le test de régression couvre la **cause racine, pas seulement le
+   symptôme**. Gate de code : **approve / request changes / cancel** (changes reboucle, plafond 3).
 
-8. **Ship (optional)** and **retrospective.** `retro.md` **must** record the *class* of root cause so
-   similar bugs are caught earlier next time. Approve the proposed learnings you want kept.
+8. **Ship (optionnel)** et **rétrospective.** `retro.md` **doit** consigner la *classe* de cause racine pour que
+   des bugs similaires soient attrapés plus tôt la prochaine fois. Approuvez les apprentissages proposés que vous voulez garder.
 
-## Common pitfalls
+## Pièges courants
 
-- **Skipping reproduction because "the cause is obvious."** The workflow won't let you — and "obvious"
-  causes are often the trigger, not the root cause.
-- **A regression test that passes even without the fix.** The reviewer flags this; the test must fail
-  before the fix.
-- **Confusing this with [`investigate`](../reference/workflows.md#6-investigate).** If you only want to
-  *understand* why something happened without fixing it, use `investigate`.
+- **Sauter la reproduction parce que « la cause est évidente ».** Le workflow ne vous le permettra pas — et les causes
+  « évidentes » sont souvent le déclencheur, pas la cause racine.
+- **Un test de régression qui passe même sans la correction.** Le reviewer le signale ; le test doit échouer
+  avant la correction.
+- **Confondre ceci avec [`investigate`](../reference/workflows.md#6-investigate).** Si vous voulez seulement
+  *comprendre* pourquoi quelque chose est arrivé sans le corriger, utilisez `investigate`.
 
-## Reference
+## Référence
 
-- Phase table: [Reference: workflows §2](../reference/workflows.md#2-bug)
-- The full skill spec: [`.claude/skills/bug/SKILL.md`](../../.claude/skills/bug/SKILL.md)
+- Table des phases : [Référence : workflows §2](../reference/workflows.md#2-bug)
+- La spécification complète du skill : [`.claude/skills/bug/SKILL.md`](../../.claude/skills/bug/SKILL.md)

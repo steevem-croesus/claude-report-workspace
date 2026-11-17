@@ -12,7 +12,7 @@ Analyser fonction C++ de rapport pour identifier patterns, dépendances et logiq
 - Code source C++ (via `locate-cpp-function` ou direct)
 - Context: Widget Type, Entry Type, Paramètre (PARAM_XXX)
 
-**Note:** Templates d'implémentation → `implementation-guide`
+**Note:** Templates d'implémentation → `.claude/conventions/reference/implementation-guide.md`
 
 ## Mode d'Utilisation
 
@@ -322,7 +322,7 @@ Ne pas migrer logique UI → Focus sur logique métier/calculs
 
 ## Implémentation
 
-**Pattern:** {1-6} ou Helper (voir `implementation-guide`)
+**Pattern:** {1-6} ou Helper (voir `.claude/conventions/reference/implementation-guide.md`)
 
 **Approche:** ☐ ValidationFunction ☐ ValueProviderFunction ☐ Mixte
 
@@ -338,7 +338,7 @@ Catégories: Date/, Hidden/, Preference/, General/
 **Services nouveaux (si requis):**
 - `IParameterDateValueService` → Ajouter `{MethodName}()`
 
-**Tests:** Nominal, null/vide, limites, erreurs (voir `implementation-guide`)
+**Tests:** Nominal, null/vide, limites, erreurs (voir `.claude/conventions/reference/implementation-guide.md`)
 
 ## Complexité
 
@@ -363,7 +363,7 @@ Catégories: Date/, Hidden/, Preference/, General/
 ## Références
 - Source: `validation_xxx.c:{lines}`
 - Similaire: `{Example}Parameter.cs` (PR #{num})
-- Skills: `implementation-guide`, `estimate-complexity`
+- Skills: `.claude/conventions/reference/implementation-guide.md`, `estimate-complexity`
 ```
 
 ## Format Sortie

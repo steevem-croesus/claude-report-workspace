@@ -2,8 +2,8 @@
 
 _Rédigé par planner · Date : <YYYY-MM-DD>_
 
-**Status:** <draft | ready> · **Grade:** <F | D | C | B | A | S>
-<!-- Buildable only when Status = ready AND Grade ∈ {A, S}. Scale: F < D < C < B < A < S. -->
+**Status:** <draft | ready>
+<!-- ready = no needs-user decision point, no blocking open question. Buildability is judged by the reviewer in review-plan.md (criteria C1–C8, protocol.md). -->
 
 ## Problème
 <un paragraphe. Nomme le(s) repo(s) et langage(s) cible(s).>
