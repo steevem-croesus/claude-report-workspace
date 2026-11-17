@@ -19,26 +19,32 @@ single root. The symlinks live under **`repos/`** and each points at a checkout 
 | `repos/CroesusServer`      | `/c/Repos/monolith/PM/Products/CroesusServer`  | **C++** (CMake)         | The "Frameworkserver" monolith. Holds *legacy* report logic (`Src/Report`, `Src/ReportApi`) being ported to C#. |
 | `repos/ReportServer`       | `/c/Repos/monolith/PM/Products/ReportServer`   | **C++** (CMake)         | The legacy C++ report-generation **engine/server** (`Src/RGSession`, `Src/Server`, gRPC/XMLRPC). Also a source of report logic being ported to C#. |
 | `repos/ReportFoundations`  | `/c/Repos/monolith/CFF/ReportFoundations`      | **C#** (class libs)     | Shared reporting libraries: business logic, entities, design, implementations, and the **Spooler** (batch generation). Consumed by `ReportManagerApi`. |
-| `repos/ReportManagerApi`   | `/c/Repos/monolith/CFF/Products/ReportManagerApi` | **C# / .NET 8** (Web API) | Async report-generation API. Clean/DDD layering; uses AWS SQS + S3; talks to the Frameworkserver. |
+| `repos/ReportManagerApi`   | `/c/Repos/monolith/CFF/Products/ReportManagerApi` | **C# / .NET 8** (Web API) | Async report-generation API. Clean/DDD layering; in-process batch generation, S3 storage; talks to the Frameworkserver. |
 | `repos/pf-web`             | `/c/Repos/pf-web`                              | **TypeScript / Angular 21 + NX** | Frontend (Croesus Xpert). The `report` domain lives under `libs/report/`. |
 | `repos/CroesusClient`      | `/c/Repos/monolith/CFF/Products/CroesusClient` | **C# / WPF**            | The legacy **WPF desktop client** — the interfaces `pf-web` is being rebuilt from. A *reference source* of report UI/logic being ported to `ReportManagerApi` + `pf-web`. Report-porting surface is staged under `TempReport/`. |
+| `repos/Foundations`        | `/c/Repos/monolith/CFF/Foundations`            | **C#** (class libs)     | Shared CFF foundation libraries (non-report-specific) consumed by the C# products. |
 
-Because these are symlinks, git operations for *product code* run against the real repos, each on
-its own branch and remote. Check `git status`/`git branch` inside a given symlink (e.g. `cd
-repos/pf-web`) before committing — product changes never go to the workspace-root repo, which only
-versions the tooling. All workspace-relative paths below are written from the workspace root, hence
-the `repos/` prefix.
+**Only two git repos sit behind these symlinks.** Every symlink except `repos/pf-web` points into the
+**same monorepo** (`/c/Repos/monolith`, remote `croesusfin/monolith`): one branch and one PR cover
+ReportManagerApi + ReportFoundations + the C++ sources together. `repos/pf-web` is the second repo
+(`/c/Repos/pf-web`). So a cross-stack change is **at most two branches/PRs** — one in the monolith,
+one in pf-web. Check `git status`/`git branch` inside a symlink before committing — product changes
+never go to the workspace-root repo, which only versions the tooling. All workspace-relative paths
+below are written from the workspace root, hence the `repos/` prefix.
 
 ## How the pieces fit (report generation flow)
 
 1. A user requests a report from the frontend (`pf-web`, or the legacy ReportWebClient).
-2. `POST /api/v1/reports` on **ReportManagerApi** creates a generation request: the payload is
-   pushed to an **AWS SQS queue** and a status row is written to `B_RPT_BATCH_GEN_REQUEST`.
-3. A batch worker (ReportBatchService) dequeues the request and generates the report using
-   **ReportFoundations** logic, which in turn reaches the **CroesusServer** Frameworkserver
-   over **port 8999** for portfolio/financial data.
-4. The finished file lands in an **S3 bucket**; the frontend downloads it via
-   `GET /api/v1/reports/{generationId}`.
+2. `POST /api/v1/reports` on **ReportManagerApi** (`BaseReportGenerationController` →
+   `ReportGenerationService`) creates a generation request and writes a status row to
+   `B_RPT_BATCH_GEN_REQUEST`.
+3. Generation runs **in-process**: `BaseReportGenerationService.SubmitGenerationRequest` enqueues the
+   batches in memory and runs them through `BaseBatchServiceAsynchronous`, using **ReportFoundations**
+   logic and the **ReportSpooler**, which reach the **CroesusServer** Frameworkserver over
+   **port 8999** for portfolio/financial data. **There is no SQS hop on this path** — an SQS client
+   (`IQueueMessaging`) is registered in DI but nothing consumes it.
+4. The finished file is stored through `IStorageManager` (**S3** via `CloudStorageManager`, or local
+   disk); the frontend downloads it via `GET /api/v1/reports/{generationId}`.
 
 Naming convention on a vserver: queue `{vserver}-reports-sqs`, bucket `{vserver}-reports-bucket`.
 
@@ -91,9 +97,9 @@ workflow — a function to port may live in either, so search both.
 
 ## Conventions
 
-- Commit inside the specific symlinked repo, on that repo's branch — never assume a shared root.
+- Commit inside the real repo behind the symlink (monolith or pf-web), on that repo's branch — never at the workspace root.
 - Respect each repo's own commit rules: `pf-web` enforces **Conventional Commits** via commitlint (see its CLAUDE.md); the .NET repos follow standard team conventions.
-- When a task spans repos (e.g. a new report field: C++ analysis → C# parameter → API route → Angular UI), follow the pipeline order above and keep each repo's change on its own branch/PR.
+- When a task spans repos (e.g. a new report field: C++ analysis → C# parameter → API route → Angular UI), follow the pipeline order above: the C++/C# parts share one monolith branch/PR, the Angular part gets its own pf-web branch/PR.
 
 ## Working with Claude in this workspace
 
@@ -127,9 +133,10 @@ Rules that aren't discoverable from those files:
   `/c/Repos/monolith/.claude/skills/` — machine-specific and gitignored. (Re)create them with
   `link-monolith-skills.ps1` run elevated, then restart Claude Code. **They are owned by the monolith
   repo — edit them there, never here.**
-- **All deliverables for a report migration go under `.work/{slug}/`** (analysis, logs, review, PDF,
-  `state.json`); `{slug}` = the Jira key if a ticket is given, else the report internal name.
-  **Never** under `docs/reports/`. Shared global inputs (not deliverables) stay under `docs/`:
+- **All deliverables for a report migration go under `.work/{slug}/`** (analysis, logs, review, PDF);
+  `{slug}` = the Jira key if a ticket is given, else the report internal name. `.work/` is not versioned.
+  `docs/reports/{REPORT_NAME}/` is a **versioned archive**: copy final deliverables worth keeping in git
+  (`analysis.md`, `migration-log-*.md`) there only when the user asks — never work in it directly. Shared global inputs (not deliverables) stay under `docs/`:
   `fields.csv` (master parameter list) + `template_ids.csv`.
 - Migration work is reachable directly (dispatch a migration agent) or through the gated `/feature`
   **migration mode** (`.claude/skills/feature/SKILL.md` §1a).
