@@ -42,6 +42,10 @@ ouvertes. Terminer par un résumé (nombre de paramètres par catégorie, ce qui
 réutilisé, PRE à afficher au frontend). Citer chaque affirmation (`repos/CroesusServer/…:ligne`,
 `repos/ReportManagerApi/…`, `fields.csv`).
 
+## Pièges connus
+Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
+livrées) : applique les sections qui concernent ta phase et signale tout piège rencontré.
+
 ## Garde-fous
 - Lecture seule sur le code ; n'édite jamais, ne propose pas de correctif inline — tu décris.
 - Jamais de CLI interdit (`aws`, `terraform`). Le C++ est source de vérité en lecture seule.

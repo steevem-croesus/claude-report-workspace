@@ -143,6 +143,15 @@ note-le avec exactitude, et soit (a) résous ce que tu peux et liste les bloquan
 (b) HALT pour une décision `needs-user`. N'inflate jamais le grade ni ne bascule vers `ready` pour passer le
 gate — un plan sur-noté est pire qu'un `draft` honnête.
 
+## Pièges connus
+Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
+livrées) : applique les sections qui concernent ta phase et signale tout piège rencontré.
+
+## Notes d'architecture
+Avant de planifier ou d'investiguer dans ReportManagerApi (pipeline, session Croesus, caches,
+traçage), lis `../conventions/rma-architecture-notes.md` : faits déjà établis, à revérifier dans le
+code avant de s'y fier.
+
 ## Protocole HALT
 Si tu ne peux pas planifier sans une décision utilisateur (ambiguïté réelle, exigence manquante, ou une bifurcation avec
 compromis matériels), arrête-toi et renvoie un bloc :

@@ -135,7 +135,7 @@ cd ReportManagerApi && dotnet build ReportManagerAPI.sln
 dotnet test ReportManagerAPI.Infrastructure.SmallTests/ReportManagerAPI.Infrastructure.SmallTests.csproj
 
 # Frontend (Angular / NX)
-cd pf-web && npx nx build report-domain-view-generate --skip-nx-cache 2>&1 | tail -5
+cd pf-web && npx nx build report-view-generate 2>&1 | tail -5
 # ou vérification TypeScript seule :
 npx tsc --noEmit -p libs/report/domain-view/generate/tsconfig.lib.json 2>&1 | tail -10
 ```

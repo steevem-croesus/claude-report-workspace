@@ -22,8 +22,12 @@ _Rédigée par retrospective · Date : <YYYY-MM-DD>_
 - [ ] <ouvrir un ticket Jira pour …>
 
 ## Apprentissages durables (pour approbation utilisateur — non sauvegardés automatiquement)
-Entrées **Claude memory** proposées :
-- [ ] type `<project|feedback|reference>` — <le fait unique>
+Ajouts aux **conventions du repo** (mémoire d'équipe, versionnée) :
+- [ ] `.claude/conventions/known-pitfalls.md` § <A–E> — ajouter : <l'entrée, 3 à 6 lignes>
+- [ ] `.claude/conventions/rma-architecture-notes.md` § <section> — ajouter : <le fait vérifié>
 
 Mises à jour **doc / CLAUDE.md** proposées :
 - [ ] `<file>` — ajouter : <la ligne/section>
+
+Entrées **Claude memory** (préférences personnelles de l'utilisateur seulement) :
+- [ ] type `feedback` — <la préférence>

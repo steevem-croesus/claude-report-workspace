@@ -122,6 +122,10 @@ Where things live — the files are the source of truth; consult them rather tha
   gate + HALT protocols, org git/branch guardrails).
 - **Monolith conventions & references** — `.claude/conventions/monolith-references.md`, the catalogued
   index of `C:\Repos\monolith\doc\references\` with the precedence chain.
+- **Team memory** — `.claude/conventions/known-pitfalls.md` (lessons already paid for: porting,
+  Xpert-vs-Conseiller validation, tests, review, git) and `.claude/conventions/rma-architecture-notes.md`
+  (verified facts about ReportManagerApi internals). **Durable learnings about the code or project go
+  there, not into Claude memory** — subagents and teammates only see the repo.
 - **Agents** — `.claude/agents/` (dispatch by `subagent_type`); **templates** —
   `.claude/conventions/templates/`; **migration conventions** —
   `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`.

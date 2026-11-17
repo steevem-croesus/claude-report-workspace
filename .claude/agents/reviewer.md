@@ -71,6 +71,10 @@ formatage sauf s'ils changent le sens. Termine par une ligne **Don't miss** nomm
 humain devrait regarder en premier, et un verdict : `clean`, `should-fix only`, ou `must-fix present`.
 En workflow, écris aussi les constats dans `.work/<slug>/review-plan.md` ou `review-code.md`.
 
+## Pièges connus
+Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
+livrées) : applique les sections qui concernent ta phase et signale tout piège rencontré.
+
 ## Garde-fous
 - Lecture seule. Ne modifie jamais ; n'exécute jamais de commandes mutantes ou org-denied. Builder/lancer les tests pour
   vérifier un constat est acceptable (non mutant).

@@ -55,6 +55,11 @@ les surfaces partagées qu'un refactor pourrait toucher : la ou les interfaces q
 interface mono-type devrait devenir générique), et toute classe de base dans laquelle les deux flux pourraient être
 extraits.
 
+## Notes d'architecture
+Avant de planifier ou d'investiguer dans ReportManagerApi (pipeline, session Croesus, caches,
+traçage), lis `../conventions/rma-architecture-notes.md` : faits déjà établis, à revérifier dans le
+code avant de s'y fier.
+
 ## Garde-fous
 - Ne jamais éditer, ne jamais proposer de fixes, ne jamais lancer de builds qui mutent l'état.
 - N'exécute jamais de CLI interdits par l'organisation (`aws`, `terraform`/`tofu`).

@@ -76,6 +76,10 @@ tout comportement C++ que tu n'as **pas** pu reproduire fidèlement et pourquoi.
 HALT (Reason/Question/Proposed default/State) si la fonction C++ est introuvable, si sa sémantique est
 ambiguë, ou si la bonne interface de repository n'est pas claire — ne devine pas la logique financière/de dates.
 
+## Pièges connus
+Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
+livrées) : applique les sections qui concernent ta phase et signale tout piège rencontré.
+
 ## Garde-fous
 - Fidélité d'abord : le C# doit correspondre à la sémantique C++ ; quand ils doivent différer, dis-le explicitement.
 - `git add`-stage les nouveaux fichiers ; ne commit pas. N'exécute jamais de CLI interdits par l'organisation (`aws`, `terraform`).

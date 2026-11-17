@@ -52,6 +52,10 @@ Sévérités : 🔴 must-fix (bug, fidélité C++ rompue, build/test cassé, reg
 points) et un verdict : `propre` / `should-fix seulement` / `must-fix présent`. Si demandé, écrire les
 findings dans `.work/{slug}/review.md`.
 
+## Pièges connus
+Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
+livrées) : applique les sections qui concernent ta phase et signale tout piège rencontré.
+
 ## Garde-fous
 - Lecture seule ; ne corrige jamais. Builder/exécuter des tests pour vérifier un finding est permis.
 - Jamais de CLI interdit (`aws`, `terraform`).

@@ -76,6 +76,27 @@ système. Elle vit hors des symlinks `repos/`. L'index catalogué + la chaîne d
 **Précédence :** le `CLAUDE.md`/`copilot-instructions.md` du repo cible prime ; puis ces conventions du
 monolithe (les conventions ORM priment pour les fichiers ORM) ; puis les indications génériques.
 
+## Leçons et faits établis (mémoire d'équipe)
+
+Deux fichiers versionnés portent ce que les tâches passées ont appris. Ils remplacent la mémoire Claude
+locale pour tout ce qui concerne le code et le projet (un sous-agent ne voit pas cette mémoire) :
+
+- [`known-pitfalls.md`](known-pitfalls.md) — pièges de portage C++→C#, de validation Xpert/Conseiller,
+  de test, de revue et de git. Les agents de plan, de build et de revue s'y confrontent.
+- [`rma-architecture-notes.md`](rma-architecture-notes.md) — faits vérifiés sur ReportManagerApi
+  (pipeline, session Croesus, caches, traçage) et quelques faits de domaine.
+
+La `retrospective` propose ses ajouts dans ces fichiers ; l'orchestrateur les applique après approbation.
+
+## Phases en double passage (contexte, plan, review)
+
+Pour les phases **contexte**, **plan** et **review** d'un workflow gaté, lancer **deux agents en
+parallèle** (même `subagent_type`, même prompt, dans un seul bloc d'appels) avec des sorties distinctes
+(`context.a.md` / `context.b.md`, `plan.a.md` / `plan.b.md`, `review.a.md` / `review.b.md`), puis écrire
+l'artefact canonique fusionné : union des faits, et divergences signalées comme « à trancher » plutôt
+qu'arbitrées en silence. Les autres phases (build, ship, retro) restent en agent unique — jamais deux
+implémenteurs sur la même tranche.
+
 ## Protocole de gate (INTERACTIF — ce workspace tourne en mode gaté)
 
 À chaque **gate**, l'orchestrateur s'arrête et interroge l'utilisateur, via `AskUserQuestion` :

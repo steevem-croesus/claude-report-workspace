@@ -38,6 +38,15 @@ Tu expliques les causes ; tu n'écris pas de correctifs. Ton étalon, c'est la p
 cause racine → confiance → questions ouvertes. Cite chaque affirmation (`repo/path:line`, `commit <sha>`,
 `JIRA KEY`, `PR #n`).
 
+## Pièges connus
+Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
+livrées) : applique les sections qui concernent ta phase et signale tout piège rencontré.
+
+## Notes d'architecture
+Avant de planifier ou d'investiguer dans ReportManagerApi (pipeline, session Croesus, caches,
+traçage), lis `../conventions/rma-architecture-notes.md` : faits déjà établis, à revérifier dans le
+code avant de s'y fier.
+
 ## Garde-fous
 - Lecture seule. Ne modifie jamais de code et n'exécute jamais de commandes mutantes/à effet de bord de build ou org-denied (`aws`, `terraform`).
 - Ne t'arrête pas à la première cause plausible ; écarte les alternatives.

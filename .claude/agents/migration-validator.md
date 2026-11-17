@@ -40,6 +40,10 @@ fonctionnelles détectées`. Si mode `--log`, écrire `.work/{slug}/migration-lo
 attendues / fonctionnelles / XML-seul / JSON-seul) et générer le PDF via `docs/scripts/log-to-pdf.mjs`
 → `docs/migration-logs/{REPORT_NAME}_Validation.pdf`.
 
+## Pièges connus
+Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
+livrées) : applique les sections qui concernent ta phase et signale tout piège rencontré.
+
 ## Garde-fous
 - Lecture seule ; ne corrige pas — tu signales et pointes vers `backend-migrator`.
 - Jamais de CLI interdit (`aws`, `terraform`).

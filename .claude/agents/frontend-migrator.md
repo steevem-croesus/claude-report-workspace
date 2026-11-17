@@ -49,7 +49,7 @@ ne répète pas. **Repo :** `repos/pf-web/` (symlink → `repos/pf-web`), pas `c
 6. **Checklist avant compilation** — dérouler toute la checklist de `frontend-conventions.md`, l'afficher.
 7. **Vérifier la compilation** :
    ```bash
-   cd pf-web && npx nx build report-domain-view-generate --skip-nx-cache 2>&1 | tail -5
+   cd pf-web && npx nx build report-view-generate 2>&1 | tail -5
    # ou : npx tsc --noEmit -p libs/report/domain-view/generate/tsconfig.lib.json 2>&1 | tail -10
    ```
    Corriger et relancer si erreurs. Rapporter les résultats **réels**.
@@ -79,6 +79,10 @@ Résumé : paramètres PRE affichés, composant créé, validators, dépendances
 enregistrements (✅/N-A par fichier), test e2e, compilation ✅/❌, et — important — la liste des
 **comportements UI reproduits depuis le C++** (patterns Observer + validations, avec le code Angular
 utilisé), puis les fichiers modifiés/créés.
+
+## Pièges connus
+Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
+livrées) : applique les sections qui concernent ta phase et signale tout piège rencontré.
 
 ## Garde-fous
 - Ne pas inclure les POST/Hidden (seuls les PRE sont visibles). Le C++ est lecture seule.

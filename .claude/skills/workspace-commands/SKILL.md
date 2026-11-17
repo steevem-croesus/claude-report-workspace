@@ -46,7 +46,27 @@ See `repos/pf-web/CLAUDE.md` for the full command set. Drive everything through 
 are not folder paths. The non-obvious one:
 
 ```bash
-cd repos/pf-web
+cd /c/Repos/pf-web
 nx hybrid xpert --backend=http://localhost   # serve against a backend
-nx test report                                # test the report domain libs
+npx nx test report-view-generate              # test one report lib
 ```
+
+- **The nx project name is not the folder path, and there is no project called `report`.** The report
+  libs are `report-view-generate` (`libs/report/domain-view/generate`), `report-shared-common`,
+  `report-feature-report-configuration-manager`, `report-feature-router-outlet` and
+  `report-feature-taxslip-manager`. Read the nearest `project.json` for any other.
+- **A cache hit means the tests did not run.** To force a real run, use both flags together:
+
+  ```bash
+  cd /c/Repos/pf-web && npx nx run-many -t test \
+    --projects=report-shared-common,report-view-generate \
+    --skip-nx-cache --exclude-task-dependencies
+  ```
+
+  `--skip-nx-cache` **alone is a trap**: it re-runs the `generate-code` targets while Vitest reads the
+  generated sources (`ENOTEMPTY`, `EPERM`, unresolved `./lib/generated/…` imports, runs reporting
+  `no tests`, sometimes a deleted `generated/` folder). Repair a wiped folder with
+  `npx nx run <project>:generate-code --skip-nx-cache`. **Never run `nx reset`** here.
+- `-- <spec-name>` does not filter to one file with the nx vite executor; for a single file use
+  `npx vitest run --project <project> <file-pattern>`.
+- The shell resets its working directory between calls: prefix each command with `cd /c/Repos/pf-web &&`.

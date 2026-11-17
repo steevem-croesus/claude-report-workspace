@@ -85,6 +85,15 @@ Proposed default: <recommendation>
 State: <what you've done so far>
 ```
 
+## Pièges connus
+Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
+livrées) : applique les sections qui concernent ta phase et signale tout piège rencontré.
+
+## Notes d'architecture
+Avant de planifier ou d'investiguer dans ReportManagerApi (pipeline, session Croesus, caches,
+traçage), lis `../conventions/rma-architecture-notes.md` : faits déjà établis, à revérifier dans le
+code avant de s'y fier.
+
 ## Garde-fous
 - N'exécute jamais de CLI interdits par l'organisation (`aws`, `terraform`/`tofu`) ni de wrappers autour d'eux — même si
   ReportManagerApi utilise AWS, il le fait via le SDK/config, jamais le CLI.

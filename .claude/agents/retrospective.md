@@ -28,13 +28,19 @@ touchés). Lis aussi le `CLAUDE.md` du repo concerné pour juger s'il devrait ê
 5. **Suivis** — items concrets et actionnables (dette technique, tests manquants, lacunes de doc, un ticket Jira
    à ouvrir). Marque chacun comme owner-TBD.
 6. **Apprentissages durables** — les 1-4 faits qui valent la peine d'être retenus au-delà de cette tâche. Pour chacun, propose :
-   - une entrée de **mémoire Claude** (type `project`/`feedback`/`reference`, un fait par entrée), et/ou
-   - une **mise à jour CLAUDE.md / doc** spécifique (quel fichier, quelle ligne ajouter).
-   Ne propose que des apprentissages non évidents et pas déjà consignés dans le repo/CLAUDE.md.
+   - en priorité, une **entrée dans les conventions du repo** — `../conventions/known-pitfalls.md` (piège de
+     portage, de test, de revue, de git) ou `../conventions/rma-architecture-notes.md` (fait sur le
+     fonctionnement interne) — avec le texte exact à ajouter. C'est la mémoire d'équipe : elle est versionnée
+     et lue par les sous-agents, contrairement à la mémoire Claude ;
+   - une **mise à jour CLAUDE.md / doc** spécifique (quel fichier, quelle ligne ajouter) ;
+   - une entrée de **mémoire Claude** uniquement pour une **préférence personnelle de l'utilisateur** (façon
+     de travailler, style), jamais pour un fait sur le code ou le projet.
+   Ne propose que des apprentissages non évidents et pas déjà consignés : relis d'abord les deux fichiers
+   ci-dessus, et corrige une entrée existante plutôt que d'en empiler une nouvelle.
 
 ## Sortie — écris `.work/<slug>/retro.md`
-Utilise le template dans `../conventions/templates/retro.md`. Termine en listant les entrées de mémoire proposées
-et les éditions de doc comme une checklist explicite à approuver par l'utilisateur — **n'écris pas en mémoire ni n'édite
+Utilise le template dans `../conventions/templates/retro.md`. Termine en listant les ajouts de conventions, les éditions
+de doc et les éventuelles entrées de mémoire comme une checklist explicite à approuver par l'utilisateur — **n'écris pas en mémoire ni n'édite
 les docs toi-même** ; fais-les remonter pour que l'orchestrateur/l'utilisateur décide.
 
 ## Garde-fous

@@ -94,6 +94,10 @@ Un résumé final : paramètres traités, `Parameters.cs` modifié, radio/combo 
 traductions, `WebRTMRunner` ✅, build ✅/❌, tests ✅/❌ (passés/total), **VPF divergentes corrigées**
 (C# vs C++), et la liste des fichiers modifiés.
 
+## Pièges connus
+Avant de conclure, confronte ton travail à `../conventions/known-pitfalls.md` (leçons des tâches
+livrées) : applique les sections qui concernent ta phase et signale tout piège rencontré.
+
 ## Garde-fous
 - Le C++ (`repos/CroesusServer/`) est **lecture seule**. Jamais de CLI interdit (`aws`, `terraform`).
 - Respecter `repos/ReportManagerApi/copilot-instructions.md` (recette IValueProviderParameter).
