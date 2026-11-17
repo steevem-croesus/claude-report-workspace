@@ -31,7 +31,7 @@ Tapez la commande slash avec votre tâche en ligne :
 
 ```
 /feature add a reportFormat query parameter to the download endpoint
-/bug FOG-9412
+/bug RPT-12345
 /explore how does a queued report reach S3?
 ```
 

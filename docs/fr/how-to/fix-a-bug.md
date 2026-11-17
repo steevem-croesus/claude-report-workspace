@@ -9,7 +9,7 @@ Objectif : corriger un défaut via le workflow `bug`, qui impose une règle stri
 
 ## Étapes
 
-1. **Invoquez-le.** `/bug <symptôme ou clé Jira>` — p. ex. `/bug FOG-9412` ou `/bug the year-to-date
+1. **Invoquez-le.** `/bug <symptôme ou clé Jira>` — p. ex. `/bug RPT-12345` ou `/bug the year-to-date
    parameter returns last year's start date for January reports`.
 
 2. **Contexte.** `context-gatherer` capture le rapport, les étapes de repro et toute PR liée → `context.md`.

@@ -69,7 +69,7 @@ stop with a clear message.
 
 | Repo | Build | Test (single) | Lint |
 |---|---|---|---|
-| ReportManagerApi | `dotnet build repos/ReportManagerApi/ReportManagerAPI.sln` | `dotnet test <proj> --filter "FullyQualifiedName~<Name>"` | — |
+| ReportManagerApi | `dotnet build /c/Repos/monolith/CFF/Products/ReportManagerApi/ReportManagerAPI.sln` | `dotnet test <proj> --filter "FullyQualifiedName~<Name>"` | — |
 | ReportFoundations | `dotnet build <lib .sln/.csproj>` | `dotnet test <proj.SmallTests>` | — |
 | pf-web | `nx build <project>` | `nx test <project> --testFile=<path>` | `nx lint <project>` |
 | CroesusServer | CMake / Visual Studio | (usually read-only reference) | — |
@@ -80,8 +80,8 @@ Angular: Vitest. The runnable API web project is `ReportManager.API/ReportManage
 
 ## Branch, commit & ship rules
 
-Commits/PRs happen **per symlinked repo, on that repo's own branch** — there is no shared root repo
-for product changes. Agents `git add`-stage new files but **do not commit** unless the task explicitly
+Product commits/PRs happen **in the real repo behind the symlink**, never in the workspace-root repo. There are
+only two product repos: the `monolith` monorepo (every symlink except pf-web — one branch/PR covers C# + C++) and `pf-web`. Agents `git add`-stage new files but **do not commit** unless the task explicitly
 asks; committing is the workflow's final, gated *ship* step.
 
 - Branch from a protected ref (`main`, `master`, `develop`, `release/*`, `support/*`) with

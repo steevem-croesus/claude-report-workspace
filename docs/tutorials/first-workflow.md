@@ -65,7 +65,7 @@ the machinery.)
 
 ### Step 2 — Setup & Context
 
-Claude derives a **slug** for the task (a Jira key if your text contains one like `FOG-9412`,
+Claude derives a **slug** for the task (a Jira key if your text contains one like `RPT-12345`,
 otherwise a kebab-case name) and creates a task directory: `.work/<slug>/`. This is where every
 artifact for this task lives — see [Reference: the task directory](../reference/task-directory.md).
 

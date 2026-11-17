@@ -51,7 +51,7 @@ Ce guide vous oriente ; ce fichier est la source de vérité pour les dossiers e
    tests du service de date dans `ReportManagerAPI.Domain.SmallTests/Services/DateTimeServiceTests.cs`.
 
 7. **Construit et teste** avant de retourner :
-   `dotnet build repos/ReportManagerApi/ReportManagerAPI.sln` + `dotnet test <the *.SmallTests project>`.
+   `dotnet build /c/Repos/monolith/CFF/Products/ReportManagerApi/ReportManagerAPI.sln` + `dotnet test <the *.SmallTests project>`.
 
 ## Ce qu'il faut revérifier en tant que reviewer/approbateur
 

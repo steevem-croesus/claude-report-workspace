@@ -5,7 +5,7 @@
 Every non-trivial workflow run creates a per-task directory at the **workspace root**:
 `C:\Repos\claude-report-workspace\.work\<slug>\`.
 
-- **slug** = the Jira key when detected (`FOG-9412`, `CFF-1234`); otherwise the kebab-case of the
+- **slug** = the Jira key when detected (`RPT-12345`, `CAR-1234`); otherwise the kebab-case of the
   first ~4 words of the task. Re-running the same task **reuses** the directory.
 - It lives at the workspace root on purpose: it does **not** pollute the symlinked repos and it
   survives across sessions. It is **gitignored** here (`/.work/` in [`.gitignore`](../../.gitignore)).
@@ -55,7 +55,7 @@ C:\Repos\claude-report-workspace\
 ├── .benchmark/           ← local eval fixtures (gitignored)
 ├── CLAUDE.md
 ├── link-monolith-skills.ps1
-└── repos/                ← SYMLINKS to the real repos (gitignored; each its own git repo)
+└── repos/                ← SYMLINKS to the real repos (gitignored; monolith monorepo + pf-web)
     ├── CroesusServer     → C++ Frameworkserver monolith
     ├── ReportServer      → C++ report-generation engine
     ├── ReportFoundations → C# shared reporting libs
@@ -64,6 +64,6 @@ C:\Repos\claude-report-workspace\
 ```
 
 > **Two levels of git.** The workspace root is its own repo (tracking `.claude/`, `docs/`, `CLAUDE.md`,
-> etc.). Each symlink under `repos/` points at a *separate* repo on its own branch and remote. Commits
+> etc.). The symlinks under `repos/` resolve to only two product repos: the `monolith` monorepo (all but pf-web) and `pf-web`. Commits
 > and PRs for product changes happen **inside the specific symlinked repo**, never at the root — see
 > the [branch/commit/ship rules](gates-and-protocol.md#branch-commit--ship-rules).

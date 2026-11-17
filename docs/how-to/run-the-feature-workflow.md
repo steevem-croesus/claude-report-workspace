@@ -37,8 +37,8 @@ code — and optionally to a PR — through the gated `feature` playbook.
 
 ## Tips
 
-- **Multi-repo work stays on separate branches/PRs** — there is no shared root repo. Each repo under
-  `repos/` is its own git repo on its own branch.
+- **Cross-stack work is at most two branches/PRs** — one in the `monolith` monorepo (C# + C++ together), one in
+  `pf-web`. Never commit product code at the workspace root.
 - **Delegating to `code-fleet`.** The build+review phases can instead be handed to `/code-fleet:work`
   if you prefer its language packs; the workspace agents add the multi-repo topology awareness and the
   `cpp-to-csharp-porter`. See [`workflows.md` → Relationship to code-fleet](../../.claude/conventions/workflows.md).

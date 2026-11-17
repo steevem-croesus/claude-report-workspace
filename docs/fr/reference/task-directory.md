@@ -5,7 +5,7 @@
 Chaque exécution de workflow non triviale crée un répertoire par tâche à la **racine du workspace** :
 `C:\Repos\claude-report-workspace\.work\<slug>\`.
 
-- **slug** = la clé Jira quand détectée (`FOG-9412`, `CFF-1234`) ; sinon le kebab-case des
+- **slug** = la clé Jira quand détectée (`RPT-12345`, `CAR-1234`) ; sinon le kebab-case des
   ~4 premiers mots de la tâche. Ré-exécuter la même tâche **réutilise** le répertoire.
 - Il vit à la racine du workspace intentionnellement : il ne pollue **pas** les repos symlinkés et il
   survit d'une session à l'autre. Il est **gitignoré** ici (`/.work/` dans [`.gitignore`](../../../.gitignore)).
@@ -55,7 +55,7 @@ C:\Repos\claude-report-workspace\
 ├── .benchmark/           ← local eval fixtures (gitignored)
 ├── CLAUDE.md
 ├── link-monolith-skills.ps1
-└── repos/                ← SYMLINKS to the real repos (gitignored; each its own git repo)
+└── repos/                ← SYMLINKS to the real repos (gitignored; monolith monorepo + pf-web)
     ├── CroesusServer     → C++ Frameworkserver monolith
     ├── ReportServer      → C++ report-generation engine
     ├── ReportFoundations → C# shared reporting libs
@@ -64,6 +64,6 @@ C:\Repos\claude-report-workspace\
 ```
 
 > **Deux niveaux de git.** La racine du workspace est son propre repo (trackant `.claude/`, `docs/`, `CLAUDE.md`,
-> etc.). Chaque symlink sous `repos/` pointe vers un repo *séparé* sur sa propre branche et son propre remote. Les commits
+> etc.). Les symlinks sous `repos/` ne résolvent que vers deux repos produit : le monorepo `monolith` (tous sauf pf-web) et `pf-web`. Les commits
 > et PRs pour les changements de produit se font **à l'intérieur du repo symlinké spécifique**, jamais à la racine — voir
 > les [règles de branch/commit/ship](gates-and-protocol.md#règles-de-branch-commit--ship).

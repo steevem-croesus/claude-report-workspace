@@ -46,8 +46,9 @@ the phase workers become the **native migration agents** in this workspace
 (`.claude/agents/`) — `report-analyst` for explore/plan, `backend-migrator` + `frontend-migrator` for
 build, `migration-reviewer` + `migration-validator` for review — dispatched by `subagent_type`. Their
 rules live in `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`.
-All per-migration **deliverables** (analysis, logs, review, PDF, `state.json`) go under `.work/{slug}/`
-— `{slug}` = the Jira key, else the report internal name; never under `docs/reports/`. Shared global
+All per-migration **deliverables** (analysis, logs, review, PDF) go under `.work/{slug}/`
+— `{slug}` = the Jira key, else the report internal name. `docs/reports/` is only a versioned archive of final
+deliverables, filled on request. Shared global
 inputs stay under `docs/` (`fields.csv`, `template_ids.csv`).
 
 ---

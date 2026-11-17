@@ -65,7 +65,7 @@ la machinerie.)
 
 ### Step 2 — Setup & Context
 
-Claude dérive un **slug** pour la tâche (une clé Jira si ton texte en contient une comme `FOG-9412`,
+Claude dérive un **slug** pour la tâche (une clé Jira si ton texte en contient une comme `RPT-12345`,
 sinon un nom en kebab-case) et crée un répertoire de tâche : `.work/<slug>/`. C'est là que vit chaque
 artefact de cette tâche — voir [Référence : le répertoire de tâche](../reference/task-directory.md).
 

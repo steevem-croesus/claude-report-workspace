@@ -69,7 +69,7 @@ s'arrêter avec un message clair.
 
 | Repo | Build | Test (unique) | Lint |
 |---|---|---|---|
-| ReportManagerApi | `dotnet build repos/ReportManagerApi/ReportManagerAPI.sln` | `dotnet test <proj> --filter "FullyQualifiedName~<Name>"` | — |
+| ReportManagerApi | `dotnet build /c/Repos/monolith/CFF/Products/ReportManagerApi/ReportManagerAPI.sln` | `dotnet test <proj> --filter "FullyQualifiedName~<Name>"` | — |
 | ReportFoundations | `dotnet build <lib .sln/.csproj>` | `dotnet test <proj.SmallTests>` | — |
 | pf-web | `nx build <project>` | `nx test <project> --testFile=<path>` | `nx lint <project>` |
 | CroesusServer | CMake / Visual Studio | (généralement référence read-only) | — |
@@ -80,8 +80,8 @@ Angular : Vitest. Le projet web API exécutable est `ReportManager.API/ReportMan
 
 ## Règles de branch, commit & ship
 
-Les commits/PRs se font **par repo symlinké, sur la branche propre de ce repo** — il n'y a pas de repo racine
-partagé pour les changements de produit. Les agents `git add`-stagent les nouveaux fichiers mais **ne committent
+Les commits/PRs de produit se font **dans le repo réel derrière le symlink**, jamais dans le repo racine du workspace. Il n'y a
+que deux repos produit : le monorepo `monolith` (tous les symlinks sauf pf-web — une branche/PR couvre C# + C++) et `pf-web`. Les agents `git add`-stagent les nouveaux fichiers mais **ne committent
 pas** sauf si la tâche le demande explicitement ; le commit est l'étape finale et gatée de *ship* du workflow.
 
 - Brancher depuis une référence protégée (`main`, `master`, `develop`, `release/*`, `support/*`) avec

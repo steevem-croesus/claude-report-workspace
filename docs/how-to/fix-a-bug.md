@@ -9,7 +9,7 @@ Goal: fix a defect through the `bug` workflow, which enforces one hard rule:
 
 ## Steps
 
-1. **Invoke it.** `/bug <symptom or Jira key>` — e.g. `/bug FOG-9412` or `/bug the year-to-date
+1. **Invoke it.** `/bug <symptom or Jira key>` — e.g. `/bug RPT-12345` or `/bug the year-to-date
    parameter returns last year's start date for January reports`.
 
 2. **Context.** `context-gatherer` captures the report, repro steps, and any linked PRs → `context.md`.

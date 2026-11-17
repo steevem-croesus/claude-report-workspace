@@ -46,8 +46,9 @@ les workers de phase deviennent les **agents de migration natifs** de ce workspa
 (`.claude/agents/`) — `report-analyst` pour explore/plan, `backend-migrator` + `frontend-migrator` pour
 build, `migration-reviewer` + `migration-validator` pour review — dispatchés en `subagent_type`. Leurs
 règles vivent dans `.claude/conventions/{migration-protocol,backend-conventions,frontend-conventions}.md`.
-Tous les **livrables** d'une migration (analysis, logs, review, PDF, `state.json`) vivent sous
-`.work/{slug}/` — `{slug}` = la clé Jira, sinon le nom interne du rapport ; jamais sous `docs/reports/`.
+Tous les **livrables** d'une migration (analysis, logs, review, PDF) vivent sous
+`.work/{slug}/` — `{slug}` = la clé Jira, sinon le nom interne du rapport. `docs/reports/` n'est qu'une archive
+versionnée des livrables finaux, alimentée sur demande (voir `migration-protocol.md`).
 Les entrées globales partagées restent sous `docs/` (`fields.csv`, `template_ids.csv`).
 
 ---

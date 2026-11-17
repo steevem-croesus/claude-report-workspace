@@ -37,8 +37,8 @@ fonctionnel et testé — et optionnellement jusqu'à une PR — via le playbook
 
 ## Astuces
 
-- **Le travail multi-repo reste sur des branches/PR séparées** — il n'y a pas de repo racine partagé. Chaque repo sous
-  `repos/` est son propre repo git sur sa propre branche.
+- **Le travail cross-stack, c'est au plus deux branches/PR** — une dans le monorepo `monolith` (C# + C++ ensemble), une dans
+  `pf-web`. Jamais de code produit commité à la racine du workspace.
 - **Déléguer à `code-fleet`.** Les phases build+review peuvent à la place être confiées à `/code-fleet:work`
   si vous préférez ses language packs ; les agents du workspace ajoutent la conscience de la topologie multi-repo et le
   `cpp-to-csharp-porter`. Voir [`workflows.md` → Relationship to code-fleet](../../../.claude/conventions/workflows.md).
