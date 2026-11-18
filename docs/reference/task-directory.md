@@ -55,11 +55,14 @@ C:\Repos\claude-report-workspace\
 ├── .benchmark/           ← local eval fixtures (gitignored)
 ├── CLAUDE.md
 ├── link-monolith-skills.ps1
+├── link-repos.ps1        ← (re)creates the repos/ symlinks below
 └── repos/                ← SYMLINKS to the real repos (gitignored; monolith monorepo + pf-web)
     ├── CroesusServer     → C++ Frameworkserver monolith
     ├── ReportServer      → C++ report-generation engine
     ├── ReportFoundations → C# shared reporting libs
     ├── ReportManagerApi  → C# / .NET 8 report API
+    ├── CroesusClient     → C# / WPF legacy desktop client
+    ├── Foundations       → C# shared CFF foundation libs
     └── pf-web            → TypeScript / Angular 21 + NX frontend
 ```
 

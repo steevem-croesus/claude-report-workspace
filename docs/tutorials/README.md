@@ -10,4 +10,5 @@ tu veux plutôt accomplir une tâche précise, bascule vers les [Guides how-to](
 
 > Prérequis pour tous les tutoriels : Claude Code ouvert dans ce workspace
 > (`C:\Repos\claude-report-workspace`), avec les symlinks `repos/` présents. Si `repos/` est vide, les
-> symlinks n'ont pas encore été créés sur cette machine — c'est une étape de setup hors de ces docs.
+> symlinks n'ont pas encore été créés sur cette machine : lance `.\link-repos.ps1` à la racine (il s'élève
+> tout seul ; `-MonolithRoot` / `-PfWebRoot` si tes checkouts ne sont pas sous `C:\Repos`).

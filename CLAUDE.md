@@ -24,6 +24,10 @@ single root. The symlinks live under **`repos/`** and each points at a checkout 
 | `repos/CroesusClient`      | `/c/Repos/monolith/CFF/Products/CroesusClient` | **C# / WPF**            | The legacy **WPF desktop client** — the interfaces `pf-web` is being rebuilt from. A *reference source* of report UI/logic being ported to `ReportManagerApi` + `pf-web`. Report-porting surface is staged under `TempReport/`. |
 | `repos/Foundations`        | `/c/Repos/monolith/CFF/Foundations`            | **C#** (class libs)     | Shared CFF foundation libraries (non-report-specific) consumed by the C# products. |
 
+To (re)create the symlinks on a new machine, run `.\link-repos.ps1` from the workspace root (self-elevates;
+pass `-MonolithRoot` / `-PfWebRoot` if the checkouts aren't under `C:\Repos`). It replaces existing links
+but never deletes a real directory found at a link path.
+
 **Only two git repos sit behind these symlinks.** Every symlink except `repos/pf-web` points into the
 **same monorepo** (`/c/Repos/monolith`, remote `croesusfin/monolith`): one branch and one PR cover
 ReportManagerApi + ReportFoundations + the C++ sources together. `repos/pf-web` is the second repo
